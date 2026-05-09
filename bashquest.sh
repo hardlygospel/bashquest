@@ -19,17 +19,17 @@
 # BASHQUEST - The Linux Command Learning Adventure
 # ============================================================
 
-RED=$'\033[0;31m';    LRED=$'\033[1;31m'
-GREEN=$'\033[0;32m';  LGREEN=$'\033[1;32m'
-YELLOW=$'\033[1;33m'
-BLUE=$'\033[0;34m';   LBLUE=$'\033[1;34m'
-MAGENTA=$'\033[0;35m';LMAGENTA=$'\033[1;35m'
-CYAN=$'\033[0;36m';   LCYAN=$'\033[1;36m'
-WHITE=$'\033[1;37m'
-BOLD=$'\033[1m';      DIM=$'\033[2m'
-BG_RED=$'\033[41m';   BG_GREEN=$'\033[42m'
-BG_BLUE=$'\033[44m';  BG_MAGENTA=$'\033[45m'
-NC=$'\033[0m'
+RED=$(printf '\033[0;31m');    LRED=$(printf '\033[1;31m')
+GREEN=$(printf '\033[0;32m');  LGREEN=$(printf '\033[1;32m')
+YELLOW=$(printf '\033[1;33m')
+BLUE=$(printf '\033[0;34m');   LBLUE=$(printf '\033[1;34m')
+MAGENTA=$(printf '\033[0;35m');LMAGENTA=$(printf '\033[1;35m')
+CYAN=$(printf '\033[0;36m');   LCYAN=$(printf '\033[1;36m')
+WHITE=$(printf '\033[1;37m')
+BOLD=$(printf '\033[1m');      DIM=$(printf '\033[2m')
+BG_RED=$(printf '\033[41m');   BG_GREEN=$(printf '\033[42m')
+BG_BLUE=$(printf '\033[44m');  BG_MAGENTA=$(printf '\033[45m')
+NC=$(printf '\033[0m')
 
 SAVE_DIR="$HOME/.bashquest"
 USERS_FILE="$SAVE_DIR/users.db"
@@ -47,24 +47,24 @@ clear_screen() { clear; }
 
 print_banner() {
     clear_screen
-    echo -e "${LCYAN}"
+    printf '%b\n' "${LCYAN}"
     echo ' ██████╗  █████╗ ███████╗██╗  ██╗ ██████╗ ██╗   ██╗███████╗███████╗████████╗'
     echo ' ██╔══██╗██╔══██╗██╔════╝██║  ██║██╔═══██╗██║   ██║██╔════╝██╔════╝╚══██╔══╝'
     echo ' ██████╔╝███████║███████╗███████║██║   ██║██║   ██║█████╗  ███████╗   ██║   '
     echo ' ██╔══██╗██╔══██║╚════██║██╔══██║██║▄▄ ██║██║   ██║██╔══╝  ╚════██║   ██║   '
     echo ' ██████╔╝██║  ██║███████║██║  ██║╚██████╔╝╚██████╔╝███████╗███████║   ██║   '
     echo ' ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚══▀▀╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝   '
-    echo -e "${NC}${YELLOW}              ⚡  The Ultimate Linux Command Learning Adventure  ⚡${NC}"
-    echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    printf '%b\n' "${NC}${YELLOW}              ⚡  The Ultimate Linux Command Learning Adventure  ⚡${NC}"
+    printf '%b\n' "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
 status_bar() {
-    echo -e "\n${BG_BLUE}${WHITE}  👤 ${PLAYER_NAME}  ${NC}${BG_MAGENTA}${WHITE}  ⭐ Level ${PLAYER_LEVEL}  ${NC}${BG_GREEN}${WHITE}  ✨ XP: ${PLAYER_XP}  ${NC}${BG_RED}${WHITE}  ❤  Lives: ${PLAYER_LIVES}  ${NC}"
-    echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    printf '%b\n' "\n${BG_BLUE}${WHITE}  👤 ${PLAYER_NAME}  ${NC}${BG_MAGENTA}${WHITE}  ⭐ Level ${PLAYER_LEVEL}  ${NC}${BG_GREEN}${WHITE}  ✨ XP: ${PLAYER_XP}  ${NC}${BG_RED}${WHITE}  ❤  Lives: ${PLAYER_LIVES}  ${NC}"
+    printf '%b\n' "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
 press_enter() {
-    echo -e "\n${DIM}Press ${YELLOW}[ENTER]${NC}${DIM} to continue...${NC}"
+    printf '%b\n' "\n${DIM}Press ${YELLOW}[ENTER]${NC}${DIM} to continue...${NC}"
     read -r
 }
 
@@ -80,7 +80,7 @@ type_text() {
 show_xp_gain() {
     local amount="$1"
     PLAYER_XP=$((PLAYER_XP + amount))
-    echo -e "\n${BG_GREEN}${WHITE}  ✨ +${amount} XP!  Total: ${PLAYER_XP}  ${NC}"
+    printf '%b\n' "\n${BG_GREEN}${WHITE}  ✨ +${amount} XP!  Total: ${PLAYER_XP}  ${NC}"
     save_progress
 }
 
@@ -91,22 +91,22 @@ wrong_answer() {
         game_over
         return 1
     fi
-    echo -e "\n${LRED}  ✗  Incorrect!${NC}  Lives remaining: ${YELLOW}${PLAYER_LIVES} ❤${NC}"
+    printf '%b\n' "\n${LRED}  ✗  Incorrect!${NC}  Lives remaining: ${YELLOW}${PLAYER_LIVES} ❤${NC}"
     return 0
 }
 
 game_over() {
     clear_screen
-    echo -e "${LRED}"
+    printf '%b\n' "${LRED}"
     echo '  ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ '
     echo ' ██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██╔═══██╗██║   ██║██╔════╝██╔══██╗'
     echo ' ██║  ███╗███████║██╔████╔██║█████╗      ██║   ██║██║   ██║█████╗  ██████╔╝'
     echo ' ██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗'
     echo ' ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗    ╚██████╔╝ ╚████╔╝ ███████╗██║  ██║'
     echo '  ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝     ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝'
-    echo -e "${NC}"
-    echo -e "${YELLOW}  You ran out of lives, ${BOLD}${PLAYER_NAME}${NC}${YELLOW}. Better luck next time!${NC}"
-    echo -e "${CYAN}  Final XP: ${PLAYER_XP}  |  Level reached: ${PLAYER_LEVEL}${NC}"
+    printf '%b\n' "${NC}"
+    printf '%b\n' "${YELLOW}  You ran out of lives, ${BOLD}${PLAYER_NAME}${NC}${YELLOW}. Better luck next time!${NC}"
+    printf '%b\n' "${CYAN}  Final XP: ${PLAYER_XP}  |  Level reached: ${PLAYER_LEVEL}${NC}"
     PLAYER_LIVES=3
     save_progress
     press_enter
@@ -132,39 +132,39 @@ hash_pw() { printf '%s' "$1" | md5 2>/dev/null || printf '%s' "$1" | md5sum | cu
 
 register_user() {
     clear_screen; print_banner
-    echo -e "\n${LCYAN}╔═══════════════════════════════╗"
-    echo -e "║     CREATE YOUR ACCOUNT       ║"
-    echo -e "╚═══════════════════════════════╝${NC}\n"
+    printf '%b\n' "\n${LCYAN}╔═══════════════════════════════╗"
+    printf '%b\n' "║     CREATE YOUR ACCOUNT       ║"
+    printf '%b\n' "╚═══════════════════════════════╝${NC}\n"
     local username password confirm hashed
     while true; do
         printf "${YELLOW}Choose a username: ${NC}"; read -r username
         username="${username//[[:space:]]/}"
-        [ -z "$username" ] && echo -e "${RED}Username cannot be empty.${NC}" && continue
-        grep -q "^${username}:" "$USERS_FILE" 2>/dev/null && echo -e "${RED}Username taken.${NC}" && continue
+        [ -z "$username" ] && printf '%b\n' "${RED}Username cannot be empty.${NC}" && continue
+        grep -q "^${username}:" "$USERS_FILE" 2>/dev/null && printf '%b\n' "${RED}Username taken.${NC}" && continue
         break
     done
     while true; do
         printf "${YELLOW}Choose a password: ${NC}"; read -rs password; echo
-        [ ${#password} -lt 4 ] && echo -e "${RED}Minimum 4 characters.${NC}" && continue
+        [ ${#password} -lt 4 ] && printf '%b\n' "${RED}Minimum 4 characters.${NC}" && continue
         printf "${YELLOW}Confirm password: ${NC}";  read -rs confirm; echo
-        [ "$password" != "$confirm" ] && echo -e "${RED}Passwords do not match.${NC}" && continue
+        [ "$password" != "$confirm" ] && printf '%b\n' "${RED}Passwords do not match.${NC}" && continue
         break
     done
     hashed=$(hash_pw "$password")
     echo "${username}:${hashed}" >> "$USERS_FILE"
     PLAYER_NAME="$username"; PLAYER_LEVEL=1; PLAYER_XP=0; PLAYER_LIVES=3
     save_progress
-    echo -e "\n${LGREEN}  ✓ Account created! Welcome, ${BOLD}${username}${NC}${LGREEN}!${NC}"
+    printf '%b\n' "\n${LGREEN}  ✓ Account created! Welcome, ${BOLD}${username}${NC}${LGREEN}!${NC}"
     sleep 1; main_menu
 }
 
 login_user() {
     clear_screen; print_banner
-    echo -e "\n${LCYAN}╔═══════════════════════════════╗"
-    echo -e "║       TERMINAL LOGIN          ║"
-    echo -e "╚═══════════════════════════════╝${NC}\n"
-    echo -e "${GREEN}BashQuest OS v2.4.1 LTS (GNU/Linux 5.15.0-amd64)${NC}"
-    echo -e "${DIM}$(date)${NC}\n"
+    printf '%b\n' "\n${LCYAN}╔═══════════════════════════════╗"
+    printf '%b\n' "║       TERMINAL LOGIN          ║"
+    printf '%b\n' "╚═══════════════════════════════╝${NC}\n"
+    printf '%b\n' "${GREEN}BashQuest OS v2.4.1 LTS (GNU/Linux 5.15.0-amd64)${NC}"
+    printf '%b\n' "${DIM}$(date)${NC}\n"
     local attempts=0 username password hashed
     while [ $attempts -lt 3 ]; do
         printf "${WHITE}login: ${NC}";    read -r username
@@ -172,28 +172,28 @@ login_user() {
         hashed=$(hash_pw "$password")
         if grep -q "^${username}:${hashed}$" "$USERS_FILE" 2>/dev/null; then
             PLAYER_NAME="$username"; load_progress
-            echo -e "\n${LGREEN}  ✓ Authentication successful.${NC}"
+            printf '%b\n' "\n${LGREEN}  ✓ Authentication successful.${NC}"
             sleep 0.6; main_menu; return
         fi
         attempts=$((attempts + 1))
-        echo -e "${RED}  Login incorrect.${NC}\n"
+        printf '%b\n' "${RED}  Login incorrect.${NC}\n"
     done
-    echo -e "${LRED}  Too many failed attempts.${NC}"; sleep 2; startup_screen
+    printf '%b\n' "${LRED}  Too many failed attempts.${NC}"; sleep 2; startup_screen
 }
 
 # ---- MENUS ----
 
 main_menu() {
     clear_screen; print_banner; status_bar
-    echo -e "\n${LCYAN}╔══════════════════════════════════════╗"
-    echo -e "║             MAIN MENU                ║"
-    echo -e "╠══════════════════════════════════════╣"
-    echo -e "║  ${LGREEN}[1]${LCYAN} Continue Adventure              ║"
-    echo -e "║  ${YELLOW}[2]${LCYAN} Level Select                    ║"
-    echo -e "║  ${BLUE}[3]${LCYAN} Command Reference               ║"
-    echo -e "║  ${MAGENTA}[4]${LCYAN} Leaderboard                    ║"
-    echo -e "║  ${RED}[5]${LCYAN} Logout                         ║"
-    echo -e "╚══════════════════════════════════════╝${NC}\n"
+    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════╗"
+    printf '%b\n' "║             MAIN MENU                ║"
+    printf '%b\n' "╠══════════════════════════════════════╣"
+    printf '%b\n' "║  ${LGREEN}[1]${LCYAN} Continue Adventure              ║"
+    printf '%b\n' "║  ${YELLOW}[2]${LCYAN} Level Select                    ║"
+    printf '%b\n' "║  ${BLUE}[3]${LCYAN} Command Reference               ║"
+    printf '%b\n' "║  ${MAGENTA}[4]${LCYAN} Leaderboard                    ║"
+    printf '%b\n' "║  ${RED}[5]${LCYAN} Logout                         ║"
+    printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
     printf "${YELLOW}Choice: ${NC}"; read -r choice
     case $choice in
         1) run_current_level ;;
@@ -207,9 +207,9 @@ main_menu() {
 
 level_select() {
     clear_screen; print_banner; status_bar
-    echo -e "\n${LCYAN}╔══════════════════════════════════════════════════════╗"
-    echo -e "║                   LEVEL SELECT                      ║"
-    echo -e "╠══════════════════════════════════════════════════════╣${NC}"
+    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════╗"
+    printf '%b\n' "║                   LEVEL SELECT                      ║"
+    printf '%b\n' "╠══════════════════════════════════════════════════════╣${NC}"
     local -a levels=(
         " 1|Navigation & Basics   |ls cd pwd mkdir rmdir        |🗺 "
         " 2|File Operations       |cat touch cp mv rm tar       |📁"
@@ -245,52 +245,52 @@ level_select() {
         local n
         n=$(echo "$num" | tr -d ' ')
         if [ "$n" -le "$PLAYER_LEVEL" ]; then
-            echo -e "${LCYAN}║ ${LGREEN}[${num}]${NC} ${icon} ${WHITE}${BOLD}${name}${NC} ${DIM}${cmds}${NC}"
+            printf '%b\n' "${LCYAN}║ ${LGREEN}[${num}]${NC} ${icon} ${WHITE}${BOLD}${name}${NC} ${DIM}${cmds}${NC}"
         else
-            echo -e "${LCYAN}║ ${DIM}[${num}] ${icon} ${name} ${cmds} [LOCKED]${NC}"
+            printf '%b\n' "${LCYAN}║ ${DIM}[${num}] ${icon} ${name} ${cmds} [LOCKED]${NC}"
         fi
     done
-    echo -e "${LCYAN}╚══════════════════════════════════════════════════════╝${NC}"
+    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════╝${NC}"
     printf "\n${YELLOW}Enter level (1-28) or 0 to go back: ${NC}"; read -r choice
     [ "$choice" = "0" ] && main_menu && return
     if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le 28 ] && [ "$choice" -le "$PLAYER_LEVEL" ]; then
         dispatch_level "$choice"
     else
-        echo -e "${RED}  Locked or invalid!${NC}"; sleep 1; level_select
+        printf '%b\n' "${RED}  Locked or invalid!${NC}"; sleep 1; level_select
     fi
 }
 
 command_reference() {
     clear_screen; print_banner
-    echo -e "\n${LCYAN}╔══════════════════════════════════════════════════════════════════╗"
-    echo -e "║                      COMMAND REFERENCE                          ║"
-    echo -e "╚══════════════════════════════════════════════════════════════════╝${NC}\n"
-    echo -e "  ${LGREEN}NAVIGATION ${NC}  ls  cd  pwd  mkdir  rmdir  tree"
-    echo -e "  ${YELLOW}FILES      ${NC}  cat  touch  cp  mv  rm  ln  tar  gzip  zip  less"
-    echo -e "  ${CYAN}SEARCH     ${NC}  grep  grep -E  grep -v  grep -r  find  locate"
-    echo -e "  ${MAGENTA}PERMISSIONS${NC}  chmod  chown  whoami  id  su  sudo"
-    echo -e "  ${BLUE}PROCESSES  ${NC}  ps  kill  jobs  bg  fg  nohup  lsof"
-    echo -e "  ${LRED}TEXT PROC  ${NC}  awk  sed  cut  tr  sort  uniq  head  tail  tee"
-    echo -e "  ${LCYAN}NETWORKING ${NC}  curl  wget  ping  ssh  scp  ssh-keygen  ss"
-    echo -e "  ${WHITE}SCRIPTING  ${NC}  echo  read  if  for  while  case  function  trap"
-    echo -e "  ${LMAGENTA}DISK/SYS   ${NC}  df  du  lsblk  mount  uname  uptime  free  lscpu"
-    echo -e "  ${YELLOW}USERS/SVCS ${NC}  useradd  usermod  passwd  systemctl  journalctl"
-    echo -e "  ${LGREEN}REDIRECT   ${NC}  >  >>  <  2>  2>&1  /dev/null  |  tee  xargs"
-    echo -e "  ${CYAN}CRON       ${NC}  crontab  at  * * * * *  (min hr day mon wday)"
-    echo -e "  ${MAGENTA}STRINGS    ${NC}  \${#v}  \${v:0:n}  \${v%p}  \${v//f/r}  printf"
-    echo -e "  ${BLUE}PACKAGES   ${NC}  apt  dnf  yum  brew  pacman  pip  snap"
-    echo -e "\n${DIM}  In-game: type '${YELLOW}hint${NC}${DIM}' for a clue, '${YELLOW}skip${NC}${DIM}' to skip (costs 1 life).${NC}"
-    echo -e "${DIM}  Platform notes: macOS uses md5/vm_stat/sysctl/brew vs Linux md5sum/free/lscpu/apt.${NC}"
+    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════════════════╗"
+    printf '%b\n' "║                      COMMAND REFERENCE                          ║"
+    printf '%b\n' "╚══════════════════════════════════════════════════════════════════╝${NC}\n"
+    printf '%b\n' "  ${LGREEN}NAVIGATION ${NC}  ls  cd  pwd  mkdir  rmdir  tree"
+    printf '%b\n' "  ${YELLOW}FILES      ${NC}  cat  touch  cp  mv  rm  ln  tar  gzip  zip  less"
+    printf '%b\n' "  ${CYAN}SEARCH     ${NC}  grep  grep -E  grep -v  grep -r  find  locate"
+    printf '%b\n' "  ${MAGENTA}PERMISSIONS${NC}  chmod  chown  whoami  id  su  sudo"
+    printf '%b\n' "  ${BLUE}PROCESSES  ${NC}  ps  kill  jobs  bg  fg  nohup  lsof"
+    printf '%b\n' "  ${LRED}TEXT PROC  ${NC}  awk  sed  cut  tr  sort  uniq  head  tail  tee"
+    printf '%b\n' "  ${LCYAN}NETWORKING ${NC}  curl  wget  ping  ssh  scp  ssh-keygen  ss"
+    printf '%b\n' "  ${WHITE}SCRIPTING  ${NC}  echo  read  if  for  while  case  function  trap"
+    printf '%b\n' "  ${LMAGENTA}DISK/SYS   ${NC}  df  du  lsblk  mount  uname  uptime  free  lscpu"
+    printf '%b\n' "  ${YELLOW}USERS/SVCS ${NC}  useradd  usermod  passwd  systemctl  journalctl"
+    printf '%b\n' "  ${LGREEN}REDIRECT   ${NC}  >  >>  <  2>  2>&1  /dev/null  |  tee  xargs"
+    printf '%b\n' "  ${CYAN}CRON       ${NC}  crontab  at  * * * * *  (min hr day mon wday)"
+    printf '%b\n' "  ${MAGENTA}STRINGS    ${NC}  \${#v}  \${v:0:n}  \${v%p}  \${v//f/r}  printf"
+    printf '%b\n' "  ${BLUE}PACKAGES   ${NC}  apt  dnf  yum  brew  pacman  pip  snap"
+    printf '%b\n' "\n${DIM}  In-game: type '${YELLOW}hint${NC}${DIM}' for a clue, '${YELLOW}skip${NC}${DIM}' to skip (costs 1 life).${NC}"
+    printf '%b\n' "${DIM}  Platform notes: macOS uses md5/vm_stat/sysctl/brew vs Linux md5sum/free/lscpu/apt.${NC}"
     press_enter; main_menu
 }
 
 leaderboard() {
     clear_screen; print_banner
-    echo -e "\n${YELLOW}╔══════════════════════════════════════╗"
-    echo -e "║            LEADERBOARD               ║"
-    echo -e "╚══════════════════════════════════════╝${NC}\n"
-    echo -e "${BOLD}${WHITE}  #    Player            Level   XP${NC}"
-    echo -e "${DIM}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    printf '%b\n' "\n${YELLOW}╔══════════════════════════════════════╗"
+    printf '%b\n' "║            LEADERBOARD               ║"
+    printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
+    printf '%b\n' "${BOLD}${WHITE}  #    Player            Level   XP${NC}"
+    printf '%b\n' "${DIM}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     local rank=1
     for save in "$SAVE_DIR"/*.save; do
         [ -f "$save" ] || continue
@@ -313,18 +313,18 @@ leaderboard() {
 startup_screen() {
     PLAYER_NAME=""; PLAYER_LEVEL=1; PLAYER_XP=0; PLAYER_LIVES=3
     clear_screen; print_banner
-    echo -e "\n${LCYAN}╔══════════════════════════════════════╗"
-    echo -e "║      WELCOME TO BASHQUEST  🐧         ║"
-    echo -e "╠══════════════════════════════════════╣"
-    echo -e "║  ${LGREEN}[1]${LCYAN} Login                          ║"
-    echo -e "║  ${YELLOW}[2]${LCYAN} Create Account                 ║"
-    echo -e "║  ${RED}[3]${LCYAN} Quit                           ║"
-    echo -e "╚══════════════════════════════════════╝${NC}\n"
+    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════╗"
+    printf '%b\n' "║      WELCOME TO BASHQUEST  🐧         ║"
+    printf '%b\n' "╠══════════════════════════════════════╣"
+    printf '%b\n' "║  ${LGREEN}[1]${LCYAN} Login                          ║"
+    printf '%b\n' "║  ${YELLOW}[2]${LCYAN} Create Account                 ║"
+    printf '%b\n' "║  ${RED}[3]${LCYAN} Quit                           ║"
+    printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
     printf "${YELLOW}Choice: ${NC}"; read -r choice
     case $choice in
         1) login_user ;;
         2) register_user ;;
-        3) echo -e "\n${CYAN}Thanks for playing BashQuest! Keep hacking! 🐧${NC}\n"; exit 0 ;;
+        3) printf '%b\n' "\n${CYAN}Thanks for playing BashQuest! Keep hacking! 🐧${NC}\n"; exit 0 ;;
         *) startup_screen ;;
     esac
 }
@@ -360,31 +360,31 @@ run_challenge() {
     local title="$1" desc="$2" hint="$3" check="$4" xp="$5"
     local user_input
     while true; do
-        echo -e "\n${LCYAN}┌──────────────────────────────────────────────────┐"
+        printf '%b\n' "\n${LCYAN}┌──────────────────────────────────────────────────┐"
         printf "│  ${YELLOW}%-48s${LCYAN}│\n" "CHALLENGE: $title"
-        echo -e "└──────────────────────────────────────────────────┘${NC}"
-        echo -e "\n${WHITE}${desc}${NC}\n"
+        printf '%b\n' "└──────────────────────────────────────────────────┘${NC}"
+        printf '%b\n' "\n${WHITE}${desc}${NC}\n"
         printf "${LGREEN}bashquest${NC}${CYAN}@terminal${NC}:${YELLOW}~\$${NC} "
         read -r user_input
         case "$user_input" in
             hint)
-                echo -e "\n${YELLOW}  💡 HINT: ${hint}${NC}"
+                printf '%b\n' "\n${YELLOW}  💡 HINT: ${hint}${NC}"
                 continue ;;
             skip)
-                echo -e "\n${DIM}  Skipped. -1 life.${NC}"
+                printf '%b\n' "\n${DIM}  Skipped. -1 life.${NC}"
                 PLAYER_LIVES=$((PLAYER_LIVES - 1))
                 save_progress
                 [ "$PLAYER_LIVES" -le 0 ] && game_over
                 return ;;
         esac
         if eval "$check" 2>/dev/null; then
-            echo -e "\n${LGREEN}  ✓  Correct! Well done!${NC}"
+            printf '%b\n' "\n${LGREEN}  ✓  Correct! Well done!${NC}"
             show_xp_gain "$xp"
             sleep 0.5
             return
         else
             wrong_answer || return
-            echo -e "${DIM}  Type '${YELLOW}hint${NC}${DIM}' for help or '${YELLOW}skip${NC}${DIM}' to skip.${NC}"
+            printf '%b\n' "${DIM}  Type '${YELLOW}hint${NC}${DIM}' for help or '${YELLOW}skip${NC}${DIM}' to skip.${NC}"
         fi
     done
 }
@@ -392,8 +392,8 @@ run_challenge() {
 level_intro() {
     local num="$1" title="$2" desc="$3" badge="$4"
     clear_screen; print_banner; status_bar
-    echo -e "\n${BG_MAGENTA}${WHITE}  LEVEL ${num}: ${BOLD}${title}  ${NC}\n"
-    echo -e "  ${badge}\n"
+    printf '%b\n' "\n${BG_MAGENTA}${WHITE}  LEVEL ${num}: ${BOLD}${title}  ${NC}\n"
+    printf '%b\n' "  ${badge}\n"
     printf "  %s" "${CYAN}"; type_text "${desc}" 0.018; printf "%s\n" "${NC}"
     press_enter
 }
@@ -401,15 +401,15 @@ level_intro() {
 level_complete() {
     local num="$1"
     clear_screen
-    echo -e "${LGREEN}"
+    printf '%b\n' "${LGREEN}"
     echo ' ██╗     ███████╗██╗   ██╗███████╗██╗         ██████╗  ██████╗ ███╗   ██╗███████╗'
     echo ' ██║     ██╔════╝██║   ██║██╔════╝██║         ██╔══██╗██╔═══██╗████╗  ██║██╔════╝'
     echo ' ██║     █████╗  ██║   ██║█████╗  ██║         ██║  ██║██║   ██║██╔██╗ ██║█████╗  '
     echo ' ██║     ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║         ██║  ██║██║   ██║██║╚██╗██║██╔══╝  '
     echo ' ███████╗███████╗ ╚████╔╝ ███████╗███████╗    ██████╔╝╚██████╔╝██║ ╚████║███████╗'
     echo ' ╚══════╝╚══════╝  ╚═══╝  ╚══════╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝'
-    echo -e "${NC}"
-    echo -e "  ${YELLOW}⭐ Level ${num} Complete!${NC}   ${CYAN}XP: ${PLAYER_XP}${NC}"
+    printf '%b\n' "${NC}"
+    printf '%b\n' "  ${YELLOW}⭐ Level ${num} Complete!${NC}   ${CYAN}XP: ${PLAYER_XP}${NC}"
     [ "$PLAYER_LEVEL" -le "$num" ] && PLAYER_LEVEL=$((num + 1)) && save_progress
     sleep 1; press_enter; main_menu
 }
@@ -821,16 +821,16 @@ run_level_8() {
 
     # GAME COMPLETE
     clear_screen
-    echo -e "${YELLOW}"
+    printf '%b\n' "${YELLOW}"
     echo ' ██████╗ ██████╗ ███╗   ██╗ ██████╗ ██████╗  █████╗ ████████╗███████╗██╗'
     echo '██╔════╝██╔═══██╗████╗  ██║██╔════╝ ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝██║'
     echo '██║     ██║   ██║██╔██╗ ██║██║  ███╗██████╔╝███████║   ██║   ███████╗██║'
     echo '██║     ██║   ██║██║╚██╗██║██║   ██║██╔══██╗██╔══██║   ██║   ╚════██║╚═╝'
     echo '╚██████╗╚██████╔╝██║ ╚████║╚██████╔╝██║  ██║██║  ██║   ██║   ███████║██╗'
     echo ' ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝'
-    echo -e "${NC}"
-    echo -e "  ${LCYAN}You have mastered BashQuest, ${BOLD}${PLAYER_NAME}${NC}${LCYAN}! You are a true Linux warrior! 🐧⚔️${NC}"
-    echo -e "  ${WHITE}Final XP: ${YELLOW}${PLAYER_XP}${NC}   ${WHITE}All 8 Levels Complete!${NC}"
+    printf '%b\n' "${NC}"
+    printf '%b\n' "  ${LCYAN}You have mastered BashQuest, ${BOLD}${PLAYER_NAME}${NC}${LCYAN}! You are a true Linux warrior! 🐧⚔️${NC}"
+    printf '%b\n' "  ${WHITE}Final XP: ${YELLOW}${PLAYER_XP}${NC}   ${WHITE}All 8 Levels Complete!${NC}"
     PLAYER_LEVEL=9; save_progress
     press_enter; main_menu
 }
@@ -1774,16 +1774,16 @@ run_level_28() {
     cleanup_game_env
 
     clear_screen
-    echo -e "${YELLOW}"
+    printf '%b\n' "${YELLOW}"
     echo ' ██████╗ ██████╗ ███╗   ██╗ ██████╗ ██████╗  █████╗ ████████╗███████╗██╗'
     echo '██╔════╝██╔═══██╗████╗  ██║██╔════╝ ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝██║'
     echo '██║     ██║   ██║██╔██╗ ██║██║  ███╗██████╔╝███████║   ██║   ███████╗██║'
     echo '██║     ██║   ██║██║╚██╗██║██║   ██║██╔══██╗██╔══██║   ██║   ╚════██║╚═╝'
     echo '╚██████╗╚██████╔╝██║ ╚████║╚██████╔╝██║  ██║██║  ██║   ██║   ███████║██╗'
     echo ' ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝'
-    echo -e "${NC}"
-    echo -e "  ${LCYAN}You have completed ALL 28 levels of BashQuest, ${BOLD}${PLAYER_NAME}${NC}${LCYAN}!${NC}"
-    echo -e "  ${WHITE}You are a true Linux master. 🐧⚔️  Final XP: ${YELLOW}${PLAYER_XP}${NC}"
+    printf '%b\n' "${NC}"
+    printf '%b\n' "  ${LCYAN}You have completed ALL 28 levels of BashQuest, ${BOLD}${PLAYER_NAME}${NC}${LCYAN}!${NC}"
+    printf '%b\n' "  ${WHITE}You are a true Linux master. 🐧⚔️  Final XP: ${YELLOW}${PLAYER_XP}${NC}"
     PLAYER_LEVEL=29; save_progress
     press_enter; main_menu
 }
@@ -1799,7 +1799,7 @@ dispatch_level() {
         17) run_level_17 ;; 18) run_level_18 ;; 19) run_level_19 ;; 20) run_level_20 ;;
         21) run_level_21 ;; 22) run_level_22 ;; 23) run_level_23 ;; 24) run_level_24 ;;
         25) run_level_25 ;; 26) run_level_26 ;; 27) run_level_27 ;; 28) run_level_28 ;;
-        *) echo -e "\n${LGREEN}  🏆 All 28 levels complete — true master!${NC}"; press_enter; main_menu ;;
+        *) printf '%b\n' "\n${LGREEN}  🏆 All 28 levels complete — true master!${NC}"; press_enter; main_menu ;;
     esac
 }
 
@@ -1810,6 +1810,6 @@ run_current_level() {
 # ---- ENTRY ----
 
 trap 'cleanup_game_env' EXIT
-trap 'echo -e "\n${YELLOW}Use option [5] Logout or [3] Quit to exit cleanly.${NC}"' INT
+trap 'printf '%b\n' "\n${YELLOW}Use option [5] Logout or [3] Quit to exit cleanly.${NC}"' INT
 
 startup_screen
