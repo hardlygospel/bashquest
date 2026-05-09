@@ -1,5 +1,5 @@
 #!/bin/bash
-# BashQuest — The Linux Command Learning Adventure
+# BashQuest by Tony Hosaroygard 2026
 # Copyright (C) 2026 Tony Hosaroygard <tasmaniamate@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,17 +19,17 @@
 # BASHQUEST - The Linux Command Learning Adventure
 # ============================================================
 
-RED='\033[0;31m';    LRED='\033[1;31m'
-GREEN='\033[0;32m';  LGREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m';   LBLUE='\033[1;34m'
-MAGENTA='\033[0;35m';LMAGENTA='\033[1;35m'
-CYAN='\033[0;36m';   LCYAN='\033[1;36m'
-WHITE='\033[1;37m'
-BOLD='\033[1m';      DIM='\033[2m'
-BG_RED='\033[41m';   BG_GREEN='\033[42m'
-BG_BLUE='\033[44m';  BG_MAGENTA='\033[45m'
-NC='\033[0m'
+RED=$'\033[0;31m';    LRED=$'\033[1;31m'
+GREEN=$'\033[0;32m';  LGREEN=$'\033[1;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m';   LBLUE=$'\033[1;34m'
+MAGENTA=$'\033[0;35m';LMAGENTA=$'\033[1;35m'
+CYAN=$'\033[0;36m';   LCYAN=$'\033[1;36m'
+WHITE=$'\033[1;37m'
+BOLD=$'\033[1m';      DIM=$'\033[2m'
+BG_RED=$'\033[41m';   BG_GREEN=$'\033[42m'
+BG_BLUE=$'\033[44m';  BG_MAGENTA=$'\033[45m'
+NC=$'\033[0m'
 
 SAVE_DIR="$HOME/.bashquest"
 USERS_FILE="$SAVE_DIR/users.db"
@@ -54,7 +54,7 @@ print_banner() {
     echo ' ██╔══██╗██╔══██║╚════██║██╔══██║██║▄▄ ██║██║   ██║██╔══╝  ╚════██║   ██║   '
     echo ' ██████╔╝██║  ██║███████║██║  ██║╚██████╔╝╚██████╔╝███████╗███████║   ██║   '
     echo ' ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚══▀▀╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝   '
-    echo -e "${NC}${YELLOW}              ⚡  The Ultimate Linux Command Learning Adventure  ⚡${NC}"
+    echo -e "${NC}${YELLOW}                        by Tony Hosaroygard  2026${NC}"
     echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
@@ -292,21 +292,20 @@ leaderboard() {
     echo -e "${BOLD}${WHITE}  #    Player            Level   XP${NC}"
     echo -e "${DIM}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     local rank=1
-    for save in "$SAVE_DIR"/*.save; do
-        [ -f "$save" ] || continue
-        local name xp lvl
-        name=$(basename "$save" .save)
-        xp=$(grep "^PLAYER_XP=" "$save" | cut -d= -f2)
-        lvl=$(grep "^PLAYER_LEVEL=" "$save" | cut -d= -f2)
-        echo "$xp $lvl $name"
-    done | sort -rn | head -10 | while read -r xp lvl name; do
+    while read -r xp lvl name; do
         local medal="  "
         [ $rank -eq 1 ] && medal="${YELLOW}🥇${NC}"
         [ $rank -eq 2 ] && medal="${CYAN}🥈${NC}"
         [ $rank -eq 3 ] && medal="${MAGENTA}🥉${NC}"
         printf "  ${medal}%-3s  %-16s  %-6s  %s\n" "#$rank" "$name" "$lvl" "$xp"
         rank=$((rank + 1))
-    done
+    done < <(for save in "$SAVE_DIR"/*.save; do
+        [ -f "$save" ] || continue
+        name=$(basename "$save" .save)
+        xp=$(grep "^PLAYER_XP=" "$save" | cut -d= -f2)
+        lvl=$(grep "^PLAYER_LEVEL=" "$save" | cut -d= -f2)
+        echo "$xp $lvl $name"
+    done | sort -rn | head -10)
     press_enter; main_menu
 }
 
@@ -1600,7 +1599,7 @@ run_level_25() {
         'chk ".*\\\$\{[a-zA-Z_][a-zA-Z0-9_]*%[^}]"' 25
 
     run_challenge "Strip Directory from Path" \
-        "Given ${YELLOW}FULL=/home/tony/scripts/bashquest.sh${NC}, extract just the filename.\n\n  ${CYAN}\${var##pattern}${NC} strips the LONGEST match from the START. ${CYAN}##*/#{NC} removes everything up to and including the last slash — equivalent to basename." \
+        "Given ${YELLOW}FULL=/home/tony/scripts/bashquest.sh${NC}, extract just the filename.\n\n  ${CYAN}\${var##pattern}${NC} strips the LONGEST match from the START. ${CYAN}\${var##*/}${NC} removes everything up to and including the last slash — equivalent to basename." \
         "FULL=/home/tony/scripts/bashquest.sh; echo \${FULL##*/}  — ## strips longest prefix. ##*/ = everything up to last /." \
         'chk ".*\\\$\{[a-zA-Z_][a-zA-Z0-9_]*##[^}]"' 25
 
