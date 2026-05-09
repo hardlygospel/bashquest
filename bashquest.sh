@@ -1,5 +1,5 @@
 #!/bin/bash
-# BashQuest by Tony Hosaroygard 2026
+# BashQuest — The Linux Command Learning Adventure
 # Copyright (C) 2026 Tony Hosaroygard <tasmaniamate@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ print_banner() {
     echo ' ██╔══██╗██╔══██║╚════██║██╔══██║██║▄▄ ██║██║   ██║██╔══╝  ╚════██║   ██║   '
     echo ' ██████╔╝██║  ██║███████║██║  ██║╚██████╔╝╚██████╔╝███████╗███████║   ██║   '
     echo ' ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚══▀▀╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝   '
-    echo -e "${NC}${YELLOW}                        by Tony Hosaroygard  2026${NC}"
+    echo -e "${NC}${YELLOW}              ⚡  The Ultimate Linux Command Learning Adventure  ⚡${NC}"
     echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
@@ -292,20 +292,21 @@ leaderboard() {
     echo -e "${BOLD}${WHITE}  #    Player            Level   XP${NC}"
     echo -e "${DIM}  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     local rank=1
-    while read -r xp lvl name; do
+    for save in "$SAVE_DIR"/*.save; do
+        [ -f "$save" ] || continue
+        local name xp lvl
+        name=$(basename "$save" .save)
+        xp=$(grep "^PLAYER_XP=" "$save" | cut -d= -f2)
+        lvl=$(grep "^PLAYER_LEVEL=" "$save" | cut -d= -f2)
+        echo "$xp $lvl $name"
+    done | sort -rn | head -10 | while read -r xp lvl name; do
         local medal="  "
         [ $rank -eq 1 ] && medal="${YELLOW}🥇${NC}"
         [ $rank -eq 2 ] && medal="${CYAN}🥈${NC}"
         [ $rank -eq 3 ] && medal="${MAGENTA}🥉${NC}"
         printf "  ${medal}%-3s  %-16s  %-6s  %s\n" "#$rank" "$name" "$lvl" "$xp"
         rank=$((rank + 1))
-    done < <(for save in "$SAVE_DIR"/*.save; do
-        [ -f "$save" ] || continue
-        name=$(basename "$save" .save)
-        xp=$(grep "^PLAYER_XP=" "$save" | cut -d= -f2)
-        lvl=$(grep "^PLAYER_LEVEL=" "$save" | cut -d= -f2)
-        echo "$xp $lvl $name"
-    done | sort -rn | head -10)
+    done
     press_enter; main_menu
 }
 
@@ -1599,7 +1600,7 @@ run_level_25() {
         'chk ".*\\\$\{[a-zA-Z_][a-zA-Z0-9_]*%[^}]"' 25
 
     run_challenge "Strip Directory from Path" \
-        "Given ${YELLOW}FULL=/home/tony/scripts/bashquest.sh${NC}, extract just the filename.\n\n  ${CYAN}\${var##pattern}${NC} strips the LONGEST match from the START. ${CYAN}\${var##*/}${NC} removes everything up to and including the last slash — equivalent to basename." \
+        "Given ${YELLOW}FULL=/home/tony/scripts/bashquest.sh${NC}, extract just the filename.\n\n  ${CYAN}\${var##pattern}${NC} strips the LONGEST match from the START. ${CYAN}##*/#{NC} removes everything up to and including the last slash — equivalent to basename." \
         "FULL=/home/tony/scripts/bashquest.sh; echo \${FULL##*/}  — ## strips longest prefix. ##*/ = everything up to last /." \
         'chk ".*\\\$\{[a-zA-Z_][a-zA-Z0-9_]*##[^}]"' 25
 
