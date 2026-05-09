@@ -1,0 +1,42 @@
+title: BashQuest
+description: Interactive terminal game teaching Linux and Bash — 28 levels from ls to systemd
+remote_theme: just-the-docs/just-the-docs
+
+color_scheme: dark
+search_enabled: true
+permalink: pretty
+
+heading_anchors: true
+back_to_top: true
+back_to_top_text: "Back to top"
+
+footer_content: "BashQuest &mdash; GPL-3.0 &mdash; <a href='https://hardlygospel.github.io'>hardlygospel.github.io</a>"
+
+aux_links:
+  "← Homepage":
+    - "https://hardlygospel.github.io"
+  "GitHub":
+    - "https://github.com/hardlygospel/bashquest"
+  "Download":
+    - "https://raw.githubusercontent.com/hardlygospel/bashquest/main/bashquest.sh"
+
+aux_links_new_tab: true
+
+callouts_level: quiet
+callouts:
+  tip:
+    title: Tip
+    color: green
+  note:
+    title: Note
+    color: blue
+  warning:
+    title: Warning
+    color: yellow
+  mac:
+    title: macOS Note
+    color: purple
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
