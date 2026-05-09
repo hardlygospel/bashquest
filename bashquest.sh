@@ -74,7 +74,7 @@ type_text() {
         printf "%s" "${text:$i:1}"
         sleep "$delay"
     done
-    echo
+    printf "\n"
 }
 
 show_xp_gain() {
@@ -394,7 +394,7 @@ level_intro() {
     clear_screen; print_banner; status_bar
     echo -e "\n${BG_MAGENTA}${WHITE}  LEVEL ${num}: ${BOLD}${title}  ${NC}\n"
     echo -e "  ${badge}\n"
-    type_text "  ${CYAN}${desc}${NC}" 0.018
+    printf "  %s" "${CYAN}"; type_text "${desc}" 0.018; printf "%s\n" "${NC}"
     press_enter
 }
 
