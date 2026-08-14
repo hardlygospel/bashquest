@@ -1,6 +1,7 @@
 #!/bin/bash
 # BashQuest: The Linux Command Learning Adventure
-# Copyright (C) 2026 Tony Hosaroygard <tasmaniamate@gmail.com>
+# Copyright (C) 2026 Tony "Hardlygospel" Hosaroygard <tasmaniamate@gmail.com>
+# github.com/hardlygospel/bashquest
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,6 +37,93 @@ SAVE_DIR="$HOME/.bashquest"
 USERS_FILE="$SAVE_DIR/users.db"
 mkdir -p "$SAVE_DIR"
 
+# The whole curriculum in one place. Every "28" that used to be hardcoded
+# throughout the file reads from TOTAL_LEVELS now, so growing the game means
+# growing this number, the TIERS table below, and the LEVELS table in
+# level_select(), nothing else.
+TOTAL_LEVELS=61
+
+# num|name|icon|start_level|end_level
+TIERS=(
+    " 1|Beginner               |🗺 | 1| 4"
+    " 2|Intermediate           |⚙ | 5| 8"
+    " 3|Pipes & Patterns       |🔗| 9|14"
+    " 4|Power Tools            |🔧|15|20"
+    " 5|Expert                 |🛡️|21|28"
+    " 6|Storage & Filesystems  |💾|29|34"
+    " 7|File Editing & Sharing |📁|35|39"
+    " 8|Networking             |🌐|40|45"
+    " 9|Storage Networking & SAN|🔌|46|49"
+    "10|Boot Process & Kernel  |🥾|50|54"
+    "11|Media Management       |🎬|55|57"
+    "12|Desktop Ricing         |🎨|58|61"
+)
+
+# num|name|cmds|icon, filtered by tier range in level_select_tier().
+LEVELS=(
+    " 1|Navigation & Basics   |ls cd pwd mkdir rmdir        |🗺 "
+    " 2|File Operations       |cat touch cp mv rm tar       |📁"
+    " 3|Text & Search         |grep find wc sort uniq       |🔍"
+    " 4|Permissions & Users   |chmod chown whoami id        |🔐"
+    " 5|Process Management    |ps kill jobs bg fg           |⚙ "
+    " 6|Text Processing       |awk sed cut tr head tail     |✂ "
+    " 7|Networking            |curl wget ping ssh ss        |🌐"
+    " 8|Shell Scripting       |vars loops if/else funcs     |📜"
+    " 9|Advanced Piping       |tee pipe-chains xargs        |🔗"
+    "10|I/O Redirection       |> >> < 2> 2>&1 /dev/null     |📤"
+    "11|Regular Expressions   |grep -E . * + ? [] ^ \$       |🔤"
+    "12|Advanced grep         |-n -l -c -A -B -C --include  |🔎"
+    "13|Advanced sed          |s/// -i ranges d p addresses |📝"
+    "14|Advanced awk          |NR NF BEGIN END printf math  |⚡"
+    "15|xargs & find -exec    |-exec xargs -I{} -size -mtime|🔧"
+    "16|Disk & Storage        |df du lsblk mount findmnt    |💾"
+    "17|System Information    |uname lscpu free uptime lsof |🖥️"
+    "18|User Management       |useradd usermod passwd groups |👥"
+    "19|SSH & Keys            |ssh-keygen ssh-copy-id -i -L |🔑"
+    "20|Environment & Shell   |PATH export alias source PS1  |🌍"
+    "21|Cron & Scheduling     |crontab syntax at timers     |⏰"
+    "22|Logs & Monitoring     |tail -f journalctl logger    |📋"
+    "23|Package Management    |apt dnf brew install search  |📦"
+    "24|Compression Deep Dive |gzip bzip2 xz zip zcat       |🗜️"
+    "25|String Processing     |\${#} \${:} \${%} \${//} printf   |🔡"
+    "26|Arrays in Bash        |declare -a [@] loops append  |📚"
+    "27|Functions & Errors    |\$? set -e trap return exit   |🛡️"
+    "28|Systemd & Services    |systemctl journalctl units   |⚙️"
+    "29|Disks & Partitions    |lsblk fdisk -l parted -l blkid|💽"
+    "30|Partitioning          |parted mkpart fdisk partprobe|✂️"
+    "31|Filesystems           |mkfs.ext4 mkfs.xfs mkswap    |🧱"
+    "32|Mounting & fstab      |mount umount /etc/fstab UUID |📌"
+    "33|LVM: Volumes & Groups |pvcreate vgcreate lvcreate   |🧩"
+    "34|LVM: Resize & Snapshot|lvextend resize2fs lvcreate -s|📐"
+    "35|Vim Essentials        |i Esc :wq dd /search :%s     |✏️"
+    "36|Permissions & ACLs    |setfacl getfacl umask        |🧷"
+    "37|Samba File Sharing    |smb.conf smbpasswd testparm  |🗂️"
+    "38|NFS Sharing           |/etc/exports exportfs showmount|📡"
+    "39|Sync & Backup (rsync) |rsync -avz --delete -e ssh   |🔁"
+    "40|IP Addressing         |ip addr ip link hostname -I  |🧭"
+    "41|Routing & Gateways    |ip route traceroute          |🛣️"
+    "42|DNS Tools             |dig nslookup /etc/hosts      |🧾"
+    "43|Firewalls             |iptables nft ufw              |🧱"
+    "44|VLANs & Trunking      |vlan id link add 802.1Q      |🔀"
+    "45|Bonding & Troubleshoot|tcpdump mtr nmcli bond        |🩺"
+    "46|iSCSI Init. & Targets |iscsiadm targetcli            |🔗"
+    "47|NFS/SMB at Scale      |autofs automount              |🗺️"
+    "48|Multipath & SAN       |multipath -ll WWN zoning      |🧵"
+    "49|Fibre Channel Storage |lsscsi systool multipath -F   |🔬"
+    "50|Boot Process Overview |systemctl get-default targets |🥾"
+    "51|GRUB2                 |update-grub grub-mkconfig     |🐧"
+    "52|Alt. Boot Managers    |bootctl systemd-boot rEFInd   |🔁"
+    "53|Kernel Panics/Recovery|rescue single-user initramfs  |💥"
+    "54|Building a Kernel     |menuconfig make modules_install|🧬"
+    "55|ffmpeg Basics         |transcode extract-audio thumbs|🎞️"
+    "56|Media Library Org     |find rename sha256sum         |🗃️"
+    "57|Home Media Server     |layout hwaccel transcode      |📺"
+    "58|X11/Wayland & WMs     |XDG_SESSION_TYPE loginctl     |🖼️"
+    "59|i3 Window Manager     |mod+enter workspaces config   |🪟"
+    "60|AwesomeWM & Compositors|rc.lua picom                 |🎨"
+    "61|Dotfiles & Theming    |stow git bare-repo dotfiles   |🌈"
+)
+
 PLAYER_NAME=""
 PLAYER_LEVEL=1
 PLAYER_XP=0
@@ -60,13 +148,15 @@ LEVEL_HINTS=0
 LEVEL_SKIPS=0
 LEVEL_LIVES_LOST=0
 
-# ---- ROOT: your guide through this ----
+# ---- TASMANIA: your guide through this ----
 #
-# ROOT is the voice of BashQuest, a legend of a sysadmin who has seen every
-# incident worth seeing and lived to log it. Every array below is a bank of
-# lines root_pick() draws from at random, so two playthroughs never sound
-# identical. Keep new lines in ROOT's voice: dry, honest, unimpressed by
-# excuses, quietly proud when you earn it.
+# Tasmania is Tony "Hardlygospel" Hosaroygard's in-game handle, a legend of
+# a sysadmin who has seen every incident worth seeing and lived to log it.
+# Every array below is a bank of lines root_pick() draws from at random, so
+# two playthroughs never sound identical. Keep new lines in Tasmania's voice:
+# dry, honest, unimpressed by excuses, quietly proud when you earn it.
+# (The internal root_* naming stuck around from an early draft; it's plumbing,
+# not what the player sees.)
 
 ROOT_CORRECT=(
     "Clean. That's how it's done."
@@ -135,7 +225,7 @@ ROOT_GAME_OVER=(
     "Even root gets locked out sometimes. Log back in when you're ready."
 )
 
-# The one-line intro ROOT gives on top of each level's own lore paragraph.
+# The one-line intro Tasmania gives on top of each level's own lore paragraph.
 # Deliberately generic, it's connective tissue between levels, not a
 # retelling of what the level already explains.
 ROOT_ENCOURAGE=(
@@ -148,7 +238,7 @@ ROOT_ENCOURAGE=(
 )
 
 # Idle chatter for the main menu, lower stakes than ROOT_ENCOURAGE, just
-# ROOT keeping you company between levels.
+# Tasmania keeping you company between levels.
 ROOT_IDLE=(
     "Take your time. The servers aren't going anywhere. Probably."
     "Level select's over there if you want to revisit something."
@@ -169,10 +259,10 @@ root_pick() {
 }
 
 root_says() {
-    printf '%b\n' "  ${DIM}${LMAGENTA}ROOT${NC}${DIM} »${NC} ${MAGENTA}$1${NC}"
+    printf '%b\n' "  ${DIM}${LMAGENTA}Tasmania${NC}${DIM} »${NC} ${MAGENTA}$1${NC}"
 }
 
-# A short multi-line ROOT speech (the origin story, the graduation).
+# A short multi-line Tasmania speech (the origin story, the graduation).
 # Reveals a whole line at a time with a brief pause between lines rather
 # than type_text's character-by-character animation: on a real terminal a
 # five-line char-by-char typewriter effect is a genuinely long wait, and on
@@ -180,7 +270,7 @@ root_says() {
 # far longer than intended. One sleep per LINE keeps the dramatic pacing
 # without either cost. Pass each line as a separate argument.
 root_speech() {
-    printf '%b\n' "  ${DIM}${LMAGENTA}ROOT${NC}${DIM} »${NC}"
+    printf '%b\n' "  ${DIM}${LMAGENTA}Tasmania${NC}${DIM} »${NC}"
     local line
     for line in "$@"; do
         printf '%b\n' "  ${MAGENTA}${line}${NC}"
@@ -233,14 +323,15 @@ print_banner() {
     echo ' ██████╔╝██║  ██║███████║██║  ██║╚██████╔╝╚██████╔╝███████╗███████║   ██║   '
     echo ' ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚══▀▀╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝   '
     printf '%b\n' "${NC}${YELLOW}              ⚡  The Ultimate Linux Command Learning Adventure  ⚡${NC}"
+    printf '%b\n' "${DIM}          by Tony \"Hardlygospel\" Hosaroygard  ·  github.com/hardlygospel${NC}"
     printf '%b\n' "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
 status_bar() {
     printf '%b\n' "\n${BG_BLUE}${WHITE}  👤 ${PLAYER_NAME}  ${NC}${BG_MAGENTA}${WHITE}  ⭐ Level ${PLAYER_LEVEL}  ${NC}${BG_GREEN}${WHITE}  ✨ XP: ${PLAYER_XP}  ${NC}${BG_RED}${WHITE}  ❤  Lives: ${PLAYER_LIVES}  ${NC}"
     local lvl_shown=$PLAYER_LEVEL
-    [ "$lvl_shown" -gt 28 ] && lvl_shown=28
-    printf '%b\n' "${DIM}  ${NC}${LCYAN}$(progress_bar "$lvl_shown" 28 40)${NC} ${DIM}${lvl_shown}/28 levels${NC}$([ "$PLAYER_STREAK" -ge 3 ] && printf '%b' "  ${YELLOW}🔥 streak ${PLAYER_STREAK}${NC}")"
+    [ "$lvl_shown" -gt "$TOTAL_LEVELS" ] && lvl_shown=$TOTAL_LEVELS
+    printf '%b\n' "${DIM}  ${NC}${LCYAN}$(progress_bar "$lvl_shown" "$TOTAL_LEVELS" 40)${NC} ${DIM}${lvl_shown}/${TOTAL_LEVELS} levels${NC}$([ "$PLAYER_STREAK" -ge 3 ] && printf '%b' "  ${YELLOW}🔥 streak ${PLAYER_STREAK}${NC}")"
     printf '%b\n' "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
@@ -280,9 +371,9 @@ boot_sequence() {
     local lines=(
         "[  OK  ] Mounting /dev/quest on / ..."
         "[  OK  ] Starting terminal subsystem ..."
-        "[  OK  ] Loading personality module: root.ko ..."
+        "[  OK  ] Loading personality module: tasmania.ko ..."
         "[  OK  ] Checking for legendary sysadmins in /etc/passwd ..."
-        "[ INFO ] Found 1."
+        "[ INFO ] Found 1: Tony \"Hardlygospel\" Hosaroygard."
     )
     local l
     for l in "${lines[@]}"; do
@@ -292,7 +383,7 @@ boot_sequence() {
     printf '%b\n' "${NC}"
     sleep 0.2
     printf "  %s" "${LMAGENTA}"
-    type_text "ROOT is watching the login prompt..." 0.02
+    type_text "Tasmania is watching the login prompt..." 0.02
     printf "%s" "${NC}"
     sleep 0.4
 }
@@ -386,11 +477,14 @@ register_user() {
     printf '%b\n' "\n${LGREEN}  ✓ Account created! Welcome, ${BOLD}${username}${NC}${LGREEN}!${NC}\n"
     sleep 0.5
     root_speech \
-        "They call me ROOT. Not because I run everything, because I've seen everything." \
-        "Every 3am page. Every rm -rf typo. Every 'it works on my machine.'" \
+        "Name's Tony Hosaroygard. Round here they call me Tasmania." \
+        "Twenty-five years of IT, every role you can name. I've seen every" \
+        "3am page, every rm -rf typo, every 'it works on my machine.'" \
         "You're new here, and that's fine, everyone starts at uid 1000." \
-        "Get through what I'm about to put you through, and one day you'll be" \
-        "the one someone else is terrified of paging. Let's begin, ${username}."
+        "By the time we're done you won't just know commands, you'll be able to" \
+        "run storage, networking, a SAN, a boot process gone wrong, and still" \
+        "have the taste to rice your own desktop after hours. Let's begin, ${username}." \
+        "(github.com/hardlygospel, if you ever want to see what I actually build.)"
     press_enter
     main_menu
 }
@@ -445,58 +539,62 @@ main_menu() {
     esac
 }
 
+# Step 1: pick a tier. With 61 levels a flat list stopped being useful, so
+# level select is now two menus deep: tier, then level within that tier.
+# Every tier is always browsable (you can look ahead at what's coming), the
+# individual levels inside still show [LOCKED] same as before.
 level_select() {
     clear_screen; print_banner; status_bar
     printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════╗"
-    printf '%b\n' "║                   LEVEL SELECT                      ║"
+    printf '%b\n' "║                    JUMP TO TOPIC                     ║"
     printf '%b\n' "╠══════════════════════════════════════════════════════╣${NC}"
-    local -a levels=(
-        " 1|Navigation & Basics   |ls cd pwd mkdir rmdir        |🗺 "
-        " 2|File Operations       |cat touch cp mv rm tar       |📁"
-        " 3|Text & Search         |grep find wc sort uniq       |🔍"
-        " 4|Permissions & Users   |chmod chown whoami id        |🔐"
-        " 5|Process Management    |ps kill jobs bg fg           |⚙ "
-        " 6|Text Processing       |awk sed cut tr head tail     |✂ "
-        " 7|Networking            |curl wget ping ssh ss        |🌐"
-        " 8|Shell Scripting       |vars loops if/else funcs     |📜"
-        " 9|Advanced Piping       |tee pipe-chains xargs        |🔗"
-        "10|I/O Redirection       |> >> < 2> 2>&1 /dev/null     |📤"
-        "11|Regular Expressions   |grep -E . * + ? [] ^ \$       |🔤"
-        "12|Advanced grep         |-n -l -c -A -B -C --include  |🔎"
-        "13|Advanced sed          |s/// -i ranges d p addresses |📝"
-        "14|Advanced awk          |NR NF BEGIN END printf math  |⚡"
-        "15|xargs & find -exec    |-exec xargs -I{} -size -mtime|🔧"
-        "16|Disk & Storage        |df du lsblk mount findmnt    |💾"
-        "17|System Information    |uname lscpu free uptime lsof |🖥️"
-        "18|User Management       |useradd usermod passwd groups |👥"
-        "19|SSH & Keys            |ssh-keygen ssh-copy-id -i -L |🔑"
-        "20|Environment & Shell   |PATH export alias source PS1  |🌍"
-        "21|Cron & Scheduling     |crontab syntax at timers     |⏰"
-        "22|Logs & Monitoring     |tail -f journalctl logger    |📋"
-        "23|Package Management    |apt dnf brew install search  |📦"
-        "24|Compression Deep Dive |gzip bzip2 xz zip zcat       |🗜️"
-        "25|String Processing     |\${#} \${:} \${%} \${//} printf   |🔡"
-        "26|Arrays in Bash        |declare -a [@] loops append  |📚"
-        "27|Functions & Errors    |\$? set -e trap return exit   |🛡️"
-        "28|Systemd & Services    |systemctl journalctl units   |⚙️"
-    )
-    for entry in "${levels[@]}"; do
-        IFS='|' read -r num name cmds icon <<< "$entry"
-        local n
+    local entry num name icon start end n
+    for entry in "${TIERS[@]}"; do
+        IFS='|' read -r num name icon start end <<< "$entry"
         n=$(echo "$num" | tr -d ' ')
-        if [ "$n" -le "$PLAYER_LEVEL" ]; then
-            printf '%b\n' "${LCYAN}║ ${LGREEN}[${num}]${NC} ${icon} ${WHITE}${BOLD}${name}${NC} ${DIM}${cmds}${NC}"
+        if [ "$PLAYER_LEVEL" -ge "$start" ]; then
+            printf '%b\n' "${LCYAN}║ ${LGREEN}[${num}]${NC} ${icon} ${WHITE}${BOLD}${name}${NC} ${DIM}(levels ${start}-${end})${NC}"
         else
-            printf '%b\n' "${LCYAN}║ ${DIM}[${num}] ${icon} ${name} ${cmds} [LOCKED]${NC}"
+            printf '%b\n' "${LCYAN}║ ${DIM}[${num}] ${icon} ${name} (levels ${start}-${end}) [LOCKED]${NC}"
         fi
     done
     printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════╝${NC}"
-    printf "\n${YELLOW}Enter level (1-28) or 0 to go back: ${NC}"; read -r choice; require_input $?
+    printf "\n${YELLOW}Enter tier (1-${#TIERS[@]}) or 0 to go back: ${NC}"; read -r choice; require_input $?
     [ "$choice" = "0" ] && main_menu && return
-    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le 28 ] && [ "$choice" -le "$PLAYER_LEVEL" ]; then
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#TIERS[@]}" ]; then
+        level_select_tier "$choice"
+    else
+        printf '%b\n' "${RED}  Invalid tier!${NC}"; sleep 1; level_select
+    fi
+}
+
+# Step 2: pick a level within the chosen tier.
+level_select_tier() {
+    local tier_num="$1"
+    local entry num name icon start end tier_name tier_icon
+    IFS='|' read -r num tier_name tier_icon start end <<< "${TIERS[$((tier_num - 1))]}"
+
+    clear_screen; print_banner; status_bar
+    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════╗"
+    printf '%b\n' "║ ${tier_icon} $(printf '%-51s' "${tier_name}")║"
+    printf '%b\n' "╠══════════════════════════════════════════════════════╣${NC}"
+    local lvl_num lvl_name lvl_cmds lvl_icon n
+    for entry in "${LEVELS[@]:$((start - 1)):$((end - start + 1))}"; do
+        IFS='|' read -r lvl_num lvl_name lvl_cmds lvl_icon <<< "$entry"
+        n=$(echo "$lvl_num" | tr -d ' ')
+        if [ "$n" -le "$PLAYER_LEVEL" ]; then
+            printf '%b\n' "${LCYAN}║ ${LGREEN}[${lvl_num}]${NC} ${lvl_icon} ${WHITE}${BOLD}${lvl_name}${NC} ${DIM}${lvl_cmds}${NC}"
+        else
+            printf '%b\n' "${LCYAN}║ ${DIM}[${lvl_num}] ${lvl_icon} ${lvl_name} ${lvl_cmds} [LOCKED]${NC}"
+        fi
+    done
+    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════╝${NC}"
+    printf "\n${YELLOW}Enter level (${start}-${end}) or 0 to go back: ${NC}"; read -r choice; require_input $?
+    [ "$choice" = "0" ] && level_select && return
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge "$start" ] && [ "$choice" -le "$end" ] && [ "$choice" -le "$PLAYER_LEVEL" ]; then
         dispatch_level "$choice"
     else
-        printf '%b\n' "${RED}  Locked or invalid!${NC}"; sleep 1; level_select
+        printf '%b\n' "${RED}  Locked or invalid!${NC}"; sleep 1; level_select_tier "$tier_num"
     fi
 }
 
@@ -519,6 +617,13 @@ command_reference() {
     printf '%b\n' "  ${CYAN}CRON       ${NC}  crontab  at  * * * * *  (min hr day mon wday)"
     printf '%b\n' "  ${MAGENTA}STRINGS    ${NC}  \${#v}  \${v:0:n}  \${v%p}  \${v//f/r}  printf"
     printf '%b\n' "  ${BLUE}PACKAGES   ${NC}  apt  dnf  yum  brew  pacman  pip  snap"
+    printf '%b\n' "  ${LCYAN}STORAGE/LVM${NC}  fdisk  parted  mkfs  pvcreate  vgcreate  lvcreate"
+    printf '%b\n' "  ${YELLOW}SHARING    ${NC}  vim  setfacl  smbclient  exportfs  showmount  rsync"
+    printf '%b\n' "  ${CYAN}NETWORK 2  ${NC}  ip addr  ip route  dig  iptables  nft  ufw  tcpdump"
+    printf '%b\n' "  ${MAGENTA}SAN/ISCSI  ${NC}  iscsiadm  targetcli  multipath  lsscsi  autofs"
+    printf '%b\n' "  ${BLUE}BOOT/KERNEL${NC}  update-grub  bootctl  journalctl -b  dmesg  make"
+    printf '%b\n' "  ${LRED}MEDIA      ${NC}  ffmpeg  ffprobe  sha256sum  iotop  find -size"
+    printf '%b\n' "  ${LGREEN}RICING     ${NC}  i3-msg  bindsym  picom  stow  gsettings  feh"
     printf '%b\n' "\n${DIM}  In-game: type '${YELLOW}hint${NC}${DIM}' for a clue, '${YELLOW}skip${NC}${DIM}' to skip (costs 1 life).${NC}"
     printf '%b\n' "${DIM}  Platform notes: macOS uses md5/vm_stat/sysctl/brew vs Linux md5sum/free/lscpu/apt.${NC}"
     press_enter; main_menu
@@ -574,8 +679,8 @@ achievements_panel() {
         "On a Roll" "${DIM}5-answer streak (best: ${PLAYER_BEST_STREAK})${NC}"
     printf " %s  %-16s %s\n" "$(mark $([ "$PLAYER_BEST_STREAK" -ge 10 ] && echo 1 || echo 0))" \
         "Unstoppable" "${DIM}10-answer streak (best: ${PLAYER_BEST_STREAK})${NC}"
-    printf " %s  %-16s %s\n" "$(mark $([ "$PLAYER_LEVEL" -gt 28 ] && echo 1 || echo 0))" \
-        "Graduate" "${DIM}Completed all 28 levels${NC}"
+    printf " %s  %-16s %s\n" "$(mark $([ "$PLAYER_LEVEL" -gt "$TOTAL_LEVELS" ] && echo 1 || echo 0))" \
+        "Graduate" "${DIM}Completed all ${TOTAL_LEVELS} levels${NC}"
 
     printf '\n'
     root_says "Purist and No Shortcuts are only true until the moment you reach for either. Own that."
@@ -2085,6 +2190,1194 @@ run_level_28() {
         'chk ".*systemd/system/.+\\.service|.*daemon-reload"' 25
 
     cleanup_game_env
+    tier_complete 28 "Expert" \
+        "Cron, logs, packages, compression, string processing, arrays, error handling, and systemd. You can now run a Linux box end to end without adult supervision." \
+        "Tier 6: Storage & Filesystems: partitioning, filesystems, mounting, and LVM."
+}
+
+# ---- TIER 6: STORAGE & FILESYSTEMS ----
+
+run_level_29() {
+    level_intro 29 "Disks & Partition Tables" \
+        "Before you can format or mount anything, you need to know what's actually attached to the box: which devices exist, how they're partitioned, and what's already living on them. fdisk, parted, blkid, and lsblk each answer a slightly different question, and a real sysadmin reaches for all four before touching a disk." \
+        "💽   lsblk -f  |  fdisk -l  |  parted -l  |  blkid  |  /proc/partitions"
+    setup_game_env
+
+    run_challenge "Read the Partition Table (fdisk)" \
+        "List the partition table of ${YELLOW}/dev/sda${NC} using fdisk.\n\n  ${CYAN}fdisk -l${NC} works on MBR and GPT disks alike. Run without a device to list every disk on the system." \
+        "sudo fdisk -l /dev/sda: -l lists the partition table. No device argument lists all disks." \
+        'chk "^sudo fdisk -l"' 15
+
+    run_challenge "Read the Partition Table (parted)" \
+        "Do the same thing with parted instead of fdisk.\n\n  ${CYAN}parted${NC} handles GPT natively and is the safer choice on disks over 2TB, where MBR runs out of addressing space." \
+        "sudo parted -l: -l lists every disk's partition table, GPT included." \
+        'chk "^sudo parted -l"' 15
+
+    run_challenge "Identify Filesystem Types" \
+        "Find out what filesystem type lives on every block device, without mounting anything.\n\n  Essential before you format or mount a disk you didn't set up yourself, so you don't overwrite live data." \
+        "sudo blkid: prints device, UUID, and filesystem TYPE for every block device." \
+        'chk "^sudo blkid"' 15
+
+    run_challenge "Filesystem-Aware Block Tree" \
+        "Show the block device tree the way lsblk normally does, but with filesystem type and mount point included.\n\n  ${CYAN}-f${NC} adds FSTYPE and MOUNTPOINT columns to the usual tree view." \
+        "lsblk -f: -f adds filesystem type, label, UUID, and mountpoint to the tree." \
+        'chk "^lsblk -f"' 15
+
+    run_challenge "Read Partitions Straight from the Kernel" \
+        "The kernel exposes a live list of every partition it currently knows about. Print it.\n\n  Useful when a tool's cache is stale and you want ground truth straight from the kernel." \
+        "cat /proc/partitions: major, minor, block count, and name for every partition the kernel sees." \
+        'chk "^cat /proc/partitions"' 15
+
+    cleanup_game_env
+    level_complete 29
+}
+
+run_level_30() {
+    level_intro 30 "Partitioning with parted &amp; fdisk" \
+        "Once you know what's on a disk, the next step is carving it up. parted does it in one non-interactive command, fdisk drops you into an interactive prompt where n creates and w writes. Both get used constantly, know both." \
+        "✂️   parted mkpart  |  fdisk n/w  |  partprobe"
+    setup_game_env
+
+    run_challenge "Create a Partition (parted)" \
+        "Create a new primary ext4 partition spanning the whole disk on ${YELLOW}/dev/sdb${NC}.\n\n  parted takes the whole operation as one line: device, action, filesystem hint, start, end." \
+        "sudo parted /dev/sdb mkpart primary ext4 0% 100%: mkpart creates it, 0% to 100% uses the entire disk." \
+        'chk "^sudo parted /dev/sdb mkpart"' 20
+
+    run_challenge "fdisk: Start a New Partition" \
+        "You're inside an interactive fdisk session on /dev/sdb. Type the single letter that starts creating a new partition." \
+        "n: n = new partition. fdisk then prompts for partition number, first sector, and last sector." \
+        'exact "n"' 10
+
+    run_challenge "fdisk: Write and Exit" \
+        "You've finished configuring the new partition inside fdisk. Type the single letter that writes the change to disk and exits.\n\n  Nothing is written until this point, everything before it lives only in memory. ${CYAN}q${NC} quits without saving if you change your mind." \
+        "w: w writes the new partition table to disk and exits. q discards changes instead." \
+        'exact "w"' 10
+
+    run_challenge "Force the Kernel to Reread the Table" \
+        "You just repartitioned ${YELLOW}/dev/sdb${NC} without rebooting. Make the kernel notice the new layout.\n\n  Without this, the kernel keeps using its old, stale view of the partition table until the next reboot." \
+        "sudo partprobe /dev/sdb: tells the kernel to reread the partition table. Some kernels need partprobe with no argument instead." \
+        'chk "^sudo partprobe"' 15
+
+    run_challenge "Delete a Partition (parted)" \
+        "Remove partition number 1 from ${YELLOW}/dev/sdb${NC} using parted.\n\n  ${LRED}Destroys any data on that partition. Always double-check the device and number first.${NC}" \
+        "sudo parted /dev/sdb rm 1: rm removes the partition by its number, not its device name." \
+        'chk "^sudo parted /dev/sdb rm 1"' 20
+
+    cleanup_game_env
+    level_complete 30
+}
+
+run_level_31() {
+    level_intro 31 "Filesystems &amp; Formatting" \
+        "A blank partition is just an empty container until you put a filesystem on it. ext4 is the safe Linux default, xfs shines on large files and databases, and swap gives the kernel somewhere to page memory under pressure." \
+        "🧱   mkfs.ext4  |  mkfs.xfs  |  mkswap  |  swapon  |  fsck"
+    setup_game_env
+
+    run_challenge "Format as ext4" \
+        "Format ${YELLOW}/dev/sdb1${NC} with the ext4 filesystem.\n\n  ext4 is the default, well-understood choice for most Linux partitions: journaled, mature, and forgiving." \
+        "sudo mkfs.ext4 /dev/sdb1: mkfs.<type> is shorthand for mkfs -t <type>." \
+        'chk "^sudo mkfs\\.ext4 /dev/sdb1"' 20
+
+    run_challenge "Format as XFS" \
+        "Format ${YELLOW}/dev/sdc1${NC} with XFS instead.\n\n  XFS handles very large files and high-throughput workloads (media servers, databases) better than ext4, at the cost of being harder to shrink later." \
+        "sudo mkfs.xfs /dev/sdc1: XFS partitions generally can't be shrunk, only grown, plan sizing accordingly." \
+        'chk "^sudo mkfs\\.xfs /dev/sdc1"' 20
+
+    run_challenge "Create a Swap Partition" \
+        "Turn ${YELLOW}/dev/sdb2${NC} into a swap partition.\n\n  Swap gives the kernel somewhere to evict idle memory pages under pressure, instead of the OOM killer stepping in immediately." \
+        "sudo mkswap /dev/sdb2: prepares the partition's on-disk swap signature, but doesn't activate it yet." \
+        'chk "^sudo mkswap /dev/sdb2"' 15
+
+    run_challenge "Activate Swap" \
+        "Turn on the swap space you just created on ${YELLOW}/dev/sdb2${NC}.\n\n  mkswap prepares it, swapon actually puts it into use. Add it to /etc/fstab to survive a reboot." \
+        "sudo swapon /dev/sdb2: activates the swap partition. Check active swap with swapon --show or free -h." \
+        'chk "^sudo swapon /dev/sdb2"' 15
+
+    run_challenge "Check a Filesystem for Errors" \
+        "Run a filesystem check on ${YELLOW}/dev/sdb1${NC} and automatically repair anything it finds.\n\n  ${LRED}Never run fsck on a mounted filesystem, unmount it first or you risk corruption.${NC}" \
+        "sudo fsck -y /dev/sdb1: -y answers yes to every repair prompt automatically." \
+        'chk "^sudo fsck"' 15
+
+    cleanup_game_env
+    level_complete 31
+}
+
+run_level_32() {
+    level_intro 32 "Mounting &amp; /etc/fstab" \
+        "A formatted partition still isn't usable until it's mounted somewhere in the filesystem tree. Mount it by hand for a one-off, or add it to /etc/fstab so it comes back automatically on every boot." \
+        "📌   mount  |  umount  |  /etc/fstab  |  UUID  |  mount -a"
+    setup_game_env
+
+    run_challenge "Mount a Partition" \
+        "Mount ${YELLOW}/dev/sdb1${NC} at ${YELLOW}/mnt/data${NC}.\n\n  The mount point directory needs to already exist. Anything that was in it before is hidden, not deleted, until you unmount again." \
+        "sudo mount /dev/sdb1 /mnt/data: device first, mount point second." \
+        'chk "^sudo mount /dev/sdb1 /mnt/data"' 15
+
+    run_challenge "Unmount It Cleanly" \
+        "Unmount ${YELLOW}/mnt/data${NC}.\n\n  If it reports 'target is busy', something still has an open file or working directory inside it, find it with lsof +D /mnt/data." \
+        "sudo umount /mnt/data: works with either the mount point or the device path." \
+        'chk "^sudo umount"' 15
+
+    run_challenge "Find the UUID for fstab" \
+        "Get the UUID of ${YELLOW}/dev/sdb1${NC} so you can reference it safely in /etc/fstab.\n\n  Device names like /dev/sdb1 can shift between boots if disks are added or removed. UUIDs never change, always prefer them in fstab." \
+        "sudo blkid /dev/sdb1: prints the UUID, filesystem TYPE, and label for that one device." \
+        'chk "^sudo blkid /dev/sdb1"' 15
+
+    run_challenge "Test fstab Without Rebooting" \
+        "You just added a new line to /etc/fstab. Verify every entry in it mounts cleanly, without rebooting the box.\n\n  This is the single most useful fstab command: it catches a typo now instead of leaving you staring at a boot that won't finish." \
+        "sudo mount -a: mounts everything listed in /etc/fstab that isn't already mounted." \
+        'chk "^sudo mount -a"' 20
+
+    run_challenge "Remount Root Read-Write" \
+        "The root filesystem came up read-only after a crash. Remount it read-write without unmounting it.\n\n  A read-only root after an unclean shutdown is one of the first things you'll see in a real incident. This gets you back to work immediately." \
+        "sudo mount -o remount,rw /: -o remount changes mount options in place, no unmount needed." \
+        'chk "^sudo mount -o remount,rw"' 20
+
+    cleanup_game_env
+    level_complete 32
+}
+
+run_level_33() {
+    level_intro 33 "LVM: Volumes &amp; Groups" \
+        "Logical Volume Manager adds a layer of abstraction between physical disks and the filesystems on them: physical volumes pool into volume groups, and volume groups carve out logical volumes you can resize on demand. It's how you avoid ever running out of space on a partition you sized wrong three years ago." \
+        "🧩   pvcreate  |  vgcreate  |  lvcreate  |  pvs/vgs/lvs"
+    setup_game_env
+
+    run_challenge "Create a Physical Volume" \
+        "Initialize ${YELLOW}/dev/sdb1${NC} as an LVM physical volume.\n\n  This is the bottom layer of LVM: a raw partition (or whole disk) marked so LVM can pool it into a volume group." \
+        "sudo pvcreate /dev/sdb1: writes an LVM label to the start of the device." \
+        'chk "^sudo pvcreate /dev/sdb1"' 15
+
+    run_challenge "Create a Volume Group" \
+        "Create a volume group called ${YELLOW}data_vg${NC} out of the physical volume you just made.\n\n  A volume group is a pool of storage, one or more physical volumes combined into a single space you carve logical volumes from." \
+        "sudo vgcreate data_vg /dev/sdb1: name first, then one or more physical volumes to add to the pool." \
+        'chk "^sudo vgcreate data_vg /dev/sdb1"' 20
+
+    run_challenge "Create a Logical Volume" \
+        "Carve a 10GB logical volume named ${YELLOW}data_lv${NC} out of ${YELLOW}data_vg${NC}.\n\n  A logical volume behaves like a partition, but it can be resized on the fly, span multiple disks, and be snapshotted, none of which a real partition can do." \
+        "sudo lvcreate -L 10G -n data_lv data_vg: -L sets the size, -n names it, then the source volume group." \
+        'chk "^sudo lvcreate -L ?10G -n data_lv data_vg"' 20
+
+    run_challenge "Format the Logical Volume" \
+        "Put an ext4 filesystem on the new logical volume at ${YELLOW}/dev/data_vg/data_lv${NC}.\n\n  From here it mounts exactly like any other formatted device." \
+        "sudo mkfs.ext4 /dev/data_vg/data_lv: same mkfs you already know, just pointed at an LVM path instead of a raw partition." \
+        'chk "^sudo mkfs\\.ext4 /dev/data_vg/data_lv"' 20
+
+    run_challenge "List Volume Groups" \
+        "Show every volume group on the system along with its size and free space.\n\n  vgs gives a compact one-line-per-group summary. vgdisplay gives the same information in a more verbose, human-readable layout." \
+        "vgs: short columnar summary. vgdisplay gives the long form." \
+        'chk "^(sudo )?vgs|^(sudo )?vgdisplay"' 15
+
+    cleanup_game_env
+    level_complete 33
+}
+
+run_level_34() {
+    level_intro 34 "LVM: Resize &amp; Snapshots" \
+        "The entire point of LVM is that today's sizing decision doesn't have to be final. Running low on space is a five-minute fix, not a migration project, and a snapshot gives you a safe rollback point before anything risky." \
+        "📐   lvextend  |  resize2fs  |  vgextend  |  lvcreate -s"
+    setup_game_env
+
+    run_challenge "Extend a Logical Volume" \
+        "Grow ${YELLOW}data_lv${NC} by another 5GB.\n\n  This grows the logical volume itself. The filesystem sitting on top of it doesn't know about the new space yet, that's the next step." \
+        "sudo lvextend -L +5G /dev/data_vg/data_lv: the + makes it relative (add 5GB), omit it to set an absolute size instead." \
+        'chk "^sudo lvextend -L \\+5G"' 20
+
+    run_challenge "Grow the Filesystem to Match" \
+        "The logical volume is bigger, but the ext4 filesystem on it still thinks it's the old size. Fix that.\n\n  For XFS the equivalent is xfs_growfs, and unlike ext4 it can only be grown online, never offline." \
+        "sudo resize2fs /dev/data_vg/data_lv: grows ext4 to fill all available space on the logical volume." \
+        'chk "^sudo resize2fs"' 20
+
+    run_challenge "Add a Disk to the Volume Group" \
+        "Add ${YELLOW}/dev/sdc1${NC} (already a physical volume) into ${YELLOW}data_vg${NC}, growing the pool.\n\n  This is how you outgrow the original disks entirely, add more physical volumes to the same group, no downtime, no data migration." \
+        "sudo vgextend data_vg /dev/sdc1: group name first, then the physical volume to add." \
+        'chk "^sudo vgextend data_vg /dev/sdc1"' 20
+
+    run_challenge "Create a Snapshot" \
+        "Take a 2GB snapshot of ${YELLOW}data_lv${NC} called ${YELLOW}data_snap${NC} before you make a risky change.\n\n  A snapshot freezes the volume's state at this instant. If the change goes wrong, you roll back to the snapshot instead of restoring from a backup." \
+        "sudo lvcreate -L 2G -s -n data_snap /dev/data_vg/data_lv: -s marks it as a snapshot of the given source volume." \
+        'chk "^sudo lvcreate -L ?2G -s -n data_snap"' 25
+
+    run_challenge "Remove a Logical Volume" \
+        "The snapshot did its job and the change succeeded. Remove ${YELLOW}data_snap${NC}, you don't need it anymore.\n\n  ${LRED}This is permanent. Confirm you're pointed at the snapshot, not the real volume, before running it.${NC}" \
+        "sudo lvremove /dev/data_vg/data_snap: prompts for confirmation unless you add -f to force it." \
+        'chk "^sudo lvremove"' 20
+
+    cleanup_game_env
+    tier_complete 34 "Storage & Filesystems" \
+        "Partition tables, filesystems, mounting, and the full LVM lifecycle: create, extend, and snapshot. You can now build and grow storage on a Linux box without ever taking it offline." \
+        "Tier 7: File Editing & Sharing: vim, ACLs, Samba, NFS, and rsync."
+}
+
+# ---- TIER 7: FILE EDITING & SHARING ----
+
+run_level_35() {
+    level_intro 35 "Vim Essentials" \
+        "Every Linux box has vim, or at least vi, whether or not you asked for it. Editing a config file over SSH at 3am is not the time to be learning modal editing from scratch. You don't need to be fast, you just need to never get stuck." \
+        "✏️   i / Esc  |  :wq  |  dd  |  /search  |  :%s///g"
+    setup_game_env
+
+    run_challenge "Open a File" \
+        "Open ${YELLOW}home/welcome.txt${NC} in vim.\n\n  vim opens straight into normal mode, where keystrokes are commands, not text. That's the part that trips up everyone the first time." \
+        "vim home/welcome.txt: vi works identically if vim isn't installed, most vim commands are shared with vi." \
+        'chk "^vim? home/welcome\\.txt"' 10
+
+    run_challenge "Enter Insert Mode" \
+        "You're in normal mode looking at the file. Type the single key that switches to insert mode so you can actually type text." \
+        "i: i = insert before the cursor. a = insert after it. Both drop you into insert mode." \
+        'exact "i"' 10
+
+    run_challenge "Back to Normal Mode" \
+        "You just finished typing. Get back to normal mode so your next keystrokes are commands again, not more text.\n\n  This is the single most-pressed key in vim, and the one new users forget most often." \
+        "Esc: the Escape key. Every vim session, every mode, always gets you back to normal mode." \
+        'chk "^([Ee][Ss][Cc])$"' 10
+
+    run_challenge "Delete the Current Line" \
+        "From normal mode, delete the entire line the cursor is sitting on.\n\n  dd also copies the deleted line into vim's default register, so a following p pastes it right back." \
+        "dd: press d twice. 3dd deletes three lines starting from the cursor." \
+        'exact "dd"' 15
+
+    run_challenge "Search Forward" \
+        "Search forward through the file for the word ${YELLOW}error${NC}.\n\n  n repeats the search forward, N repeats it backward. ? searches backward from the start." \
+        "/error: / starts a forward search, type the pattern, press Enter." \
+        'chk "^/[A-Za-z]+$"' 15
+
+    run_challenge "Save and Quit" \
+        "You're done editing. Save the file and exit vim in one command." \
+        ":wq: w writes, q quits. :q! discards changes instead, :wq! forces a write on a read-only file." \
+        'exact ":wq"' 15
+
+    run_challenge "Find and Replace Every Occurrence" \
+        "Replace every instance of ${YELLOW}foo${NC} with ${YELLOW}bar${NC} across the whole file, not just the current line.\n\n  Without the leading %, the substitution only applies to the current line." \
+        ":%s/foo/bar/g: % means every line, s is substitute, g means every match per line, not just the first." \
+        'chk "^:%s/[^/]+/[^/]*/g$"' 20
+
+    cleanup_game_env
+    level_complete 35
+}
+
+run_level_36() {
+    level_intro 36 "Advanced Permissions &amp; ACLs" \
+        "chmod's owner/group/other model runs out of expressiveness fast: what if two different teams need different access to the same file, and neither is the owner? Access Control Lists let you grant permissions to specific users and groups on top of the normal permission bits." \
+        "🧷   getfacl  |  setfacl  |  umask"
+    setup_game_env
+
+    run_challenge "View a File's ACLs" \
+        "Show the full access control list for ${YELLOW}home/welcome.txt${NC}.\n\n  This shows the standard owner/group/other bits plus any extra user or group entries layered on top." \
+        "getfacl home/welcome.txt: prints every ACL entry, standard and extended, for the file." \
+        'chk "^getfacl home/welcome\\.txt"' 15
+
+    run_challenge "Grant a User Extra Access" \
+        "Give the user ${YELLOW}alice${NC} read and write access to ${YELLOW}home/welcome.txt${NC}, without changing the file's owner or group.\n\n  This is the whole point of ACLs: extra access for one specific user, layered on top of normal permissions." \
+        "setfacl -m u:alice:rw home/welcome.txt: -m modifies the ACL, u:name:perms adds or updates a user entry." \
+        'chk "^setfacl -m u:alice:rw"' 20
+
+    run_challenge "Grant a Group Extra Access" \
+        "Give the group ${YELLOW}devs${NC} read and execute access to ${YELLOW}home/welcome.txt${NC}.\n\n  Same idea as the user entry, but for an entire group instead of one person." \
+        "setfacl -m g:devs:rx home/welcome.txt: g:name:perms adds or updates a group entry the same way u: does for users." \
+        'chk "^setfacl -m g:devs:rx"' 20
+
+    run_challenge "Strip All ACLs" \
+        "Remove every extended ACL entry from ${YELLOW}home/welcome.txt${NC}, back to just the standard owner/group/other bits.\n\n  Useful when a file's ACLs have drifted into something nobody can explain anymore, and you want a clean baseline." \
+        "setfacl -b home/welcome.txt: -b removes all extended ACL entries in one shot." \
+        'chk "^setfacl -b"' 15
+
+    run_challenge "Check the Current umask" \
+        "Show the umask that determines the default permissions on every file you create from this shell." \
+        "umask: with no arguments, prints the current umask (commonly 022, giving new files 644 and new directories 755)." \
+        'exact "umask"' 10
+
+    run_challenge "Tighten the umask" \
+        "Set the umask for this session so newly created files default to owner-only access.\n\n  A umask of 027 gives new files 640 and new directories 750, no access at all for others." \
+        "umask 027: the umask value is SUBTRACTED from full permissions, it's a mask of what to deny, not what to grant." \
+        'chk "^umask 0?27$"' 15
+
+    cleanup_game_env
+    level_complete 36
+}
+
+run_level_37() {
+    level_intro 37 "Samba File Sharing" \
+        "Samba is how a Linux box speaks the SMB protocol, so Windows machines (and everyone else) can see it as a normal network share. It's still the standard way to hand a folder to a mixed-OS office, decades on." \
+        "🗂️   testparm  |  smbpasswd  |  smbclient  |  mount -t cifs"
+    setup_game_env
+
+    run_challenge "Validate the Samba Config" \
+        "Before restarting Samba, check that ${YELLOW}/etc/samba/smb.conf${NC} has no syntax errors.\n\n  Restarting Samba on a broken config takes down every existing share. Always test first." \
+        "testparm: parses smb.conf and reports any syntax problems before you commit to a restart." \
+        'exact "testparm"' 15
+
+    run_challenge "Set a Samba Password" \
+        "Create a Samba password for the existing Linux user ${YELLOW}alice${NC}.\n\n  Samba keeps its own separate password database from the system's. A Linux user needs a Samba password added before they can authenticate to a share." \
+        "sudo smbpasswd -a alice: -a adds the user to Samba's password database and prompts for a new password." \
+        'chk "^sudo smbpasswd -a alice"' 20
+
+    run_challenge "Apply a Config Change" \
+        "You've edited smb.conf and confirmed it's valid. Apply the change.\n\n  Like most daemons, Samba doesn't reread its config until told to." \
+        "sudo systemctl restart smbd: restart applies config changes. reload works too if smbd supports it for a lighter-touch apply." \
+        'chk "^sudo systemctl re(start|load) smbd"' 15
+
+    run_challenge "List Shares from a Client" \
+        "See what shares are available on ${YELLOW}fileserver${NC} as the user ${YELLOW}alice${NC}, without mounting anything yet.\n\n  Always worth doing before you mount blind, confirms the share name and that credentials work." \
+        "smbclient -L fileserver -U alice: -L lists shares, -U sets the username, it'll prompt for the password." \
+        'chk "^smbclient -L fileserver"' 20
+
+    run_challenge "Mount a Samba Share" \
+        "Mount ${YELLOW}//fileserver/data${NC} at ${YELLOW}/mnt/win${NC} as the user ${YELLOW}alice${NC}.\n\n  cifs is the modern name for the SMB client filesystem module, smbfs is the old deprecated one." \
+        "sudo mount -t cifs //fileserver/data /mnt/win -o username=alice: -t cifs selects the filesystem type, -o passes mount options." \
+        'chk "^sudo mount -t cifs"' 20
+
+    cleanup_game_env
+    level_complete 37
+}
+
+run_level_38() {
+    level_intro 38 "NFS Sharing" \
+        "NFS is the native way Unix and Linux machines share filesystems with each other: lighter weight than Samba, and the default choice when every box on both ends is Linux or Unix, not Windows." \
+        "📡   /etc/exports  |  exportfs  |  showmount  |  mount -t nfs"
+    setup_game_env
+
+    run_challenge "Review Current Exports" \
+        "Show every filesystem currently being exported by this NFS server, and who it's exported to.\n\n  exportfs -v reads the live kernel export table, not just what's written in the config file, so it reflects reality even if /etc/exports was edited but not yet applied." \
+        "exportfs -v: -v adds verbose output, showing each export's options alongside the path and client list." \
+        'chk "^exportfs -v"' 15
+
+    run_challenge "Apply /etc/exports Changes" \
+        "You edited ${YELLOW}/etc/exports${NC} to add a new share. Apply it without restarting the NFS service.\n\n  -r re-exports everything listed in the file, adding new entries and dropping removed ones, all without an interruption to existing clients." \
+        "sudo exportfs -ra: -r re-exports all, -a applies to all entries in /etc/exports." \
+        'chk "^sudo exportfs -ra"' 20
+
+    run_challenge "See What a Server Exports" \
+        "From a client machine, check what ${YELLOW}192.168.1.10${NC} is exporting, before you try to mount anything." \
+        "showmount -e 192.168.1.10: -e lists the export list of the given NFS server." \
+        'chk "^showmount -e"' 15
+
+    run_challenge "Mount an NFS Share" \
+        "Mount the export ${YELLOW}/data${NC} from ${YELLOW}192.168.1.10${NC} at ${YELLOW}/mnt/nfs${NC} locally." \
+        "sudo mount -t nfs 192.168.1.10:/data /mnt/nfs: server:/export-path as a single argument, same as any other mount." \
+        'chk "^sudo mount -t nfs"' 20
+
+    run_challenge "Unmount It" \
+        "Unmount the NFS share at ${YELLOW}/mnt/nfs${NC}.\n\n  If it hangs on a dead server, -f forces it and -l does a lazy unmount that detaches immediately and cleans up once nothing references it anymore." \
+        "sudo umount /mnt/nfs: same umount you already know, NFS mounts don't need anything special to remove." \
+        'chk "^sudo umount"' 15
+
+    cleanup_game_env
+    level_complete 38
+}
+
+run_level_39() {
+    level_intro 39 "Sync &amp; Backup with rsync" \
+        "rsync is the workhorse behind more backup systems than almost any other single tool: it only transfers what changed, it can run over SSH with no extra setup, and it can mirror a destination exactly or just add to it. Learn this one properly." \
+        "🔁   rsync -avz  |  --delete  |  -e ssh  |  --dry-run"
+    setup_game_env
+
+    run_challenge "Basic Archive Copy" \
+        "Copy the contents of ${YELLOW}home/${NC} into ${YELLOW}/mnt/backup/${NC}, preserving permissions, timestamps, and symlinks.\n\n  -a (archive) bundles up the flags you almost always want: recursive, preserve permissions, timestamps, symlinks, and ownership where possible." \
+        "rsync -av home/ /mnt/backup/: -a for archive mode, -v for verbose so you can see what's transferring." \
+        'chk "^rsync -a?v?[a-z]* home/ /mnt/backup/?$|^rsync -[a-z]*a[a-z]*v[a-z]* home/ /mnt/backup/?$"' 20
+
+    run_challenge "Mirror Exactly, Including Deletions" \
+        "Sync ${YELLOW}home/${NC} to ${YELLOW}/mnt/backup/${NC} again, but this time also remove anything from the destination that no longer exists in the source.\n\n  Without --delete, rsync only ever adds and updates, files removed from the source pile up forever at the destination." \
+        "rsync -av --delete home/ /mnt/backup/: --delete makes the destination an exact mirror of the source, not just a superset." \
+        'chk "^rsync.*--delete"' 20
+
+    run_challenge "Sync Over SSH" \
+        "Sync ${YELLOW}home/${NC} to ${YELLOW}/data/${NC} on the remote host ${YELLOW}backup${NC}, as user ${YELLOW}alice${NC}, over SSH.\n\n  rsync over SSH needs no extra daemon running on the remote end, it just needs SSH access, the same as scp." \
+        "rsync -avz -e ssh home/ alice@backup:/data/: -z compresses data in transit, -e ssh selects the remote shell to tunnel through." \
+        'chk "^rsync.*-e ssh"' 20
+
+    run_challenge "Preview Before You Commit" \
+        "Before running a sync for real, preview exactly what rsync WOULD do, without actually copying or deleting anything.\n\n  Always dry-run a sync with --delete before trusting it against anything that matters." \
+        "rsync -avzn home/ /mnt/backup/: n (or --dry-run) shows every action rsync would take without touching a single file." \
+        'chk "^rsync.*(-[a-z]*n[a-z]*|--dry-run)"' 20
+
+    run_challenge "Track Progress on a Large Transfer" \
+        "Run the same backup sync, but this time show a live progress indicator for each file as it copies.\n\n  On a large transfer over a slow link, --progress is the difference between watching it work and wondering if it's hung." \
+        "rsync -avz --progress home/ /mnt/backup/: --progress prints a live percentage and transfer rate for the file currently copying." \
+        'chk "^rsync.*--progress"' 20
+
+    cleanup_game_env
+    tier_complete 39 "File Editing & Sharing" \
+        "Modal editing in vim, fine-grained ACLs, and both major file-sharing protocols, Samba for Windows clients, NFS for Unix ones, plus rsync for everything in between. You can now edit anything and share it with anyone." \
+        "Tier 8: Networking: IP addressing, routing, DNS, firewalls, and VLANs."
+}
+
+# ---- TIER 8: NETWORKING ----
+
+run_level_40() {
+    level_intro 40 "IP Addressing" \
+        "curl and ping get you through the basics, but real network administration starts one layer down: seeing exactly which addresses are assigned to which interfaces, and being able to change that yourself. ip is the modern tool for all of it, ifconfig is legacy." \
+        "🧭   ip addr  |  ip link  |  hostname -I"
+    setup_game_env
+
+    run_challenge "Show All Addresses" \
+        "Show every IP address assigned to every interface on this machine." \
+        "ip addr: ip a is the common shorthand. Shows every interface with its addresses, state, and MTU." \
+        'chk "^ip a(ddr)?( show)?$"' 10
+
+    run_challenge "Show Interface Link State" \
+        "Show just the link-layer state of every interface: up, down, and MAC address, without the IP address noise." \
+        "ip link show: link is layer 2, addr is layer 3. Same tool, different layer of detail." \
+        'chk "^ip link( show)?$"' 15
+
+    run_challenge "Assign an IP Address" \
+        "Add the address ${YELLOW}192.168.1.50/24${NC} to interface ${YELLOW}eth0${NC}.\n\n  This is temporary, it won't survive a reboot unless it's also written into the network config for your distro." \
+        "sudo ip addr add 192.168.1.50/24 dev eth0: add takes the address in CIDR notation, dev specifies the interface." \
+        'chk "^sudo ip addr add"' 20
+
+    run_challenge "Bring an Interface Up" \
+        "The interface ${YELLOW}eth0${NC} is currently down. Bring it up.\n\n  A newly added interface, or one after a driver reload, often comes up in a down state and needs this explicitly." \
+        "sudo ip link set eth0 up: set changes a link property, up brings it online. down takes it offline the same way." \
+        'chk "^sudo ip link set eth0 up"' 15
+
+    run_challenge "Quick Own-IP Check" \
+        "You just need your own IP address for a one-liner, nothing else. Get it as fast as possible." \
+        "hostname -I: prints just the IP addresses, space-separated, no other noise. Perfect for scripting." \
+        'chk "^hostname -I"' 10
+
+    cleanup_game_env
+    level_complete 40
+}
+
+run_level_41() {
+    level_intro 41 "Routing &amp; Gateways" \
+        "An address without a route is just a number. Every packet leaving this box for another network has to go somewhere, and the routing table decides exactly where. This is also where you diagnose 'I can ping the gateway but nothing past it.'" \
+        "🛣️   ip route  |  traceroute  |  mtr"
+    setup_game_env
+
+    run_challenge "Show the Routing Table" \
+        "Show the current routing table for this machine." \
+        "ip route: ip r is the common shorthand. The default route is what everything without a more specific match uses." \
+        'chk "^ip r(oute)?( show)?$"' 10
+
+    run_challenge "Set a Default Gateway" \
+        "Set ${YELLOW}192.168.1.1${NC} as the default gateway for all outbound traffic that doesn't match a more specific route." \
+        "sudo ip route add default via 192.168.1.1: default matches anything, via specifies the next-hop router." \
+        'chk "^sudo ip route add default via"' 20
+
+    run_challenge "Add a Static Route" \
+        "Add a route so traffic to ${YELLOW}10.0.0.0/24${NC} goes via ${YELLOW}192.168.1.254${NC} instead of the default gateway.\n\n  More specific routes always win over the default, this is how you reach a second subnet without changing your main gateway." \
+        "sudo ip route add 10.0.0.0/24 via 192.168.1.254: destination network first, via the specific next-hop for that network." \
+        'chk "^sudo ip route add 10\\.0\\.0\\.0/24 via"' 20
+
+    run_challenge "Trace the Path to a Host" \
+        "See every hop your traffic takes on the way to ${YELLOW}google.com${NC}.\n\n  Invaluable for spotting exactly where a connection is dying: your gateway, your ISP, or somewhere further out." \
+        "traceroute google.com: shows each router hop and its round-trip time, one line per hop." \
+        'chk "^traceroute"' 15
+
+    run_challenge "Live Combined Trace" \
+        "Do the same thing as traceroute, but continuously, with live loss and latency stats updating per hop, instead of a single one-shot report." \
+        "mtr google.com: combines traceroute and ping into one continuously updating view, the single best tool for diagnosing intermittent path issues." \
+        'chk "^mtr"' 20
+
+    cleanup_game_env
+    level_complete 41
+}
+
+run_level_42() {
+    level_intro 42 "DNS Tools" \
+        "Half of 'the network is down' tickets are actually DNS. Knowing how to query a record directly, bypassing whatever's cached in the browser or the OS, is how you tell the difference between a real outage and a stale cache in about ten seconds." \
+        "🧾   dig  |  nslookup  |  /etc/resolv.conf  |  /etc/hosts"
+    setup_game_env
+
+    run_challenge "Query a Domain" \
+        "Look up the DNS record for ${YELLOW}google.com${NC}.\n\n  dig's output is dense but precise: it shows the query, the answer section, and exactly which server answered." \
+        "dig google.com: returns the A record by default, along with query time and the responding server." \
+        'chk "^dig google\\.com"' 15
+
+    run_challenge "Query a Specific Record Type" \
+        "Look up the mail server (MX) records for ${YELLOW}google.com${NC} specifically, not the default A record." \
+        "dig google.com MX: the record type goes after the domain. Try NS, TXT, or AAAA the same way." \
+        'chk "^dig google\\.com MX"' 15
+
+    run_challenge "Simple Lookup" \
+        "Do a quick, simpler DNS lookup for ${YELLOW}google.com${NC}, less detailed than dig but faster to read." \
+        "nslookup google.com: older and less flexible than dig, but its terse output is sometimes exactly what you want." \
+        'chk "^nslookup google\\.com"' 15
+
+    run_challenge "Check the Resolver Config" \
+        "Show which DNS servers this machine is actually configured to query.\n\n  If DNS lookups are slow or failing entirely, this file is one of the first things worth checking." \
+        "cat /etc/resolv.conf: lists the nameserver entries this machine queries, in priority order." \
+        'chk "^cat /etc/resolv\\.conf"' 15
+
+    run_challenge "Reverse Lookup" \
+        "Find out what hostname resolves to the IP address ${YELLOW}8.8.8.8${NC}." \
+        "dig -x 8.8.8.8: -x performs a reverse lookup, IP to hostname instead of the usual hostname to IP." \
+        'chk "^dig -x"' 20
+
+    cleanup_game_env
+    level_complete 42
+}
+
+run_level_43() {
+    level_intro 43 "Firewalls" \
+        "A server with every port wide open is a server waiting for something to go wrong. iptables and its modern replacement nftables give you precise, rule-by-rule control over what traffic is allowed in and out. ufw wraps either one in a friendlier syntax for simpler cases." \
+        "🧱   iptables  |  nft  |  ufw"
+    setup_game_env
+
+    run_challenge "List Current Rules" \
+        "Show the current iptables ruleset, with numeric output instead of resolving hostnames.\n\n  -n skips DNS resolution on every listed address, which is both faster and avoids leaking the query to whatever DNS server you use." \
+        "sudo iptables -L -n: -L lists rules, -n keeps addresses and ports numeric instead of resolved." \
+        'chk "^sudo iptables -L"' 15
+
+    run_challenge "Allow SSH Through" \
+        "Add a rule allowing incoming TCP traffic on port 22 (SSH).\n\n  Get SSH access wrong on a remote box and you've locked yourself out. Always double, then triple-check this rule before applying anything stricter around it." \
+        "sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT: -A appends the rule, -p sets protocol, --dport the destination port, -j the action." \
+        'chk "^sudo iptables -A INPUT.*22.*ACCEPT"' 25
+
+    run_challenge "List the Modern Ruleset" \
+        "Show the current ruleset using nftables, the modern replacement for iptables.\n\n  Most current distros ship nftables under the hood even when you're typing iptables commands, translated automatically." \
+        "sudo nft list ruleset: shows every table, chain, and rule currently configured." \
+        'chk "^sudo nft list ruleset"' 15
+
+    run_challenge "Allow a Port with ufw" \
+        "Using ufw's simpler syntax, allow incoming traffic on port 22.\n\n  ufw exists specifically so you don't have to remember iptables' full syntax for the common cases." \
+        "sudo ufw allow 22: one word, one port, done. ufw allow 22/tcp is more explicit if you only want TCP." \
+        'chk "^sudo ufw allow 22"' 15
+
+    run_challenge "Turn the Firewall On" \
+        "You've configured your rules. Enable ufw so they actually take effect.\n\n  ${LRED}Confirm your SSH rule is in place BEFORE enabling, or you can lock yourself out of a remote box instantly.${NC}" \
+        "sudo ufw enable: activates the firewall with the current ruleset. sudo ufw status verifies what's active afterward." \
+        'chk "^sudo ufw enable"' 20
+
+    cleanup_game_env
+    level_complete 43
+}
+
+run_level_44() {
+    level_intro 44 "VLANs &amp; Trunking" \
+        "A single physical switch port can carry traffic for multiple isolated VLANs at once, tagged with an 802.1Q header, if it's configured as a trunk port instead of a plain access port. Linux hosts can speak that same tagged traffic directly with a VLAN subinterface." \
+        "🔀   ip link add ... type vlan  |  802.1Q  |  trunk vs access"
+    setup_game_env
+
+    run_challenge "Create a VLAN Subinterface" \
+        "Create a VLAN subinterface for VLAN ID 10 on top of ${YELLOW}eth0${NC}, named ${YELLOW}eth0.10${NC}.\n\n  This is how a Linux box participates in a specific VLAN over a trunk port: the physical NIC carries every tagged VLAN, the subinterface picks out just one." \
+        "sudo ip link add link eth0 name eth0.10 type vlan id 10: link is the parent interface, id is the 802.1Q VLAN tag." \
+        'chk "^sudo ip link add link eth0 name eth0\\.10 type vlan id 10"' 25
+
+    run_challenge "Bring the VLAN Interface Up" \
+        "Bring ${YELLOW}eth0.10${NC} online.\n\n  Same as any other interface, a VLAN subinterface needs to be explicitly brought up before it passes traffic." \
+        "sudo ip link set eth0.10 up: identical syntax to bringing up any physical interface." \
+        'chk "^sudo ip link set eth0\\.10 up"' 15
+
+    run_challenge "Address the VLAN Interface" \
+        "Assign ${YELLOW}10.10.10.5/24${NC} to ${YELLOW}eth0.10${NC}, so this host has a real address inside VLAN 10." \
+        "sudo ip addr add 10.10.10.5/24 dev eth0.10: identical to addressing any interface, just pointed at the VLAN subinterface instead of the physical one." \
+        'chk "^sudo ip addr add 10\\.10\\.10\\.5/24 dev eth0\\.10"' 20
+
+    run_challenge "Confirm the VLAN Tag" \
+        "Show detailed link information for ${YELLOW}eth0.10${NC}, including the VLAN ID it's tagged with.\n\n  The switch port facing this host needs to be configured as a trunk carrying VLAN 10, tagged, or none of this traffic arrives. An access port only ever carries one untagged VLAN." \
+        "ip -d link show eth0.10: -d adds detail output, which for a VLAN interface includes the protocol and VLAN ID." \
+        'chk "^ip -d link show eth0\\.10"' 20
+
+    run_challenge "Remove the VLAN Interface" \
+        "This VLAN subinterface is no longer needed. Remove it cleanly." \
+        "sudo ip link delete eth0.10: delete removes a virtual interface entirely. Physical interfaces can only be brought down, never deleted this way." \
+        'chk "^sudo ip link delete eth0\\.10"' 15
+
+    cleanup_game_env
+    level_complete 44
+}
+
+run_level_45() {
+    level_intro 45 "Bonding &amp; Troubleshooting" \
+        "The final networking skill is diagnosis: capturing packets to see exactly what's on the wire, checking interface error counters, and bonding multiple physical links into one for redundancy or throughput. When something's actually broken, these are the tools that tell you why." \
+        "🩺   tcpdump  |  bonding  |  ip -s link"
+    setup_game_env
+
+    run_challenge "Capture Live Traffic" \
+        "Start capturing packets on interface ${YELLOW}eth0${NC}.\n\n  Without a filter this shows everything, which gets noisy fast on a busy interface. Ctrl+C to stop capturing." \
+        "sudo tcpdump -i eth0: -i selects the interface to listen on." \
+        'chk "^sudo tcpdump -i eth0"' 20
+
+    run_challenge "Filter to a Single Port" \
+        "Capture traffic on ${YELLOW}eth0${NC} again, but this time only show packets on port 443.\n\n  Filtering at capture time, rather than scrolling through everything afterward, is how you keep a live capture actually readable." \
+        "sudo tcpdump -i eth0 port 443: filter expressions go after the interface, port, host, and net are the most common." \
+        'chk "^sudo tcpdump -i eth0 port 443"' 20
+
+    run_challenge "Check Bond Status" \
+        "You have a bonded interface named ${YELLOW}bond0${NC}. Check its current status: active mode, which slave interfaces are up, and which one is primary.\n\n  The kernel exposes this directly as a virtual file, no extra tool needed." \
+        "cat /proc/net/bonding/bond0: shows bonding mode, MII status, and every slave interface's individual state." \
+        'chk "^cat /proc/net/bonding/bond0"' 20
+
+    run_challenge "Create a Bond Interface" \
+        "Create a new bonded interface named ${YELLOW}bond0${NC} in active-backup mode, where one link is active and the other stands by as failover.\n\n  Active-backup is the simplest bonding mode: zero configuration needed on the switch side, unlike LACP modes which require switch cooperation." \
+        "sudo ip link add bond0 type bond mode active-backup: add ... type bond creates the virtual interface, mode sets the bonding behavior." \
+        'chk "^sudo ip link add bond0 type bond"' 25
+
+    run_challenge "Check Interface Error Counters" \
+        "Show detailed statistics for ${YELLOW}eth0${NC}, including RX/TX errors and dropped packets, not just its up/down state.\n\n  Rising error or drop counts on an otherwise 'up' interface are a classic sign of a bad cable, a duplex mismatch, or a failing NIC." \
+        "ip -s link show eth0: -s adds packet, byte, error, and drop statistics for the interface." \
+        'chk "^ip -s link show eth0"' 20
+
+    cleanup_game_env
+    tier_complete 45 "Networking" \
+        "Addressing, routing, DNS, firewalls, VLANs and trunking, bonding, and packet capture. You can now stand up, segment, secure, and troubleshoot a real network, not just talk to one." \
+        "Tier 9: Storage Networking & SAN: iSCSI, multipath, and enterprise storage."
+}
+
+# ---- TIER 9: STORAGE NETWORKING & SAN ----
+
+run_level_46() {
+    level_intro 46 "iSCSI Initiators &amp; Targets" \
+        "iSCSI puts SCSI storage commands over an ordinary IP network, turning a remote disk into something that shows up locally like any other block device. The initiator is the client asking for storage, the target is the server offering it. Enterprise storage arrays speak this constantly." \
+        "🔗   iscsiadm  |  targetcli  |  discovery / login / logout"
+    setup_game_env
+
+    run_challenge "Discover Targets on a Portal" \
+        "Discover what iSCSI targets are available from the storage portal at ${YELLOW}192.168.1.20${NC}, before connecting to any of them.\n\n  Discovery just asks 'what do you have', it doesn't establish a session yet." \
+        "sudo iscsiadm -m discovery -t sendtargets -p 192.168.1.20: -m selects discovery mode, -t the discovery type, -p the portal address." \
+        'chk "^sudo iscsiadm -m discovery"' 20
+
+    run_challenge "Log Into a Target" \
+        "Log into the discovered target ${YELLOW}iqn.2026-01.com.example:storage${NC} on portal ${YELLOW}192.168.1.20${NC}, establishing the session that exposes it as a local device." \
+        "sudo iscsiadm -m node -T iqn.2026-01.com.example:storage -p 192.168.1.20 --login: -m node targets a specific discovered node, --login establishes the session." \
+        'chk "^sudo iscsiadm -m node.*--login"' 25
+
+    run_challenge "List Active Sessions" \
+        "Show every active iSCSI session on this initiator right now.\n\n  Once logged in, the target's LUNs appear as ordinary /dev/sdX devices, check lsblk or dmesg to see which ones just arrived." \
+        "sudo iscsiadm -m session: lists every currently connected iSCSI session with its target IQN and portal." \
+        'chk "^sudo iscsiadm -m session"' 15
+
+    run_challenge "Log Out of a Target" \
+        "Cleanly disconnect from ${YELLOW}iqn.2026-01.com.example:storage${NC}, ending the session.\n\n  Always log out cleanly rather than yanking the connection, an abrupt disconnect can leave the filesystem on that LUN in an inconsistent state." \
+        "sudo iscsiadm -m node -T iqn.2026-01.com.example:storage --logout: same node targeting as login, --logout instead of --login." \
+        'chk "^sudo iscsiadm -m node.*--logout"' 20
+
+    run_challenge "Name the Server-Side Tool" \
+        "Discovery and login happen on the initiator (client) side. What's the standard tool for configuring an iSCSI TARGET, the server side that actually exports the storage?" \
+        "targetcli: an interactive shell for creating backstores, iSCSI targets, LUNs, and access control lists." \
+        'exact "targetcli"' 15
+
+    cleanup_game_env
+    level_complete 46
+}
+
+run_level_47() {
+    level_intro 47 "NFS/SMB at Scale + autofs" \
+        "Manually mounting shares doesn't scale past a handful of machines. autofs mounts a share the instant something accesses it, and unmounts it again after a timeout, so a hundred workstations can reference hundreds of shares without any of them staying permanently mounted." \
+        "🗺️   autofs  |  /etc/auto.master  |  on-demand mount/unmount"
+    setup_game_env
+
+    run_challenge "Check autofs Status" \
+        "Check whether the autofs service is running.\n\n  If a share that should auto-mount on access isn't appearing, this is the first thing worth checking." \
+        "sudo systemctl status autofs: same systemctl status pattern you already know, just pointed at autofs specifically." \
+        'chk "^sudo systemctl status autofs"' 15
+
+    run_challenge "Apply New Map Entries" \
+        "You've added a new entry to autofs's maps. Apply the change without a full restart.\n\n  reload picks up new map entries without dropping any shares that are currently auto-mounted." \
+        "sudo systemctl reload autofs: reload re-reads the maps in place, restart would also work but is heavier-handed." \
+        'chk "^sudo systemctl reload autofs"' 20
+
+    run_challenge "Check the Master Map" \
+        "Show the contents of autofs's master map, which lists every mount point autofs manages and which map file controls each one." \
+        "cat /etc/auto.master: the top-level map, each line points a mount point at a further map file defining the actual shares." \
+        'chk "^cat /etc/auto\\.master"' 15
+
+    run_challenge "See What's Currently Mounted" \
+        "List every currently mounted filesystem, autofs-triggered mounts included, to confirm a share actually mounted after being accessed." \
+        "mount: with no arguments, lists every mounted filesystem, exactly the same command whether the mount was manual or autofs-triggered." \
+        'exact "mount"' 15
+
+    run_challenge "Force-Unmount a Stuck Share" \
+        "An NFS share at ${YELLOW}/mnt/nfs${NC} has gone stale, the server's unreachable and a normal umount just hangs. Force it.\n\n  -f forces the unmount even though the server isn't responding, essential when a share's server has gone down or been decommissioned." \
+        "sudo umount -f /mnt/nfs: -f forces an unmount of an unreachable NFS share instead of waiting indefinitely." \
+        'chk "^sudo umount -f"' 20
+
+    cleanup_game_env
+    level_complete 47
+}
+
+run_level_48() {
+    level_intro 48 "Multipath &amp; SAN Concepts" \
+        "In a real SAN, a server is rarely connected to storage over just one path, it's normally two or more, through separate switches, for redundancy and throughput. Multipathing is what makes those redundant paths look like a single reliable device instead of confusing the OS with duplicates." \
+        "🧵   multipath -ll  |  WWNs  |  zoning  |  multipathd"
+    setup_game_env
+
+    run_challenge "List Multipath Devices" \
+        "Show every multipath device currently configured, along with the state of each underlying path.\n\n  Each physical path shows as active, faulty, or ghost, one glance tells you if a SAN fabric has degraded." \
+        "sudo multipath -ll: -ll shows full detail on every multipath map and every path feeding it." \
+        'chk "^sudo multipath -ll"' 20
+
+    run_challenge "Identify Devices by WWN" \
+        "List block devices by their World Wide Name instead of their changeable /dev/sdX names.\n\n  A WWN is a globally unique identifier burned into the storage hardware itself, it never changes even if Linux renames /dev/sdb to /dev/sdc after a reboot. SAN zoning is configured against WWNs for exactly this reason." \
+        "ls -la /dev/disk/by-id/: symlinks named by WWN, pointing at whatever /dev/sdX name the kernel currently assigned." \
+        'chk "^ls -la? /dev/disk/by-id"' 20
+
+    run_challenge "Restart the Multipath Daemon" \
+        "Restart multipathd after changing its configuration in /etc/multipath.conf." \
+        "sudo systemctl restart multipathd: same systemctl pattern as any other daemon, multipathd just happens to manage path failover." \
+        'chk "^sudo systemctl restart multipathd"' 20
+
+    run_challenge "Flush a Specific Device" \
+        "Remove the multipath device map named ${YELLOW}mpatha${NC}, for example because the LUN behind it has been decommissioned.\n\n  ${LRED}Confirm nothing is still using the device first, unmount and check for open handles.${NC}" \
+        "sudo multipath -f mpatha: -f flushes a single named multipath device map." \
+        'chk "^sudo multipath -f mpatha"' 20
+
+    cleanup_game_env
+    level_complete 48
+}
+
+run_level_49() {
+    level_intro 49 "Fibre Channel &amp; Storage Troubleshooting" \
+        "Fibre Channel is the older, dedicated-fabric sibling of iSCSI: purpose-built switches, HBAs instead of NICs, and its own addressing scheme. The tools differ from IP storage, but the troubleshooting instinct is identical: find the device, check the path, rescan if something's missing." \
+        "🔬   lsscsi  |  systool  |  SCSI rescan  |  multipath -F"
+    setup_game_env
+
+    run_challenge "List SCSI/FC Devices" \
+        "List every SCSI device visible to this host, iSCSI and Fibre Channel LUNs included, with their type and vendor.\n\n  From the OS's point of view, an iSCSI LUN and a Fibre Channel LUN both just show up as SCSI devices, lsscsi doesn't care which transport carried them." \
+        "lsscsi: lists every SCSI device with its host/channel/target/LUN address, type, and vendor/model." \
+        'exact "lsscsi"' 15
+
+    run_challenge "Rescan for New LUNs" \
+        "Storage just presented a new LUN to SCSI host 0, but Linux hasn't noticed yet since it was added after boot. Trigger a rescan of that host without rebooting." \
+        "echo \"- - -\" | sudo tee /sys/class/scsi_host/host0/scan: the three dashes tell the kernel to scan every channel, target, and LUN on that host." \
+        'chk "scsi_host/host0/scan"' 25
+
+    run_challenge "Check FC HBA Port Status" \
+        "Check whether Fibre Channel host adapter 0's port is currently online.\n\n  An FC HBA's port state lives directly under sysfs, the same way most modern hardware state does on Linux." \
+        "cat /sys/class/fc_host/host0/port_state: Online means the fabric link is up, Linkdown means a cable, SFP, or switch port problem." \
+        'chk "fc_host/host0/port_state"' 20
+
+    run_challenge "Clean Up Unused Multipath Maps" \
+        "Remove every multipath device map that no longer has any active, in-use paths behind it, in one command.\n\n  Handy after decommissioning several LUNs at once, cleans up every stale map instead of flushing them one at a time." \
+        "sudo multipath -F: -F (capital) flushes every unused multipath map at once, lowercase -f targets just one by name." \
+        'chk "^sudo multipath -F"' 20
+
+    cleanup_game_env
+    tier_complete 49 "Storage Networking & SAN" \
+        "iSCSI initiators and targets, autofs at scale, multipathing, WWN-based device identification, and Fibre Channel fundamentals. Enterprise storage that used to be a black box is now just another set of tools you know." \
+        "Tier 10: Boot Process & Kernel: GRUB, boot managers, kernel panics, and building a kernel."
+}
+
+# ---- TIER 10: BOOT PROCESS & KERNEL ----
+
+run_level_50() {
+    level_intro 50 "Boot Process Overview" \
+        "Between power-on and a login prompt, a lot happens: firmware, bootloader, kernel, then systemd bringing services up in dependency order toward a target. Knowing which stage you're in when something's slow, or won't come up at all, is half of diagnosing it." \
+        "🥾   systemctl get-default  |  systemd-analyze  |  targets"
+    setup_game_env
+
+    run_challenge "Check the Default Target" \
+        "Show which systemd target this machine boots into by default.\n\n  multi-user.target is a normal server, no GUI. graphical.target adds a display manager on top of it." \
+        "systemctl get-default: prints the default target's name." \
+        'chk "^systemctl get-default"' 15
+
+    run_challenge "Set a Headless Default Target" \
+        "Set the default boot target to multi-user, text-mode only, no graphical desktop.\n\n  Common on a server that had a desktop environment installed for troubleshooting and no longer needs it starting automatically." \
+        "sudo systemctl set-default multi-user.target: changes what systemd boots into by default, effective from the next boot." \
+        'chk "^sudo systemctl set-default multi-user\\.target"' 20
+
+    run_challenge "List Every Available Target" \
+        "Show every systemd target unit currently loaded on this system." \
+        "systemctl list-units --type=target: filters the unit list down to just targets, the systemd equivalent of old SysV runlevels." \
+        'chk "^systemctl list-units --type=target"' 15
+
+    run_challenge "See the Full Boot Timeline" \
+        "Show a breakdown of how long the last boot took: firmware, loader, kernel, and userspace, each broken out separately.\n\n  The first thing to run when someone says 'this box takes forever to boot now.'" \
+        "systemd-analyze: prints total boot time split into firmware, bootloader, kernel, and userspace phases." \
+        'chk "^systemd-analyze$"' 15
+
+    run_challenge "Find the Slowest Service to Start" \
+        "Show every systemd unit ranked by how long it took to initialize, slowest first.\n\n  This is how you find the one misbehaving service adding ten seconds to every single boot." \
+        "systemd-analyze blame: lists every unit and its individual startup time, sorted slowest first." \
+        'chk "^systemd-analyze blame"' 20
+
+    cleanup_game_env
+    level_complete 50
+}
+
+run_level_51() {
+    level_intro 51 "GRUB2" \
+        "GRUB is the bootloader most Linux systems use to get from firmware to kernel. Most of the time it's invisible, but when it isn't, when a boot entry is wrong, a kernel won't load, or a hand edit is needed, knowing your way around it is the difference between a five-minute fix and a reinstall." \
+        "🐧   update-grub  |  grub-install  |  /etc/default/grub  |  grub rescue"
+    setup_game_env
+
+    run_challenge "Regenerate the GRUB Config" \
+        "You edited /etc/default/grub. Regenerate the actual grub.cfg so the change takes effect." \
+        "sudo update-grub: Debian/Ubuntu's wrapper. On RHEL-based systems the equivalent is grub2-mkconfig -o /boot/grub2/grub.cfg." \
+        'chk "^sudo update-grub|^sudo grub2-mkconfig"' 20
+
+    run_challenge "Reinstall GRUB to a Disk" \
+        "Reinstall the GRUB bootloader itself onto ${YELLOW}/dev/sda${NC}.\n\n  Different from regenerating the config: this rewrites GRUB's actual boot code into the disk's boot sector or EFI partition, needed after a disk swap or a bootloader that's gone missing entirely." \
+        "sudo grub-install /dev/sda: installs GRUB onto the specified disk. On UEFI systems this targets the EFI system partition instead." \
+        'chk "^sudo grub-install"' 20
+
+    run_challenge "Check the GRUB Defaults File" \
+        "Show the contents of GRUB's own configuration source, the human-edited file, not the generated grub.cfg.\n\n  This is what you actually edit: timeout, default entry, kernel command-line parameters. update-grub then compiles it into the real grub.cfg." \
+        "cat /etc/default/grub: the source of truth for GRUB settings, always edit this file, never grub.cfg directly." \
+        'chk "^cat /etc/default/grub"' 15
+
+    run_challenge "GRUB Rescue: List Partitions" \
+        "The system dropped to a grub rescue> prompt, no menu, no boot. Type the command that lists every partition GRUB can currently see, the first step to finding where your kernel actually lives." \
+        "ls: at a grub rescue> prompt, ls lists partitions like (hd0,gpt1). ls (hd0,gpt1)/ lists files inside one." \
+        'exact "ls"' 20
+
+    run_challenge "GRUB Menu: Edit an Entry" \
+        "At the normal GRUB boot menu (not rescue), what single key opens the boot entry editor, so you can temporarily change kernel parameters for just this one boot?" \
+        "e: opens the editor for the highlighted entry. Ctrl+X or F10 boots the edited entry, Esc discards the edit." \
+        'exact "e"' 15
+
+    cleanup_game_env
+    level_complete 51
+}
+
+run_level_52() {
+    level_intro 52 "Alternative Boot Managers" \
+        "GRUB isn't the only option. systemd-boot is a minimal, fast UEFI boot manager that ships with systemd itself, and rEFInd is a graphical alternative popular for multi-OS and multi-kernel machines that want a visual picker instead of a text menu." \
+        "🔁   bootctl  |  systemd-boot  |  rEFInd"
+    setup_game_env
+
+    run_challenge "Check systemd-boot Status" \
+        "Check the current status of systemd-boot: which entries it knows about and which one is default.\n\n  bootctl is systemd-boot's management tool, the same way grub-install and update-grub manage GRUB." \
+        "bootctl status: shows the firmware, current boot loader, and every configured boot entry." \
+        'chk "^bootctl status"' 15
+
+    run_challenge "Update systemd-boot" \
+        "Update the systemd-boot binaries on the EFI system partition to match the currently installed systemd version.\n\n  Run this after a systemd package upgrade, the on-disk boot loader binary doesn't update itself automatically." \
+        "sudo bootctl update: copies the current systemd-boot binaries onto the EFI system partition." \
+        'chk "^sudo bootctl update"' 20
+
+    run_challenge "List Boot Entries" \
+        "List every boot entry systemd-boot currently knows about." \
+        "bootctl list: shows every .conf entry found under the loader/entries directory on the ESP." \
+        'chk "^bootctl list"' 15
+
+    run_challenge "Install systemd-boot for the First Time" \
+        "This machine has never had systemd-boot installed. Install it onto the EFI system partition now." \
+        "sudo bootctl install: writes the systemd-boot binary to the ESP and registers it with UEFI firmware, first-time setup." \
+        'chk "^sudo bootctl install"' 20
+
+    run_challenge "Name the Graphical Alternative" \
+        "What's the name of the popular graphical boot manager, often used on multi-OS or multi-kernel machines, that shows a themed visual picker instead of a plain text menu?" \
+        "rEFInd: an EFI boot manager known for auto-detecting OSes and kernels and presenting them as clickable icons." \
+        'chk "^[Rr][Ee][Ff][Ii][Nn][Dd]$"' 15
+
+    cleanup_game_env
+    level_complete 52
+}
+
+run_level_53() {
+    level_intro 53 "Kernel Panics &amp; Recovery" \
+        "A kernel panic is the worst-case message a Linux box can show you, and also one of the most diagnosable, if you know where to look. The kernel dumps everything it knows right before it dies. Reading that output, and getting the box back up, is a core sysadmin skill you hope to rarely need and always have ready." \
+        "💥   rescue mode  |  journalctl -b -1  |  dmesg  |  initramfs rebuild"
+    setup_game_env
+
+    run_challenge "Boot Straight to Rescue Mode" \
+        "The system won't boot normally. At the GRUB kernel command line, what do you append to boot directly into a minimal rescue shell instead of the full system?" \
+        "systemd.unit=rescue.target: appended to the kernel line at the GRUB edit screen. The older single also still works on most systems." \
+        'chk "systemd\\.unit=rescue\\.target|^single$"' 20
+
+    run_challenge "Read the Previous Boot's Logs" \
+        "The system just crashed and rebooted. Read the kernel and service logs from the boot BEFORE this one, where the actual panic happened.\n\n  The current boot's logs won't show you the crash, by definition it happened on the previous boot. This is the single most useful command after any unexpected reboot." \
+        "journalctl -b -1: -b selects a specific boot, -1 means one boot before the current one." \
+        'chk "^journalctl -b -1"' 25
+
+    run_challenge "Check the Kernel Ring Buffer" \
+        "Show the kernel's own message buffer directly, hardware detection, driver errors, and any panic messages still held in memory.\n\n  dmesg is lower-level than journalctl, it's talking to the kernel's ring buffer directly, useful even in a minimal rescue environment with no full logging stack running." \
+        "dmesg: prints the kernel ring buffer. dmesg -T adds human-readable timestamps." \
+        'exact "dmesg"' 15
+
+    run_challenge "Rebuild the initramfs" \
+        "You fixed a driver or module configuration issue that was causing panics at boot. Rebuild the initramfs so the fix is actually included in what loads before the real root filesystem mounts." \
+        "sudo update-initramfs -u: Debian/Ubuntu's rebuild command. RHEL-based systems use sudo dracut -f instead." \
+        'chk "^sudo update-initramfs -u|^sudo dracut"' 20
+
+    run_challenge "Force a Filesystem Check on Next Boot" \
+        "You suspect filesystem corruption is behind these panics. Force fsck to run automatically on the next boot, without an interactive prompt.\n\n  This classic trick works because most init systems check for this specific file's existence before deciding whether to run a full fsck." \
+        "sudo touch /forcefsck: the presence of this file at the root of the filesystem triggers a forced fsck on the next boot." \
+        'chk "^sudo touch /forcefsck"' 20
+
+    cleanup_game_env
+    level_complete 53
+}
+
+run_level_54() {
+    level_intro 54 "Building a Kernel" \
+        "Almost nobody builds a kernel from source for daily use anymore, distros handle that. But knowing how, adding a missing driver, enabling a feature flag, patching for hardware nobody else supports yet, is the deepest possible level of Linux mastery, and it demystifies everything above it." \
+        "🧬   menuconfig  |  make  |  modules_install  |  make install"
+    setup_game_env
+
+    run_challenge "Configure Kernel Options" \
+        "Open the interactive configuration menu to choose which kernel features, drivers, and modules to build.\n\n  This is where you'd enable a new filesystem, a new driver, or tune options for your exact hardware, hundreds of options organized into a searchable menu tree." \
+        "make menuconfig: an ncurses-based configuration UI. make xconfig is the graphical Qt equivalent." \
+        'chk "^make menuconfig"' 20
+
+    run_challenge "Compile the Kernel" \
+        "Build the kernel using every CPU core available, instead of a single-threaded build that could take hours.\n\n  A full kernel build can compile thousands of files, -j with a core count is the difference between minutes and hours." \
+        "make -j\$(nproc): -j sets parallel jobs, \$(nproc) fills in your actual CPU core count automatically." \
+        'chk "^make( -j.*)?$"' 20
+
+    run_challenge "Install the Kernel Modules" \
+        "Install every module the build just produced into the system's module directory, so the kernel can load them at runtime." \
+        "sudo make modules_install: copies built modules into /lib/modules/<version>/, where the kernel expects to find them." \
+        'chk "^sudo make modules_install"' 20
+
+    run_challenge "Install the Kernel Itself" \
+        "Install the newly built kernel image, and let the build system handle registering it as a new boot entry." \
+        "sudo make install: copies the kernel image into /boot and typically triggers an initramfs build and bootloader config update automatically." \
+        'chk "^sudo make install"' 20
+
+    run_challenge "Make the New Kernel Bootable" \
+        "The new kernel is installed, but the bootloader doesn't know about it yet. Make sure it shows up as a selectable boot entry.\n\n  Every kernel build ends the same way it started this tier: at the bootloader. Nothing you build is usable until it's reachable at boot." \
+        "sudo update-grub: regenerates grub.cfg, picking up the newly installed kernel as a boot entry." \
+        'chk "^sudo update-grub|^sudo grub2-mkconfig"' 20
+
+    cleanup_game_env
+    tier_complete 54 "Boot Process & Kernel" \
+        "The full boot timeline, GRUB and alternative boot managers, kernel panic recovery, and building a kernel from source. There is nothing left on this box, from power-on to a running shell, that you can't explain or fix." \
+        "Tier 11: Media Management: ffmpeg, library organization, and home media servers."
+}
+
+# ---- TIER 11: MEDIA MANAGEMENT ----
+
+run_level_55() {
+    level_intro 55 "ffmpeg Basics" \
+        "ffmpeg is the tool underneath nearly every media server, converter, and streaming pipeline on Linux, whether or not the front-end app admits it. Transcoding, extracting audio, and pulling a single frame out of a video are all the same tool, just different flags." \
+        "🎞️   ffmpeg -i  |  -vn  |  -c:v  |  -ss  |  ffprobe"
+    setup_game_env
+
+    run_challenge "Convert a Container Format" \
+        "Convert ${YELLOW}input.mp4${NC} to ${YELLOW}output.mkv${NC}.\n\n  With no codec flags, ffmpeg just repackages the existing streams into the new container, fast, no quality loss, because nothing is actually re-encoded." \
+        "ffmpeg -i input.mp4 output.mkv: -i specifies the input, the output filename's extension tells ffmpeg the target container." \
+        'chk "^ffmpeg -i input\\.mp4 output\\.mkv"' 15
+
+    run_challenge "Extract Just the Audio" \
+        "Pull the audio track out of ${YELLOW}input.mp4${NC} and save it as ${YELLOW}audio.mp3${NC}, discarding the video entirely." \
+        "ffmpeg -i input.mp4 -vn audio.mp3: -vn (no video) strips the video stream, leaving just audio to encode into the output." \
+        'chk "^ffmpeg -i input\\.mp4 -vn audio\\.mp3"' 15
+
+    run_challenge "Re-encode with a Specific Codec" \
+        "Re-encode ${YELLOW}input.mp4${NC} to ${YELLOW}output.mp4${NC} using the H.264 codec at quality level 23.\n\n  ${CYAN}-crf${NC} (constant rate factor) controls quality vs file size, lower is higher quality and bigger files. 18-28 is the normal usable range." \
+        "ffmpeg -i input.mp4 -c:v libx264 -crf 23 output.mp4: -c:v sets the video codec, -crf sets quality." \
+        'chk "^ffmpeg -i input\\.mp4 -c:v libx264"' 20
+
+    run_challenge "Grab a Thumbnail Frame" \
+        "Extract a single frame at the 10-second mark of ${YELLOW}input.mp4${NC} and save it as ${YELLOW}thumb.jpg${NC}." \
+        "ffmpeg -i input.mp4 -ss 00:00:10 -vframes 1 thumb.jpg: -ss seeks to a timestamp, -vframes 1 grabs exactly one frame from that point." \
+        'chk "^ffmpeg -i input\\.mp4 -ss.*-vframes 1"' 20
+
+    run_challenge "Inspect a Media File" \
+        "Before transcoding ${YELLOW}input.mp4${NC}, check its codec, resolution, duration, and bitrate without converting anything." \
+        "ffprobe input.mp4: ffmpeg's companion inspection tool, reports everything about a media file's streams without touching it." \
+        'chk "^ffprobe input\\.mp4"' 15
+
+    cleanup_game_env
+    level_complete 55
+}
+
+run_level_56() {
+    level_intro 56 "Media Library Organization" \
+        "A media library with a few hundred files stays manageable by memory. A media library with tens of thousands needs the same discipline any large filesystem does: find things by pattern, verify integrity, and never trust a manual rename spree not to break something." \
+        "🗃️   find -iname  |  sha256sum  |  find -size  |  batch rename"
+    setup_game_env
+
+    run_challenge "Find Files by Pattern" \
+        "Find every .mkv file anywhere under the current directory, regardless of case.\n\n  -iname matches case-insensitively, useful since media file extensions arrive in every capitalization imaginable depending on where they came from." \
+        "find . -iname \"*.mkv\": -iname is the case-insensitive version of -name." \
+        'chk "^find \\. -iname"' 15
+
+    run_challenge "Generate Checksums" \
+        "Generate SHA-256 checksums for every .mkv file in the current directory and save them to ${YELLOW}checksums.sha256${NC}.\n\n  This is how you prove a file wasn't silently corrupted during a copy, transfer, or years of sitting on aging storage." \
+        "sha256sum *.mkv > checksums.sha256: writes one hash line per matched file, redirected into the checksum file." \
+        'chk "^sha256sum \\*\\.mkv"' 20
+
+    run_challenge "Verify Checksums Later" \
+        "Some time later, verify every file listed in ${YELLOW}checksums.sha256${NC} still matches its recorded hash.\n\n  -c reports OK or FAILED for every file, immediately obvious which ones changed or corrupted." \
+        "sha256sum -c checksums.sha256: -c checks every listed file against its stored hash instead of generating new ones." \
+        'chk "^sha256sum -c"' 20
+
+    run_challenge "Find Unusually Large Files" \
+        "Find every file in the current directory tree larger than 5GB.\n\n  Handy for spotting a corrupted download that inflated to an absurd size, or just finding what's actually eating the disk." \
+        "find . -size +5G: -size with a + matches anything larger than the given size." \
+        'chk "^find \\. -size \\+5G"' 15
+
+    run_challenge "Batch Rename an Extension" \
+        "Rename every .avi file in the current directory to the same name with a .mp4 extension instead, in one loop.\n\n  \${f%.avi} strips the .avi suffix from the variable, letting you rebuild the new name from what's left." \
+        "for f in *.avi; do mv \"\$f\" \"\${f%.avi}.mp4\"; done: loops every .avi file, strips the suffix, appends the new one." \
+        'chk "^for f in \\*\\.avi.*done$"' 25
+
+    cleanup_game_env
+    level_complete 56
+}
+
+run_level_57() {
+    level_intro 57 "Home Media Server Concepts" \
+        "Running Jellyfin, Plex, or any home media server well comes down to a handful of sysadmin fundamentals: confirming hardware transcoding is actually available, laying out a library sanely, and watching resource usage while a dozen things transcode at once." \
+        "📺   /dev/dri  |  nvidia-smi  |  library layout  |  iotop"
+    setup_game_env
+
+    run_challenge "Check for Hardware Transcode Support" \
+        "Check whether this machine has an Intel Quick Sync (or similar) hardware video encoder available for transcoding.\n\n  If /dev/dri has render nodes present, hardware transcoding is possible, letting the CPU sit mostly idle even while multiple streams transcode at once." \
+        "ls /dev/dri: lists render device nodes. No output usually means no hardware transcode acceleration is available." \
+        'chk "^ls /dev/dri"' 15
+
+    run_challenge "Check an NVIDIA GPU" \
+        "This box has an NVIDIA card instead. Check its status and confirm it's available for hardware transcoding.\n\n  Also shows temperature, memory usage, and which processes currently have the GPU open, invaluable while diagnosing a transcode that's running hot or stuck." \
+        "nvidia-smi: NVIDIA's own status and monitoring tool, works the same for a media server GPU as it does for anything else." \
+        'exact "nvidia-smi"' 15
+
+    run_challenge "Lay Out a Media Library" \
+        "Create a standard media library directory structure under ${YELLOW}media/${NC}, with separate movies, tv, and music folders, in one command.\n\n  Brace expansion creates all three subdirectories in a single call, no separate mkdir per folder needed." \
+        "mkdir -p media/{movies,tv,music}: -p creates parent directories as needed, brace expansion creates all three siblings at once." \
+        'chk "^mkdir -p media/\\{movies,tv,music\\}"' 20
+
+    run_challenge "Confirm Space Before a Big Import" \
+        "Before importing a large batch of new media, confirm there's enough free space on ${YELLOW}/mnt/media${NC}." \
+        "df -h /mnt/media: the same df you already know, pointed at the specific mount your library lives on." \
+        'chk "^df -h /mnt/media"' 10
+
+    run_challenge "Watch Disk I/O During Heavy Transcoding" \
+        "Several streams are transcoding at once and the server feels sluggish. Watch live disk I/O per process to see what's actually hammering the disk.\n\n  top and htop show CPU and memory well, but a transcode job that's disk-bound rather than CPU-bound only shows up clearly here." \
+        "sudo iotop: live per-process disk read/write rates, the disk equivalent of top." \
+        'chk "^sudo iotop"' 20
+
+    cleanup_game_env
+    tier_complete 57 "Media Management" \
+        "ffmpeg for transcoding and extraction, library organization and integrity checking at scale, and the sysadmin side of running a real home media server. The nerdy home-lab half of this job is just as covered as the corporate half." \
+        "Tier 12: Desktop Ricing: window managers, i3, awesomewm, and dotfiles."
+}
+
+# ---- TIER 12: DESKTOP RICING (FINAL) ----
+
+run_level_58() {
+    level_intro 58 "X11, Wayland &amp; Window Managers" \
+        "Everything below this line has been servers and infrastructure. This last tier is the reward: making your OWN desktop look and feel exactly the way you want. It starts with knowing what you're actually running, X11 or Wayland, and what window managers are available to you." \
+        "🖼️   XDG_SESSION_TYPE  |  loginctl  |  xsessions  |  wayland-sessions"
+    setup_game_env
+
+    run_challenge "Identify Your Session Type" \
+        "Check whether your current graphical session is running on X11 or Wayland.\n\n  Most tiling window managers support one or the other, occasionally both, this decides which ones are even an option for you." \
+        "echo \$XDG_SESSION_TYPE: reads the environment variable the session manager sets, prints either x11 or wayland." \
+        'chk "^echo \\\$XDG_SESSION_TYPE"' 15
+
+    run_challenge "List Active Sessions" \
+        "List every active login session on this machine, graphical or otherwise." \
+        "loginctl list-sessions: shows every session systemd-logind knows about, with user, TTY, and session type." \
+        'chk "^loginctl list-sessions"' 15
+
+    run_challenge "List Available X11 Window Managers" \
+        "List every X11 session available to choose from at your display manager's login screen." \
+        "ls /usr/share/xsessions: each .desktop file here becomes a selectable session at login, one per installed X11 window manager or desktop environment." \
+        'chk "^ls /usr/share/xsessions"' 15
+
+    run_challenge "List Available Wayland Sessions" \
+        "Do the same thing, but for Wayland-native sessions instead of X11 ones." \
+        "ls /usr/share/wayland-sessions: identical idea to xsessions, just the Wayland-native equivalent directory." \
+        'chk "^ls /usr/share/wayland-sessions"' 15
+
+    run_challenge "Check if a Window Manager Is Running" \
+        "Check whether the ${YELLOW}i3${NC} process is currently running on this system." \
+        "pgrep -l i3: -l prints the matched process's name alongside its PID, quick confirmation a specific WM or daemon is actually alive." \
+        'chk "^pgrep -l i3"' 15
+
+    cleanup_game_env
+    level_complete 58
+}
+
+run_level_59() {
+    level_intro 59 "i3 Window Manager" \
+        "i3 is a tiling window manager: no dragging windows around, everything snaps into a grid you control entirely from the keyboard. It's one config file, one language (plain key=value-style bindings), and it's the single most common gateway drug into the whole ricing hobby." \
+        "🪟   i3-msg reload  |  bindsym  |  workspace  |  move container"
+    setup_game_env
+
+    run_challenge "Reload the Config Live" \
+        "You just edited i3's config file. Apply the change immediately, without restarting i3 or losing your current window layout.\n\n  reload is safe and near-instant, it re-reads the config and applies it to the running session." \
+        "i3-msg reload: sends the reload command to the running i3 instance over its IPC socket." \
+        'chk "^i3-msg reload"' 15
+
+    run_challenge "Restart i3 In Place" \
+        "Something's gone wrong with i3's internal state, more than reload can fix. Restart i3 entirely, but keep your layout and running applications exactly where they are." \
+        "i3-msg restart: unlike reload, this restarts the i3 process itself, but preserves the current layout in memory across the restart." \
+        'chk "^i3-msg restart"' 15
+
+    run_challenge "Bind a Terminal Shortcut" \
+        "Write the config line that binds ${YELLOW}\$mod+Return${NC} to launch the alacritty terminal.\n\n  \$mod is normally set to the Super/Windows key earlier in the config. Almost every i3 config's very first bindsym is exactly this one." \
+        "bindsym \$mod+Return exec alacritty: bindsym binds a key combo, exec runs a program when it's pressed." \
+        'chk "^bindsym \\\$mod\\+Return exec"' 20
+
+    run_challenge "Bind a Workspace Switch" \
+        "Write the config line that switches to workspace 2 when ${YELLOW}\$mod+2${NC} is pressed." \
+        "bindsym \$mod+2 workspace 2: same bindsym pattern, workspace <n> is the built-in command that switches to a numbered workspace." \
+        'chk "^bindsym \\\$mod\\+2 workspace 2"' 20
+
+    run_challenge "Bind Moving a Window to a Workspace" \
+        "Write the config line that moves the currently focused window to workspace 2 when ${YELLOW}\$mod+Shift+2${NC} is pressed, without switching your own view to it.\n\n  The Shift-modifier convention (move the window) alongside the plain version (switch to the workspace) is standard across almost every i3 config you'll ever see." \
+        "bindsym \$mod+Shift+2 move container to workspace 2: same key combo pattern as switching, move container to workspace <n> relocates the focused window instead." \
+        'chk "^bindsym \\\$mod\\+Shift\\+2 move container to workspace 2"' 25
+
+    cleanup_game_env
+    level_complete 59
+}
+
+run_level_60() {
+    level_intro 60 "AwesomeWM &amp; Compositors" \
+        "AwesomeWM takes the tiling idea further: the entire window manager is configured and scriptable in Lua, not a static config file. Pair any tiling WM with a compositor like picom and you get the transparency, shadows, and smooth animations that turn a functional desktop into a genuinely nice-looking one." \
+        "🎨   rc.lua  |  Lua  |  picom  |  compositor"
+    setup_game_env
+
+    run_challenge "Name AwesomeWM's Config Language" \
+        "AwesomeWM's entire configuration, rc.lua, isn't a static config format like i3's. What programming language is it actually written in?" \
+        "Lua: a small, fast scripting language. AwesomeWM's config is executable Lua code, not just key=value settings." \
+        'chk "^[Ll]ua$"' 15
+
+    run_challenge "Launch a Compositor" \
+        "Start the picom compositor in the background, giving your window manager transparency, shadows, and smooth rendering it doesn't provide on its own.\n\n  A tiling WM handles window placement, nothing about how they're rendered. A compositor is a separate process layered on top for exactly that." \
+        "picom &: launches picom in the background so your shell (or startup script) isn't blocked waiting on it." \
+        'chk "^picom &"' 15
+
+    run_challenge "Launch with a Specific Config" \
+        "Launch picom using a config file at ${YELLOW}~/.config/picom.conf${NC} instead of its defaults.\n\n  This is where blur, shadow radius, fade duration, and opacity rules for individual applications all live." \
+        "picom --config ~/.config/picom.conf: --config points picom at a specific configuration file." \
+        'chk "^picom --config"' 20
+
+    run_challenge "Check for a Running Compositor" \
+        "Before launching picom, check whether an instance is already running, so you don't end up with two competing compositors fighting over the same windows." \
+        "pgrep picom: same pgrep pattern as checking for a window manager, just pointed at picom's process name instead." \
+        'chk "^pgrep picom"' 15
+
+    run_challenge "Cleanly Restart the Compositor" \
+        "Kill any running picom instance and relaunch it as a proper background daemon, in one line.\n\n  -b daemonizes picom itself, so you don't need the shell's own & backgrounding on top of it." \
+        "pkill picom && picom -b: pkill ends the old instance, && only proceeds to relaunch if that succeeded, -b daemonizes the new one." \
+        'chk "^pkill picom && picom -b"' 20
+
+    cleanup_game_env
+    level_complete 60
+}
+
+run_level_61() {
+    level_intro 61 "Dotfiles &amp; Theming" \
+        "The final skill, and the one that ties the whole rice together: managing every config file you've just spent three levels tuning, so a single command reproduces your entire setup on a brand new machine. Then the fun part, making it actually look good." \
+        "🌈   bare git repo  |  stow  |  gsettings  |  feh"
+    setup_game_env
+
+    run_challenge "Initialize a Bare Dotfiles Repo" \
+        "Set up a bare git repository at ${YELLOW}\$HOME/.dotfiles${NC} to track your config files directly from your home directory, without a separate checked-out copy sitting alongside the originals.\n\n  This is the classic 'dotfiles as a bare repo' trick: no symlinks, no separate folder, git just tracks files that are already exactly where they need to be." \
+        "git init --bare \$HOME/.dotfiles: --bare creates a repo with no working directory of its own, since your actual home directory IS the working tree." \
+        'chk "^git init --bare"' 20
+
+    run_challenge "Create the Management Alias" \
+        "Create the shell alias that lets you run git commands against that bare repo, using your home directory as the working tree, without it being your normal git repo for everything else in \$HOME.\n\n  Every dotfiles-as-bare-repo guide starts with exactly this alias. From here, ${CYAN}config add ~/.vimrc${NC} and ${CYAN}config commit${NC} work like any other git repo." \
+        "alias config='/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME': --git-dir points at the bare repo, --work-tree overrides it to your actual home directory." \
+        'chk "^alias config="' 25
+
+    run_challenge "Deploy Dotfiles with Stow" \
+        "You keep dotfiles organized in package subfolders instead, and want to symlink the ${YELLOW}nvim${NC} package into your home directory.\n\n  GNU Stow is the other popular dotfiles approach: real files live in a package folder, stow symlinks them into place, and removing them cleanly is one command away too." \
+        "stow nvim: symlinks every file inside the nvim/ folder into the parent directory, preserving the relative structure." \
+        'exact "stow nvim"' 20
+
+    run_challenge "Set a GTK Theme" \
+        "Set your GTK theme to ${YELLOW}Nordic${NC} using gsettings.\n\n  This is the GNOME/GTK equivalent of what a window manager's own config handles for window borders and bars, the theme for GTK applications themselves." \
+        "gsettings set org.gnome.desktop.interface gtk-theme \"Nordic\": gsettings reads and writes the same settings a GNOME settings panel would." \
+        'chk "^gsettings set org\\.gnome\\.desktop\\.interface gtk-theme"' 20
+
+    run_challenge "Set the Wallpaper" \
+        "Set your desktop wallpaper to ${YELLOW}~/Pictures/wallpaper.jpg${NC}, scaled to fill the screen.\n\n  feh is the classic lightweight image viewer that doubles as the standard wallpaper setter across nearly every tiling WM setup." \
+        "feh --bg-fill ~/Pictures/wallpaper.jpg: --bg-fill scales and crops the image to fill the screen without distorting its aspect ratio." \
+        'chk "^feh --bg-fill"' 20
+
+    cleanup_game_env
     graduation_ceremony
 }
 
@@ -2124,12 +3417,14 @@ graduation_ceremony() {
     printf '║%b%-75s%b║\n' "${WHITE}" "  This certifies that" "${YELLOW}"
     printf '║%b%-75s%b║\n' "${LCYAN}${BOLD}" "  ${PLAYER_NAME}" "${NC}${YELLOW}"
     printf '║%75s║\n' ""
-    printf '║%b%-75s%b║\n' "${WHITE}" "  has completed all 28 levels across all five tiers:" "${YELLOW}"
-    printf '║%b%-75s%b║\n' "${WHITE}" "  Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert" "${YELLOW}"
+    printf '║%b%-75s%b║\n' "${WHITE}" "  has completed all ${TOTAL_LEVELS} levels across all twelve tiers, from" "${YELLOW}"
+    printf '║%b%-75s%b║\n' "${WHITE}" "  basic navigation to storage, networking, SAN, kernels, and ricing," "${YELLOW}"
     printf '║%75s║\n' ""
-    printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  and is certified ready to operate as a Linux Systems Administrator." "${NC}${YELLOW}"
+    printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  and is certified ready to administrate a corporate network AND" "${NC}${YELLOW}"
+    printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  run a genuinely great-looking home setup." "${NC}${YELLOW}"
     printf '║%75s║\n' ""
     printf '║%b%-75s%b║\n' "${DIM}" "  XP: ${PLAYER_XP}  Best streak: ${PLAYER_BEST_STREAK}  Badges: ${earned}/6  Awarded: ${award_date}" "${YELLOW}"
+    printf '║%b%-75s%b║\n' "${DIM}" "  BashQuest by Tony \"Hardlygospel\" Hosaroygard, github.com/hardlygospel" "${YELLOW}"
     printf '%b\n' "╚═══════════════════════════════════════════════════════════════════════╝${NC}"
 
     local cert_file="$SAVE_DIR/${PLAYER_NAME}.certificate.txt"
@@ -2137,29 +3432,42 @@ graduation_ceremony() {
         echo "BASHQUEST - CERTIFICATE OF COMPLETION"
         echo ""
         echo "This certifies that ${PLAYER_NAME}"
-        echo "has completed all 28 levels of BashQuest across all five tiers:"
-        echo "Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert."
+        echo "has completed all ${TOTAL_LEVELS} levels of BashQuest across all twelve tiers:"
+        echo "Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert,"
+        echo "Storage & Filesystems, File Editing & Sharing, Networking,"
+        echo "Storage Networking & SAN, Boot Process & Kernel, Media Management,"
+        echo "and Desktop Ricing."
         echo ""
-        echo "Certified ready to operate as a Linux Systems Administrator."
+        echo "Certified ready to administrate a corporate network AND run a"
+        echo "genuinely great-looking home setup."
         echo ""
         echo "Final XP: ${PLAYER_XP}"
         echo "Best streak: ${PLAYER_BEST_STREAK}"
         echo "Achievements: ${earned}/6"
         echo "Time played: ${elapsed_min} minutes"
         echo "Awarded: ${award_date}"
+        echo ""
+        echo "BashQuest by Tony \"Hardlygospel\" Hosaroygard"
+        echo "github.com/hardlygospel/bashquest"
+        echo "Copyright (C) 2026 Tony Hosaroygard. GPL-3.0."
     } > "$cert_file" 2>/dev/null
 
     printf '\n'
     root_speech \
-        "Twenty-eight levels. Every tier, every fire I put in front of you." \
-        "You've now touched navigation, permissions, processes, pipes, regex," \
-        "redirection, scripting, disk, users, SSH, cron, packages, and systemd." \
-        "That's not trivia anymore, that's a working mental model of a Linux box." \
-        "Hand you a login prompt on a server you've never seen, and you'd know" \
-        "exactly where to start looking. That's the job. You can do the job." \
-        "A copy of this is saved at ${cert_file}. Go build something, ${PLAYER_NAME}."
+        "${TOTAL_LEVELS} levels. Twelve tiers. Every fire I put in front of you, lit on purpose." \
+        "You started at ls and pwd. You're finishing having built and grown storage" \
+        "with LVM, shared it over Samba and NFS, run a real network with VLANs and" \
+        "a firewall, connected to a SAN over iSCSI, recovered from a kernel panic," \
+        "and built a kernel from source. Hand you a login prompt on a server you've" \
+        "never seen, in a datacenter you've never visited, and you'd know exactly" \
+        "where to start. That's not a course anymore. That's the job." \
+        "And when the pager's finally quiet, you now also know how to make your own" \
+        "desktop look genuinely good instead of just functional. That part matters too." \
+        "A copy of this is saved at ${cert_file}." \
+        "I'm Tony Hosaroygard, github.com/hardlygospel, and this is everything I know." \
+        "Go build something, ${PLAYER_NAME}."
 
-    PLAYER_LEVEL=29; save_progress
+    PLAYER_LEVEL=$((TOTAL_LEVELS + 1)); save_progress
     press_enter; main_menu
 }
 
@@ -2174,7 +3482,16 @@ dispatch_level() {
         17) run_level_17 ;; 18) run_level_18 ;; 19) run_level_19 ;; 20) run_level_20 ;;
         21) run_level_21 ;; 22) run_level_22 ;; 23) run_level_23 ;; 24) run_level_24 ;;
         25) run_level_25 ;; 26) run_level_26 ;; 27) run_level_27 ;; 28) run_level_28 ;;
-        *) printf '%b\n' "\n${LGREEN}  🏆 All 28 levels complete, true master!${NC}"; press_enter; main_menu ;;
+        29) run_level_29 ;; 30) run_level_30 ;; 31) run_level_31 ;; 32) run_level_32 ;;
+        33) run_level_33 ;; 34) run_level_34 ;; 35) run_level_35 ;; 36) run_level_36 ;;
+        37) run_level_37 ;; 38) run_level_38 ;; 39) run_level_39 ;; 40) run_level_40 ;;
+        41) run_level_41 ;; 42) run_level_42 ;; 43) run_level_43 ;; 44) run_level_44 ;;
+        45) run_level_45 ;; 46) run_level_46 ;; 47) run_level_47 ;; 48) run_level_48 ;;
+        49) run_level_49 ;; 50) run_level_50 ;; 51) run_level_51 ;; 52) run_level_52 ;;
+        53) run_level_53 ;; 54) run_level_54 ;; 55) run_level_55 ;; 56) run_level_56 ;;
+        57) run_level_57 ;; 58) run_level_58 ;; 59) run_level_59 ;; 60) run_level_60 ;;
+        61) run_level_61 ;;
+        *) printf '%b\n' "\n${LGREEN}  🏆 All ${TOTAL_LEVELS} levels complete, true master!${NC}"; press_enter; main_menu ;;
     esac
 }
 

@@ -10,7 +10,7 @@ permalink: /
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blueviolet?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-brightgreen?style=flat-square&logo=linux)](https://github.com/hardlygospel/bashquest)
 [![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)](https://github.com/hardlygospel/bashquest)
-[![Levels](https://img.shields.io/badge/Levels-28-blue?style=flat-square)](./levels/)
+[![Levels](https://img.shields.io/badge/Levels-61-blue?style=flat-square)](./levels/)
 
 An interactive terminal game that teaches Linux and Bash from the ground up. Each challenge explains **how** a command works and **why** you'd use it: not just the syntax.
 
@@ -18,7 +18,7 @@ An interactive terminal game that teaches Linux and Bash from the ground up. Eac
 
 ## What Is BashQuest?
 
-BashQuest is a single Bash script that turns your terminal into a Linux training ground. You create an account, log in, and work through 28 progressive levels: from basic navigation all the way to systemd services and shell scripting best practices.
+BashQuest is a single Bash script that turns your terminal into a full systems administration training ground. You create an account, log in, and work through 61 progressive levels across twelve tiers: from basic navigation all the way to LVM, enterprise networking and SAN storage, kernel panics and building your own kernel, and finally ricing your own desktop with a tiling window manager. Walk out the other side able to comfortably administrate a corporate network, or set up a genuinely great-looking home setup.
 
 Every challenge:
 - Describes what you need to do in plain English
@@ -49,26 +49,26 @@ No dependencies. No installation. Pure Bash.
 
 | Feature | Detail |
 |---|---|
-| **28 levels** | Beginner → expert, each with 5–8 challenges |
+| **61 levels** | Beginner → full sysadmin mastery, each with 5–8 challenges |
 | **Pseudo login** | Register/login with hashed passwords, saved per user |
 | **Lives & XP** | 3 lives, earn XP per correct answer, save progress |
 | **Leaderboard** | Ranked across all players on the machine |
 | **Hints** | Type `hint` for a clue on any challenge |
 | **Skip** | Type `skip` to pass a challenge (costs 1 life) |
-| **Level select** | Replay any unlocked level |
-| **Command reference** | In-game cheat sheet covering all 28 level topics |
+| **Topic jump menu** | Two-step level select: pick a tier, then a level within it |
+| **Command reference** | In-game cheat sheet covering all 61 level topics |
 | **Colorful TUI** | ANSI colour, ASCII banners, status bar |
 | **Cross-platform** | Linux and macOS (bash 3.2+) |
-| **ROOT** | A mentor character who reacts to every answer, hint, and streak |
+| **Tasmania** | A mentor character (Tony "Hardlygospel" Hosaroygard's in-game handle) who reacts to every answer, hint, and streak |
 | **Streaks & achievements** | Track your best streak and earn badges for hint-free, skip-free, lives-untouched runs |
-| **Tier milestones** | A checkpoint screen at the end of each of the five tiers |
-| **Graduation certificate** | Beat all 28 levels and get a certificate, written to disk, that's yours to keep |
+| **Tier milestones** | A checkpoint screen at the end of each of the twelve tiers |
+| **Graduation certificate** | Beat all 61 levels and get a certificate, written to disk, that's yours to keep |
 
 ---
 
 ## Level Overview
 
-28 levels across five tiers (Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert). Clear a tier and ROOT checks in with a milestone screen before the next one starts. See [levels](./levels/) for the full tier breakdown.
+61 levels across twelve tiers (Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert, Storage & Filesystems, File Editing & Sharing, Networking, Storage Networking & SAN, Boot Process & Kernel, Media Management, Desktop Ricing). Clear a tier and Tasmania checks in with a milestone screen before the next one starts. See [levels](./levels/) for the full tier breakdown.
 
 | # | Level | Commands |
 |---|---|---|
@@ -100,9 +100,44 @@ No dependencies. No installation. Pure Bash.
 | 26 | Arrays | indexed arrays, loops, associative |
 | 27 | Functions & Errors | `set -euo pipefail` `trap` `$?` |
 | 28 | Systemd | `systemctl` `journalctl -fu` unit files |
+| 29 | Disks & Partitions | `lsblk` `fdisk -l` `parted -l` `blkid` |
+| 30 | Partitioning | `parted mkpart` `fdisk n/w` `partprobe` |
+| 31 | Filesystems | `mkfs.ext4` `mkfs.xfs` `mkswap` |
+| 32 | Mounting & fstab | `mount` `umount` `/etc/fstab` UUID |
+| 33 | LVM: Volumes & Groups | `pvcreate` `vgcreate` `lvcreate` |
+| 34 | LVM: Resize & Snapshots | `lvextend` `resize2fs` `lvcreate -s` |
+| 35 | Vim Essentials | `i` `Esc` `:wq` `dd` `/search` `:%s` |
+| 36 | Permissions & ACLs | `setfacl` `getfacl` `umask` |
+| 37 | Samba File Sharing | `smb.conf` `smbpasswd` `testparm` |
+| 38 | NFS Sharing | `/etc/exports` `exportfs` `showmount` |
+| 39 | Sync & Backup | `rsync -avz` `--delete` `-e ssh` |
+| 40 | IP Addressing | `ip addr` `ip link` `hostname -I` |
+| 41 | Routing & Gateways | `ip route` `traceroute` `mtr` |
+| 42 | DNS Tools | `dig` `nslookup` `/etc/hosts` |
+| 43 | Firewalls | `iptables` `nft` `ufw` |
+| 44 | VLANs & Trunking | `ip link ... type vlan` `802.1Q` |
+| 45 | Bonding & Troubleshooting | `tcpdump` `mtr` `ip -s link` |
+| 46 | iSCSI Initiators & Targets | `iscsiadm` `targetcli` |
+| 47 | NFS/SMB at Scale | `autofs` `automount` |
+| 48 | Multipath & SAN | `multipath -ll` WWN, zoning |
+| 49 | Fibre Channel Storage | `lsscsi` `systool` `multipath -F` |
+| 50 | Boot Process Overview | `systemctl get-default` `systemd-analyze` |
+| 51 | GRUB2 | `update-grub` `grub-mkconfig` |
+| 52 | Alternative Boot Managers | `bootctl` `systemd-boot` `rEFInd` |
+| 53 | Kernel Panics & Recovery | rescue mode, `journalctl -b -1`, initramfs |
+| 54 | Building a Kernel | `menuconfig` `make` `modules_install` |
+| 55 | ffmpeg Basics | transcode, extract audio, thumbnails |
+| 56 | Media Library Organization | `find` `rename` `sha256sum` |
+| 57 | Home Media Server | layout, hwaccel, transcode |
+| 58 | X11/Wayland & WMs | `XDG_SESSION_TYPE` `loginctl` |
+| 59 | i3 Window Manager | `mod+enter` workspaces, config |
+| 60 | AwesomeWM & Compositors | `rc.lua` `picom` |
+| 61 | Dotfiles & Theming | `stow` `git` bare-repo dotfiles |
 
 ---
 
 ## License
 
-GPL-3.0: Copyright © 2026 Tony Hosaroygard
+GPL-3.0: Copyright © 2026 Tony "Hardlygospel" Hosaroygard
+
+Built by [github.com/hardlygospel](https://github.com/hardlygospel).

@@ -1,0 +1,56 @@
+---
+title: "Levels 55–57: Media Management"
+parent: Levels
+nav_order: 11
+---
+
+# Levels 55–57: Media Management
+{: .no_toc }
+
+<details open markdown="block">
+  <summary>Contents</summary>
+  {: .text-delta }
+- TOC
+{:toc}
+</details>
+
+---
+
+## Level 55: ffmpeg Basics
+
+> *The tool underneath nearly every media server, converter, and streaming pipeline on Linux.*
+
+| Command | What it does |
+|---|---|
+| `ffmpeg -i input.mp4 output.mkv` | Convert container format (no re-encode) |
+| `ffmpeg -i input.mp4 -vn audio.mp3` | Extract just the audio |
+| `ffmpeg -i input.mp4 -c:v libx264 -crf 23 output.mp4` | Re-encode with a specific codec and quality |
+| `ffmpeg -i input.mp4 -ss 00:00:10 -vframes 1 thumb.jpg` | Grab a single frame at a timestamp |
+| `ffprobe input.mp4` | Inspect codec, resolution, duration, bitrate |
+
+---
+
+## Level 56: Media Library Organization
+
+| Command | What it does |
+|---|---|
+| `find . -iname "*.mkv"` | Find files by pattern, case-insensitive |
+| `sha256sum *.mkv > checksums.sha256` | Generate integrity checksums |
+| `sha256sum -c checksums.sha256` | Verify files against stored checksums |
+| `find . -size +5G` | Find unusually large files |
+| `for f in *.avi; do mv "$f" "${f%.avi}.mp4"; done` | Batch-rename an extension |
+
+---
+
+## Level 57: Home Media Server Concepts
+
+| Command | What it does |
+|---|---|
+| `ls /dev/dri` | Check for Intel Quick Sync hardware transcode support |
+| `nvidia-smi` | Check an NVIDIA GPU's status and availability |
+| `mkdir -p media/{movies,tv,music}` | Lay out a standard library structure in one command |
+| `df -h /mnt/media` | Confirm free space before a big import |
+| `iotop` | Watch live disk I/O per process during heavy transcoding |
+
+{: .tip }
+`top` and `htop` show CPU and memory well, but a transcode job that's disk-bound rather than CPU-bound only shows up clearly in `iotop`.

@@ -7,7 +7,7 @@ permalink: /reference/
 # Command Reference
 {: .no_toc }
 
-Quick lookup for every command covered across all 28 levels.
+Quick lookup for every command covered across all 61 levels.
 
 <details open markdown="block">
   <summary>Contents</summary>
@@ -447,4 +447,147 @@ echo ${ARR[@]}        # all elements
 echo ${#ARR[@]}       # count
 ARR+=(d)              # append
 for i in "${ARR[@]}"; do echo "$i"; done
+```
+
+---
+
+## Storage & LVM
+
+```bash
+fdisk -l /dev/sda            # partition table (MBR/GPT)
+parted -l                    # partition table, GPT-native
+blkid                        # device, UUID, filesystem type
+lsblk -f                     # block tree with filesystem/mount
+mkfs.ext4 /dev/sdb1          # format ext4
+mkfs.xfs /dev/sdc1           # format XFS
+mkswap /dev/sdb2 && swapon /dev/sdb2   # create + activate swap
+mount /dev/sdb1 /mnt/data    # mount
+mount -a                     # test /etc/fstab without rebooting
+pvcreate /dev/sdb1           # physical volume
+vgcreate data_vg /dev/sdb1   # volume group
+lvcreate -L 10G -n data_lv data_vg     # logical volume
+lvextend -L +5G /dev/data_vg/data_lv   # grow it
+resize2fs /dev/data_vg/data_lv         # grow the filesystem to match
+lvcreate -L 2G -s -n snap /dev/data_vg/data_lv   # snapshot
+```
+
+---
+
+## File Editing & Sharing
+
+```bash
+vim file            # i = insert, Esc = normal mode, :wq = save+quit
+dd                   # delete line (vim, normal mode)
+/pattern             # search forward (vim)
+:%s/foo/bar/g        # replace every occurrence (vim)
+getfacl file         # view ACLs
+setfacl -m u:alice:rw file   # grant a user access
+setfacl -b file       # strip all ACLs
+umask 027             # tighten default permissions
+testparm              # validate smb.conf
+smbpasswd -a alice     # set a Samba password
+mount -t cifs //host/share /mnt/win -o username=alice
+exportfs -ra           # apply /etc/exports changes
+showmount -e host       # see what a server exports
+mount -t nfs host:/data /mnt/nfs
+rsync -avz --delete home/ /mnt/backup/       # mirror, remove extras
+rsync -avz -e ssh home/ user@host:/data/     # sync over SSH
+```
+
+---
+
+## Networking (Advanced)
+
+```bash
+ip addr                      # every address on every interface
+ip link set eth0 up          # bring an interface up
+ip route                     # routing table
+ip route add default via 192.168.1.1
+traceroute host              # hop-by-hop path
+mtr host                     # live combined trace + ping
+dig domain                   # DNS query
+dig domain MX                # specific record type
+dig -x ip                    # reverse lookup
+iptables -L -n                # list firewall rules
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+ufw allow 22 && ufw enable    # simple firewall
+ip link add link eth0 name eth0.10 type vlan id 10   # VLAN subinterface
+tcpdump -i eth0 port 443      # capture traffic on a port
+ip -s link show eth0          # interface error/drop counters
+```
+
+---
+
+## Storage Networking & SAN
+
+```bash
+iscsiadm -m discovery -t sendtargets -p host   # discover iSCSI targets
+iscsiadm -m node -T <iqn> -p host --login      # log into a target
+iscsiadm -m session                            # list active sessions
+targetcli                                      # configure a target (server side)
+systemctl status autofs                        # check autofs
+multipath -ll                                  # list multipath devices
+ls -la /dev/disk/by-id/                        # devices by WWN
+multipath -f mpatha                            # flush one device map
+lsscsi                                         # list SCSI/FC devices
+cat /sys/class/fc_host/host0/port_state        # FC HBA port status
+```
+
+---
+
+## Boot Process & Kernel
+
+```bash
+systemctl get-default            # default boot target
+systemd-analyze                  # boot time breakdown
+systemd-analyze blame            # slowest units to start
+update-grub                      # regenerate grub.cfg (Debian)
+grub2-mkconfig -o /boot/grub2/grub.cfg   # same, RHEL
+grub-install /dev/sda            # reinstall GRUB to a disk
+bootctl status                   # systemd-boot status
+bootctl update                   # update systemd-boot binaries
+journalctl -b -1                 # previous boot's logs (post-panic)
+dmesg                            # kernel ring buffer
+update-initramfs -u              # rebuild initramfs (Debian)
+dracut -f                        # rebuild initramfs (RHEL)
+touch /forcefsck                 # force fsck on next boot
+make menuconfig                  # configure a kernel build
+make -j$(nproc)                  # compile using every core
+make modules_install && make install   # install modules + kernel
+```
+
+---
+
+## Media Management
+
+```bash
+ffmpeg -i in.mp4 out.mkv                       # convert container
+ffmpeg -i in.mp4 -vn audio.mp3                 # extract audio
+ffmpeg -i in.mp4 -c:v libx264 -crf 23 out.mp4  # re-encode
+ffmpeg -i in.mp4 -ss 00:00:10 -vframes 1 thumb.jpg   # grab a frame
+ffprobe in.mp4                                 # inspect a media file
+find . -iname "*.mkv"                          # find by pattern
+sha256sum *.mkv > checksums.sha256             # generate checksums
+sha256sum -c checksums.sha256                  # verify checksums
+iotop                                          # live per-process disk I/O
+```
+
+---
+
+## Desktop Ricing
+
+```bash
+echo $XDG_SESSION_TYPE           # X11 or Wayland
+loginctl list-sessions           # active login sessions
+i3-msg reload                    # apply i3 config live
+i3-msg restart                   # restart i3, keep the layout
+bindsym $mod+Return exec alacritty       # i3: bind a terminal
+bindsym $mod+2 workspace 2               # i3: bind a workspace switch
+picom &                          # launch a compositor
+picom --config ~/.config/picom.conf
+git init --bare $HOME/.dotfiles  # dotfiles as a bare repo
+alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+stow nvim                        # deploy a dotfiles package
+gsettings set org.gnome.desktop.interface gtk-theme "Nordic"
+feh --bg-fill ~/Pictures/wallpaper.jpg   # set wallpaper
 ```

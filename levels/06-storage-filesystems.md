@@ -1,0 +1,105 @@
+---
+title: "Levels 29–34: Storage & Filesystems"
+parent: Levels
+nav_order: 6
+---
+
+# Levels 29–34: Storage & Filesystems
+{: .no_toc }
+
+<details open markdown="block">
+  <summary>Contents</summary>
+  {: .text-delta }
+- TOC
+{:toc}
+</details>
+
+---
+
+## Level 29: Disks & Partition Tables
+
+> *Know what's actually attached to the box before you touch it.*
+
+| Command | What it does | Why it matters |
+|---|---|---|
+| `fdisk -l /dev/sda` | List a disk's partition table (MBR/GPT) | The classic partition inspector |
+| `parted -l` | List every disk's partition table | Handles GPT natively, safe past 2TB |
+| `blkid` | Show device, UUID, and filesystem type | Confirms what's on a disk before formatting |
+| `lsblk -f` | Block device tree with filesystem/mount info | One view of everything attached |
+| `cat /proc/partitions` | Kernel's live partition list | Ground truth when a tool's cache is stale |
+
+---
+
+## Level 30: Partitioning with parted & fdisk
+
+> *parted does it in one line, fdisk drops you into an interactive prompt.*
+
+| Command | What it does | Why it matters |
+|---|---|---|
+| `parted /dev/sdb mkpart primary ext4 0% 100%` | Create a partition, non-interactively | Scriptable, no keystrokes to remember |
+| `n` (inside fdisk) | Start a new partition | fdisk's core command |
+| `w` (inside fdisk) | Write changes and exit | Nothing is written until this |
+| `partprobe /dev/sdb` | Force the kernel to reread the partition table | No reboot needed after repartitioning |
+| `parted /dev/sdb rm 1` | Delete a partition by number | Destructive, double-check the number |
+
+{: .warning }
+Nothing fdisk does is committed until `w`. `q` discards every change and exits safely.
+
+---
+
+## Level 31: Filesystems & Formatting
+
+> *A blank partition is just an empty container until it has a filesystem.*
+
+| Command | What it does | Why it matters |
+|---|---|---|
+| `mkfs.ext4 /dev/sdb1` | Format as ext4 | The safe, mature Linux default |
+| `mkfs.xfs /dev/sdc1` | Format as XFS | Better for large files, harder to shrink |
+| `mkswap /dev/sdb2` | Prepare a swap partition | Doesn't activate it yet |
+| `swapon /dev/sdb2` | Activate swap | Add to fstab to survive a reboot |
+| `fsck -y /dev/sdb1` | Check and auto-repair a filesystem | Never run on a mounted filesystem |
+
+---
+
+## Level 32: Mounting & /etc/fstab
+
+> *A formatted partition still isn't usable until it's mounted somewhere.*
+
+| Command | What it does | Why it matters |
+|---|---|---|
+| `mount /dev/sdb1 /mnt/data` | Mount a device at a path | Mount point must already exist |
+| `umount /mnt/data` | Unmount cleanly | `lsof +D <path>` finds what's blocking it |
+| `blkid /dev/sdb1` | Get a device's UUID | Use UUIDs in fstab, not device names |
+| `mount -a` | Mount everything in /etc/fstab | Tests fstab without rebooting |
+| `mount -o remount,rw /` | Remount root read-write in place | First move after an unclean shutdown |
+
+---
+
+## Level 33: LVM: Volumes & Groups
+
+> *An abstraction layer between physical disks and the filesystems on them.*
+
+| Command | What it does | Why it matters |
+|---|---|---|
+| `pvcreate /dev/sdb1` | Mark a device as an LVM physical volume | The bottom layer of LVM |
+| `vgcreate data_vg /dev/sdb1` | Pool physical volumes into a volume group | A group of storage to carve from |
+| `lvcreate -L 10G -n data_lv data_vg` | Carve a logical volume | Resizable, unlike a real partition |
+| `mkfs.ext4 /dev/data_vg/data_lv` | Format the logical volume | Same mkfs, an LVM path instead |
+| `vgs` / `vgdisplay` | List volume groups | Short summary vs verbose detail |
+
+---
+
+## Level 34: LVM: Resize & Snapshots
+
+> *Today's sizing decision doesn't have to be final.*
+
+```bash
+lvextend -L +5G /dev/data_vg/data_lv   # grow the logical volume
+resize2fs /dev/data_vg/data_lv         # grow the filesystem to match
+vgextend data_vg /dev/sdc1             # add more physical volumes to the pool
+lvcreate -L 2G -s -n data_snap /dev/data_vg/data_lv   # snapshot before a risky change
+lvremove /dev/data_vg/data_snap        # clean up when it's no longer needed
+```
+
+{: .tip }
+A snapshot is a rollback point, not a backup. Take one before anything risky, and remove it once you've confirmed the change worked.

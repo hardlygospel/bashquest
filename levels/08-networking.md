@@ -1,0 +1,98 @@
+---
+title: "Levels 40–45: Networking"
+parent: Levels
+nav_order: 8
+---
+
+# Levels 40–45: Networking
+{: .no_toc }
+
+<details open markdown="block">
+  <summary>Contents</summary>
+  {: .text-delta }
+- TOC
+{:toc}
+</details>
+
+---
+
+## Level 40: IP Addressing
+
+| Command | What it does |
+|---|---|
+| `ip addr` | Show every IP address on every interface |
+| `ip link show` | Show link-layer state (up/down, MAC) |
+| `ip addr add 192.168.1.50/24 dev eth0` | Assign an address (temporary) |
+| `ip link set eth0 up` | Bring an interface up |
+| `hostname -I` | Quick own-IP check, script-friendly |
+
+---
+
+## Level 41: Routing & Gateways
+
+| Command | What it does |
+|---|---|
+| `ip route` | Show the routing table |
+| `ip route add default via 192.168.1.1` | Set the default gateway |
+| `ip route add 10.0.0.0/24 via 192.168.1.254` | Add a static route to a network |
+| `traceroute google.com` | Show each hop to a destination |
+| `mtr google.com` | Continuous traceroute + ping in one view |
+
+---
+
+## Level 42: DNS Tools
+
+| Command | What it does |
+|---|---|
+| `dig google.com` | Query a domain's DNS record |
+| `dig google.com MX` | Query a specific record type |
+| `nslookup google.com` | Simpler, terser lookup |
+| `cat /etc/resolv.conf` | Show configured DNS resolvers |
+| `dig -x 8.8.8.8` | Reverse lookup, IP to hostname |
+
+{: .tip }
+Half of "the network is down" tickets are actually DNS. `dig` bypasses any browser or OS cache.
+
+---
+
+## Level 43: Firewalls
+
+| Command | What it does |
+|---|---|
+| `iptables -L -n` | List current rules, numeric output |
+| `iptables -A INPUT -p tcp --dport 22 -j ACCEPT` | Allow SSH |
+| `nft list ruleset` | List rules the modern way |
+| `ufw allow 22` | Allow a port, the simple way |
+| `ufw enable` | Turn the firewall on |
+
+{: .warning }
+Confirm your SSH rule is in place **before** enabling a firewall on a remote box, or you can lock yourself out instantly.
+
+---
+
+## Level 44: VLANs & Trunking
+
+```bash
+ip link add link eth0 name eth0.10 type vlan id 10   # VLAN subinterface for tag 10
+ip link set eth0.10 up
+ip addr add 10.10.10.5/24 dev eth0.10
+ip -d link show eth0.10                               # confirm the VLAN tag
+ip link delete eth0.10                                 # remove it
+```
+
+A trunk port carries multiple tagged VLANs over one physical link; an access port only ever carries one, untagged. The switch port facing a Linux VLAN subinterface needs to be a trunk carrying that tag.
+
+---
+
+## Level 45: Bonding & Troubleshooting
+
+| Command | What it does |
+|---|---|
+| `tcpdump -i eth0` | Capture live traffic on an interface |
+| `tcpdump -i eth0 port 443` | Filter the capture to one port |
+| `cat /proc/net/bonding/bond0` | Check a bonded interface's status |
+| `ip link add bond0 type bond mode active-backup` | Create a bonded interface |
+| `ip -s link show eth0` | Interface statistics: errors, drops |
+
+{: .tip }
+Rising error or drop counts on an "up" interface usually mean a bad cable, a duplex mismatch, or a failing NIC.
