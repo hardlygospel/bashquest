@@ -10,7 +10,7 @@ heading_anchors: true
 back_to_top: true
 back_to_top_text: "Back to top"
 
-footer_content: "BashQuest &mdash; GPL-3.0 &mdash; <a href='https://hardlygospel.github.io'>hardlygospel.github.io</a>"
+footer_content: "BashQuest &middot; GPL-3.0 &middot; <a href='https://hardlygospel.github.io'>hardlygospel.github.io</a>"
 
 aux_links:
   "← Homepage":
@@ -40,3 +40,9 @@ callouts:
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
+
+# README.md has no front matter (it's the GitHub-facing landing page, kept
+# free of Jekyll/kramdown syntax so it renders cleanly on github.com).
+# index.md is the actual Jekyll homepage, exclude the duplicate from the build.
+exclude:
+  - README.md
