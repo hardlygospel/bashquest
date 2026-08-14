@@ -12,13 +12,13 @@ permalink: /
 [![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)](https://github.com/hardlygospel/bashquest)
 [![Levels](https://img.shields.io/badge/Levels-28-blue?style=flat-square)](./levels/)
 
-An interactive terminal game that teaches Linux and Bash from the ground up. Each challenge explains **how** a command works and **why** you'd use it — not just the syntax.
+An interactive terminal game that teaches Linux and Bash from the ground up. Each challenge explains **how** a command works and **why** you'd use it: not just the syntax.
 
 ---
 
 ## What Is BashQuest?
 
-BashQuest is a single Bash script that turns your terminal into a Linux training ground. You create an account, log in, and work through 28 progressive levels — from basic navigation all the way to systemd services and shell scripting best practices.
+BashQuest is a single Bash script that turns your terminal into a Linux training ground. You create an account, log in, and work through 28 progressive levels: from basic navigation all the way to systemd services and shell scripting best practices.
 
 Every challenge:
 - Describes what you need to do in plain English
@@ -59,10 +59,16 @@ No dependencies. No installation. Pure Bash.
 | **Command reference** | In-game cheat sheet covering all 28 level topics |
 | **Colorful TUI** | ANSI colour, ASCII banners, status bar |
 | **Cross-platform** | Linux and macOS (bash 3.2+) |
+| **ROOT** | A mentor character who reacts to every answer, hint, and streak |
+| **Streaks & achievements** | Track your best streak and earn badges for hint-free, skip-free, lives-untouched runs |
+| **Tier milestones** | A checkpoint screen at the end of each of the five tiers |
+| **Graduation certificate** | Beat all 28 levels and get a certificate, written to disk, that's yours to keep |
 
 ---
 
 ## Level Overview
+
+28 levels across five tiers (Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert). Clear a tier and ROOT checks in with a milestone screen before the next one starts. See [levels](./levels/) for the full tier breakdown.
 
 | # | Level | Commands |
 |---|---|---|
@@ -99,4 +105,4 @@ No dependencies. No installation. Pure Bash.
 
 ## License
 
-GPL-3.0 — Copyright © 2026 Tony Hosaroygard
+GPL-3.0: Copyright © 2026 Tony Hosaroygard

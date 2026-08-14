@@ -7,7 +7,7 @@ permalink: /levels/
 
 # Levels
 
-BashQuest has 28 levels split across four tiers. Each level has 5–8 challenges. Every challenge explains the command's purpose — not just its syntax.
+BashQuest has 28 levels split across five tiers. Each level has 5–8 challenges. Every challenge explains the command's purpose: not just its syntax.
 
 | Tier | Levels | Focus |
 |---|---|---|

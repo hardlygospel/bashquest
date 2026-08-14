@@ -16,7 +16,7 @@ nav_order: 2
 
 ---
 
-## Level 5 — Process Management
+## Level 5: Process Management
 
 > *Linux runs hundreds of processes at once. You need to control them.*
 
@@ -45,11 +45,11 @@ nav_order: 2
 | `COMMAND` | The command that was run |
 
 {: .warning }
-`kill -9` cannot be caught or ignored by the process — it terminates immediately with no cleanup. Use it only when a normal `kill` has failed.
+`kill -9` cannot be caught or ignored by the process: it terminates immediately with no cleanup. Use it only when a normal `kill` has failed.
 
 ---
 
-## Level 6 — Text Processing
+## Level 6: Text Processing
 
 > *Transform data at machine speed without a GUI.*
 
@@ -79,7 +79,7 @@ nav_order: 2
 
 ---
 
-## Level 7 — Networking
+## Level 7: Networking
 
 > *Linux is the internet. Know how to interact with it.*
 
@@ -110,7 +110,7 @@ nav_order: 2
 
 ---
 
-## Level 8 — Shell Scripting Basics
+## Level 8: Shell Scripting Basics
 
 > *Automate everything. Scripts are commands in a file.*
 
@@ -118,7 +118,7 @@ nav_order: 2
 
 ```bash
 #!/bin/bash
-# Every script starts with a shebang — tells the OS which interpreter to use
+# Every script starts with a shebang: tells the OS which interpreter to use
 
 NAME="BashQuest"
 echo "Hello from $NAME"

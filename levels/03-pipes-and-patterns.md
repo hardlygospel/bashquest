@@ -16,7 +16,7 @@ nav_order: 3
 
 ---
 
-## Level 9 — Advanced Piping
+## Level 9: Advanced Piping
 
 > *Small tools doing one thing well, chained together.*
 
@@ -39,7 +39,7 @@ This finds ERROR lines → sorts them → counts each unique one → sorts by co
 | `cmd \| less` | Pipe long output to a pager |
 | `cmd \| wc -l` | Count output lines |
 
-**`tee` — split the stream:**
+**`tee`: split the stream:**
 
 ```bash
 # Display errors on screen AND save to file simultaneously
@@ -50,7 +50,7 @@ grep ERROR app.log | tee errors.txt | wc -l
 
 ---
 
-## Level 10 — I/O Redirection
+## Level 10: I/O Redirection
 
 > *Control where data goes. stdin, stdout, stderr.*
 
@@ -97,7 +97,7 @@ Used everywhere: Dockerfiles, Ansible, remote SSH commands, scripts.
 
 ---
 
-## Level 11 — Regular Expressions
+## Level 11: Regular Expressions
 
 > *A pattern language for matching text. Learn it once, use it everywhere.*
 
@@ -132,7 +132,7 @@ Basic regex (BRE) requires `\+` `\|` `\(`. Extended regex (ERE, enabled with `-E
 
 ---
 
-## Level 12 — Advanced grep
+## Level 12: Advanced grep
 
 > *grep is more than a filter. It's an investigation tool.*
 
@@ -170,7 +170,7 @@ grep -rc 'ERROR' /var/log/*.log
 
 ---
 
-## Level 13 — Advanced sed
+## Level 13: Advanced sed
 
 > *Automated text editing at the command line.*
 
@@ -198,10 +198,10 @@ sed 's|/usr/local|/opt|g' config.txt
 **In-place editing:**
 
 ```bash
-# Linux (GNU sed) — backup optional
+# Linux (GNU sed): backup optional
 sed -i 's/foo/bar/g' file.txt
 
-# macOS (BSD sed) — backup extension required (use empty string for no backup)
+# macOS (BSD sed): backup extension required (use empty string for no backup)
 sed -i.bak 's/foo/bar/g' file.txt
 sed -i '' 's/foo/bar/g' file.txt
 ```
@@ -211,7 +211,7 @@ macOS ships BSD sed. The `-i` flag behaves differently: it requires an extension
 
 ---
 
-## Level 14 — Advanced awk
+## Level 14: Advanced awk
 
 > *awk is a complete programming language for text.*
 

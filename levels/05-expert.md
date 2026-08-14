@@ -16,7 +16,7 @@ nav_order: 5
 
 ---
 
-## Level 21 — Cron & Scheduling
+## Level 21: Cron & Scheduling
 
 > *Automate everything. If you do it twice, cron it.*
 
@@ -72,7 +72,7 @@ MIN  HOUR  DAY  MONTH  WEEKDAY  command
 | `crontab -r` | **Remove ALL cron jobs (no confirmation)** |
 | `crontab -u user -l` | List another user's crontab (root) |
 
-**`at` — one-time scheduled tasks:**
+**`at`: one-time scheduled tasks:**
 
 ```bash
 echo '/usr/local/bin/restart.sh' | at 23:00
@@ -83,7 +83,7 @@ atrm 3        # Remove at job #3
 
 ---
 
-## Level 22 — Logs & Monitoring
+## Level 22: Logs & Monitoring
 
 > *When something breaks at 3am, logs are your flashlight.*
 
@@ -109,9 +109,9 @@ Always use `grep --line-buffered` when piping from `tail -f`. Without it, grep h
 
 ---
 
-## Level 23 — Package Management
+## Level 23: Package Management
 
-> *Same concepts, different commands — know your distro.*
+> *Same concepts, different commands: know your distro.*
 
 **Debian / Ubuntu (apt):**
 
@@ -153,7 +153,7 @@ brew list                          # List installed
 
 ---
 
-## Level 24 — Compression Deep Dive
+## Level 24: Compression Deep Dive
 
 > *Different formats for different needs. Know the trade-offs.*
 
@@ -195,9 +195,9 @@ tar -tzf archive.tar.gz         # list contents
 
 ---
 
-## Level 25 — Bash String Processing
+## Level 25: Bash String Processing
 
-> *Built-in shell operations — no subprocess, no external commands.*
+> *Built-in shell operations: no subprocess, no external commands.*
 
 | Syntax | Result | Example |
 |---|---|---|
@@ -229,7 +229,7 @@ printf '%s\n' "${array[@]}"         # One element per line
 
 ---
 
-## Level 26 — Arrays in Bash
+## Level 26: Arrays in Bash
 
 > *Store multiple values. Iterate safely. No string-splitting bugs.*
 
@@ -248,7 +248,7 @@ echo ${#SERVERS[@]}       # element count: 3
 # Append
 SERVERS+=(db02)
 
-# Loop — always quote "${arr[@]}"
+# Loop: always quote "${arr[@]}"
 for s in "${SERVERS[@]}"; do
     echo "Checking $s..."
 done
@@ -276,11 +276,11 @@ macOS Bash 3.2 does not support `declare -A` (associative arrays) or negative in
 
 ---
 
-## Level 27 — Functions & Error Handling
+## Level 27: Functions & Error Handling
 
 > *Production scripts don't silently fail.*
 
-**The safety header — put this at the top of every production script:**
+**The safety header: put this at the top of every production script:**
 
 ```bash
 #!/bin/bash
@@ -322,7 +322,7 @@ fi
 ls /nonexistent 2>/dev/null
 echo $?      # 2 (non-zero = failure)
 
-# Always check immediately — $? changes after every command
+# Always check immediately: $? changes after every command
 cp src.txt dst.txt
 if [ $? -ne 0 ]; then
     echo "Copy failed" >&2
@@ -330,7 +330,7 @@ if [ $? -ne 0 ]; then
 fi
 ```
 
-**trap — guaranteed cleanup:**
+**trap: guaranteed cleanup:**
 
 ```bash
 TMPDIR=$(mktemp -d)
@@ -350,7 +350,7 @@ trap cleanup INT TERM   # Also runs on Ctrl+C / kill
 
 ---
 
-## Level 28 — Systemd & Services
+## Level 28: Systemd & Services
 
 > *systemd manages everything that runs in the background on modern Linux.*
 

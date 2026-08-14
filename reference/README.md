@@ -400,7 +400,7 @@ sudo systemctl daemon-reload        # reload unit files
 ## Bash Scripting
 
 ```bash
-# Safety header — use on every production script
+# Safety header: use on every production script
 #!/bin/bash
 set -euo pipefail
 

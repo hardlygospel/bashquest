@@ -16,7 +16,7 @@ nav_order: 1
 
 ---
 
-## Level 1 — Navigation & Basics
+## Level 1: Navigation & Basics
 
 > *Commands you will type every single day.*
 
@@ -35,9 +35,9 @@ nav_order: 1
 
 ---
 
-## Level 2 — File Operations
+## Level 2: File Operations
 
-> *Create, read, copy, move, delete — and archive.*
+> *Create, read, copy, move, delete: and archive.*
 
 | Command | What it does | Why it matters |
 |---|---|---|
@@ -47,7 +47,7 @@ nav_order: 1
 | `touch file` | Create empty file / update timestamp | Create files without opening an editor |
 | `cp src dst` | Copy a file | Backup before editing |
 | `mv src dst` | Move or rename | Rename is just a move to the same directory |
-| `rm file` | Delete a file (permanent, no undo) | Clean up — no recycle bin |
+| `rm file` | Delete a file (permanent, no undo) | Clean up: no recycle bin |
 | `rm -r dir` | Delete directory and all contents | Remove non-empty directories |
 | `tar -czf out.tar.gz dir/` | Create compressed archive | Bundle files for transfer or backup |
 | `tar -tzf file.tar.gz` | List archive contents | Preview without extracting |
@@ -71,7 +71,7 @@ nav_order: 1
 
 ---
 
-## Level 3 — Text & Search
+## Level 3: Text & Search
 
 > *Find what you need in files and directories.*
 
@@ -79,14 +79,14 @@ nav_order: 1
 |---|---|---|
 | `grep pattern file` | Search for pattern in file | Filter log files, find config values |
 | `grep -i pattern file` | Case-insensitive search | When you're not sure of capitalisation |
-| `grep -v pattern file` | Invert — show lines that do NOT match | Exclude noise from output |
+| `grep -v pattern file` | Invert: show lines that do NOT match | Exclude noise from output |
 | `grep -r pattern .` | Recursive search | Search all files in a directory tree |
 | `find . -name '*.txt'` | Find files by name pattern | Locate files when you don't know where they are |
 | `find . -type d` | Find directories only | Browse just the directory structure |
 | `wc -l file` | Count lines | How many records in a file? |
 | `sort file` | Sort lines alphabetically | Order data for reading or for `uniq` |
-| `uniq file` | Remove adjacent duplicates | Must sort first — uniq only removes consecutive duplicates |
-| `cmd1 \| cmd2` | Pipe: send output of cmd1 to cmd2 | Chain tools together — the Unix superpower |
+| `uniq file` | Remove adjacent duplicates | Must sort first: uniq only removes consecutive duplicates |
+| `cmd1 \| cmd2` | Pipe: send output of cmd1 to cmd2 | Chain tools together: the Unix superpower |
 
 **Pipe example:**
 
@@ -94,11 +94,11 @@ nav_order: 1
 grep ERROR app.log | sort | uniq -c | sort -rn
 ```
 
-This finds ERROR lines, sorts them, counts each unique one, then sorts by frequency — showing the most common errors first.
+This finds ERROR lines, sorts them, counts each unique one, then sorts by frequency: showing the most common errors first.
 
 ---
 
-## Level 4 — Permissions & Users
+## Level 4: Permissions & Users
 
 > *Every file has an owner. Every access is controlled.*
 

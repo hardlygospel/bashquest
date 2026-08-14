@@ -22,7 +22,7 @@ nav_order: 1
 |---|---|
 | **Shell** | Bash 3.2 or higher |
 | **OS** | Linux (any distro) or macOS |
-| **Dependencies** | None — pure Bash, no external tools needed |
+| **Dependencies** | None: pure Bash, no external tools needed |
 | **Disk** | ~60 KB for the script |
 
 {: .note }

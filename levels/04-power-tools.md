@@ -16,7 +16,7 @@ nav_order: 4
 
 ---
 
-## Level 15 — xargs & find -exec
+## Level 15: xargs & find -exec
 
 > *find locates files. xargs and -exec act on them.*
 
@@ -35,10 +35,10 @@ nav_order: 4
 **xargs patterns:**
 
 ```bash
-# Basic — pass all found files to wc at once
+# Basic: pass all found files to wc at once
 find . -name '*.txt' | xargs wc -l
 
-# With placeholder (-I{}) — use filename anywhere
+# With placeholder (-I{}): use filename anywhere
 find . -name '*.conf' | xargs -I{} cp {} {}.bak
 
 # Safe for filenames with spaces
@@ -52,7 +52,7 @@ find . -name '*.png' -print0 | xargs -0 -P 4 convert -resize 50%
 
 ---
 
-## Level 16 — Disk & Storage
+## Level 16: Disk & Storage
 
 > *A full disk silently kills services. Know these commands cold.*
 
@@ -89,7 +89,7 @@ find /var/log -name '*.gz' -mtime +30 -delete
 
 ---
 
-## Level 17 — System Information
+## Level 17: System Information
 
 > *Establish situational awareness on any machine in 60 seconds.*
 
@@ -116,7 +116,7 @@ find /var/log -name '*.gz' -mtime +30 -delete
 
 ---
 
-## Level 18 — User Management
+## Level 18: User Management
 
 > *Linux security is built on users and groups.*
 
@@ -124,7 +124,7 @@ find /var/log -name '*.gz' -mtime +30 -delete
 |---|---|
 | `useradd -m username` | Create user with home directory |
 | `passwd username` | Set user password |
-| `usermod -aG group user` | Add user to group (append — never omit `-a`) |
+| `usermod -aG group user` | Add user to group (append: never omit `-a`) |
 | `usermod -L username` | Lock account (prefix `!` to password hash) |
 | `usermod -U username` | Unlock account |
 | `userdel -r username` | Delete user and home directory |
@@ -135,7 +135,7 @@ find /var/log -name '*.gz' -mtime +30 -delete
 | `visudo` | Safely edit /etc/sudoers |
 
 {: .warning }
-**Always use `usermod -aG`** (append + groups), never `usermod -G` alone. Without `-a`, the command **replaces** all group memberships — potentially locking the user out of everything they had access to.
+**Always use `usermod -aG`** (append + groups), never `usermod -G` alone. Without `-a`, the command **replaces** all group memberships: potentially locking the user out of everything they had access to.
 
 **`/etc/passwd` format:**
 
@@ -148,7 +148,7 @@ Fields: username, password placeholder, UID, GID, comment, home directory, login
 
 ---
 
-## Level 19 — SSH & Keys
+## Level 19: SSH & Keys
 
 > *Key-based auth is the industry standard. Passwords are for humans, keys are for machines.*
 
@@ -192,7 +192,7 @@ After adding this, `ssh webserver` works without typing the full details.
 
 ---
 
-## Level 20 — Environment & Shell Config
+## Level 20: Environment & Shell Config
 
 > *Your shell environment controls how everything works.*
 
