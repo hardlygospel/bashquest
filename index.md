@@ -138,6 +138,6 @@ No dependencies. No installation. Pure Bash.
 
 ## License
 
-GPL-3.0: Copyright © 2026 Tony "Hardlygospel" Hosaroygard
+Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0).
 
-Built by [github.com/hardlygospel](https://github.com/hardlygospel).
+Copyright © 2026 Tony "Hardlygospel" Hosaroygard. Built by [github.com/hardlygospel](https://github.com/hardlygospel).
