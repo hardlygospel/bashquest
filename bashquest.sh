@@ -545,9 +545,9 @@ main_menu() {
 # individual levels inside still show [LOCKED] same as before.
 level_select() {
     clear_screen; print_banner; status_bar
-    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════╗"
-    printf '%b\n' "║                    JUMP TO TOPIC                     ║"
-    printf '%b\n' "╠══════════════════════════════════════════════════════╣${NC}"
+    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════════════════════════╗"
+    printf '%b\n' "║$(printf '%*s%s%*s' 30 '' "JUMP TO TOPIC" 31 '')║"
+    printf '%b\n' "╠══════════════════════════════════════════════════════════════════════════╣${NC}"
     local entry num name icon start end n
     for entry in "${TIERS[@]}"; do
         IFS='|' read -r num name icon start end <<< "$entry"
@@ -558,7 +558,7 @@ level_select() {
             printf '%b\n' "${LCYAN}║ ${DIM}[${num}] ${icon} ${name} (levels ${start}-${end}) [LOCKED]${NC}"
         fi
     done
-    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════╝${NC}"
+    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
     printf "\n${YELLOW}Enter tier (1-${#TIERS[@]}) or 0 to go back: ${NC}"; read -r choice; require_input $?
     [ "$choice" = "0" ] && main_menu && return
     if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#TIERS[@]}" ]; then
@@ -575,9 +575,9 @@ level_select_tier() {
     IFS='|' read -r num tier_name tier_icon start end <<< "${TIERS[$((tier_num - 1))]}"
 
     clear_screen; print_banner; status_bar
-    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════╗"
-    printf '%b\n' "║ ${tier_icon} $(printf '%-51s' "${tier_name}")║"
-    printf '%b\n' "╠══════════════════════════════════════════════════════╣${NC}"
+    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════════════════════════╗"
+    printf '%b\n' "║ ${tier_icon} ${WHITE}${BOLD}${tier_name}${NC}"
+    printf '%b\n' "${LCYAN}╠══════════════════════════════════════════════════════════════════════════╣${NC}"
     local lvl_num lvl_name lvl_cmds lvl_icon n
     for entry in "${LEVELS[@]:$((start - 1)):$((end - start + 1))}"; do
         IFS='|' read -r lvl_num lvl_name lvl_cmds lvl_icon <<< "$entry"
@@ -588,7 +588,7 @@ level_select_tier() {
             printf '%b\n' "${LCYAN}║ ${DIM}[${lvl_num}] ${lvl_icon} ${lvl_name} ${lvl_cmds} [LOCKED]${NC}"
         fi
     done
-    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════╝${NC}"
+    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
     printf "\n${YELLOW}Enter level (${start}-${end}) or 0 to go back: ${NC}"; read -r choice; require_input $?
     [ "$choice" = "0" ] && level_select && return
     if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge "$start" ] && [ "$choice" -le "$end" ] && [ "$choice" -le "$PLAYER_LEVEL" ]; then
