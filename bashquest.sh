@@ -512,6 +512,55 @@ login_user() {
     printf '%b\n' "${LRED}  Too many failed attempts.${NC}"; sleep 2; startup_screen
 }
 
+# Opt-in, non-interactive entry point for embedding BashQuest behind another
+# identity system (used by the BashQuest door on late.sh: the SSH layer
+# already authenticated the player, so there's nothing left for a second
+# username/password prompt to prove). Set BASHQUEST_AUTOLOGIN to a handle and
+# the normal login/register screen is skipped entirely: an existing account
+# loads straight in, a new one is created on the spot. Unset, nothing
+# changes, this function is never called.
+autologin() {
+    local raw="$1" username
+    # The caller's handle is already validated upstream (late.sh's arcade
+    # handles are 3-20 chars, alnum + underscore, starting with a letter),
+    # but PLAYER_NAME feeds straight into save/certificate file paths below,
+    # so strip anything unsafe for a filename regardless of what arrived.
+    username=$(printf '%s' "$raw" | tr -cd 'A-Za-z0-9_')
+    username="${username:0:20}"
+    if [ -z "$username" ]; then
+        startup_screen
+        return
+    fi
+    if grep -q "^${username}:" "$USERS_FILE" 2>/dev/null; then
+        PLAYER_NAME="$username"; load_progress
+        main_menu
+        return
+    fi
+    # A literal, unhashed placeholder: hash_pw always returns a 32-char hex
+    # digest, so this can never match a real password and the account stays
+    # unreachable from the normal login screen, exactly as intended for an
+    # identity that isn't supposed to have a separate password at all.
+    echo "${username}:autologin" >> "$USERS_FILE"
+    PLAYER_NAME="$username"; PLAYER_LEVEL=1; PLAYER_XP=0; PLAYER_LIVES=3
+    PLAYER_STREAK=0; PLAYER_BEST_STREAK=0
+    TOTAL_HINTS_USED=0; TOTAL_SKIPS_USED=0; TOTAL_LIVES_LOST=0; RUN_START_TS=0
+    save_progress
+    clear_screen; print_banner
+    printf '%b\n' "\n${LGREEN}  ✓ Account created! Welcome, ${BOLD}${username}${NC}${LGREEN}!${NC}\n"
+    sleep 0.5
+    root_speech \
+        "Name's Tony Hosaroygard. Round here they call me Tasmania." \
+        "Twenty-five years of IT, every role you can name. I've seen every" \
+        "3am page, every rm -rf typo, every 'it works on my machine.'" \
+        "You're new here, and that's fine, everyone starts at uid 1000." \
+        "By the time we're done you won't just know commands, you'll be able to" \
+        "run storage, networking, a SAN, a boot process gone wrong, and still" \
+        "have the taste to rice your own desktop after hours. Let's begin, ${username}." \
+        "(github.com/hardlygospel, if you ever want to see what I actually build.)"
+    press_enter
+    main_menu
+}
+
 # ---- MENUS ----
 
 main_menu() {
@@ -3505,4 +3554,8 @@ trap 'cleanup_game_env' EXIT
 trap 'printf '%b\n' "\n${YELLOW}Use option [5] Logout or [3] Quit to exit cleanly.${NC}"' INT
 
 boot_sequence
-startup_screen
+if [ -n "${BASHQUEST_AUTOLOGIN:-}" ]; then
+    autologin "$BASHQUEST_AUTOLOGIN"
+else
+    startup_screen
+fi
