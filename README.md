@@ -3,7 +3,7 @@
 # BashQuest 🐧
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blueviolet?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS-brightgreen?style=flat-square&logo=linux)](https://github.com/hardlygospel/bashquest)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-brightgreen?style=flat-square&logo=linux)](https://github.com/hardlygospel/bashquest)
 [![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)](https://github.com/hardlygospel/bashquest)
 [![Levels](https://img.shields.io/badge/Levels-61-blue?style=flat-square)](https://hardlygospel.github.io/bashquest/levels/)
 [![Docs](https://img.shields.io/badge/docs-hardlygospel.github.io%2Fbashquest-9cf?style=flat-square)](https://hardlygospel.github.io/bashquest/)
@@ -168,7 +168,7 @@ It's flavor, not a mechanic: nothing Tasmania says changes your score. But it's 
 - Single self-contained Bash script, no external dependencies
 - Targets bash 3.2+ for macOS compatibility out of the box
 - Runs entirely in a disposable sandbox, never touches real files, users, or network config
-- Works identically on Linux and macOS
+- Works identically on Linux, macOS, and Windows (via WSL or Git Bash)
 
 ---
 
@@ -294,6 +294,7 @@ No dependencies. No installation. Pure Bash.
 - Bash 3.2 or newer (the macOS default, no upgrade needed)
 - A terminal that supports ANSI colour and emoji
 - Nothing else. No `sudo`, no packages to install, no config to write
+- On Windows: a Bash shell to run it in, since Windows doesn't ship one natively. [WSL](https://learn.microsoft.com/windows/wsl/install) (`wsl --install`) or [Git Bash](https://git-scm.com/downloads/win) both work; everything below is identical once you're inside either one
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Installation"
-description: "System requirements and how to download and run BashQuest on Linux or macOS."
+description: "System requirements and how to download and run BashQuest on Linux, macOS, or Windows."
 ---
 
 ## Requirements
@@ -8,13 +8,31 @@ description: "System requirements and how to download and run BashQuest on Linux
 | Requirement | Detail |
 |---|---|
 | **Shell** | Bash 3.2 or higher |
-| **OS** | Linux (any distro) or macOS |
+| **OS** | Linux (any distro), macOS, or Windows (via WSL or Git Bash) |
 | **Dependencies** | None: pure Bash, no external tools needed |
 | **Disk** | ~60 KB for the script |
 
 :::note
 macOS ships Bash 3.2 by default (due to GPL licensing). BashQuest is fully compatible with 3.2+. If you have Bash 5 via Homebrew, it works there too.
 :::
+
+---
+
+## Windows
+
+BashQuest is pure Bash, so it needs a Bash shell to run in, Windows doesn't ship one natively. Two good options:
+
+**WSL (recommended)** — a real Linux environment inside Windows, so everything just works exactly as it does on Linux:
+
+```powershell
+wsl --install
+```
+
+Reboot if prompted, open the "Ubuntu" app from your Start menu, then follow the [one-liner install](#one-liner-install) below inside it.
+
+**Git Bash** — lighter weight, no reboot needed. Install [Git for Windows](https://git-scm.com/downloads/win) (BashQuest doesn't need Git itself, just the Bash environment it ships with), then open "Git Bash" from the Start menu and follow the same steps below.
+
+Either way, once you're inside a Bash prompt, the rest of this page is identical.
 
 ---
 
