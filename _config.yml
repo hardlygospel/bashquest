@@ -1,5 +1,5 @@
 title: BashQuest
-description: Interactive terminal game teaching Linux and Bash: 61 levels from ls to kernel builds and desktop ricing
+description: "Interactive terminal game teaching Linux and Bash: 61 levels from ls to kernel builds and desktop ricing"
 remote_theme: just-the-docs/just-the-docs
 
 color_scheme: dark
