@@ -6,7 +6,7 @@ permalink: /
 
 ![BashQuest — Master the Shell](assets/banner.png)
 
-# BashQuest 🐧
+# BashQuest 🐧 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/40px-Tux.svg.png" alt="Tux" height="40" align="right"/>
 {: .no_toc }
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blueviolet?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
