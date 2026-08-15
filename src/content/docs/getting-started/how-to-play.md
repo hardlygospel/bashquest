@@ -135,6 +135,8 @@ The hint-free, skip-free, and lives-untouched badges track your whole run: they 
 
 Clear all 61 levels and you get a graduation ceremony: a certificate with your name, final XP, best streak, and badge count, plus a closing speech from Tasmania. A copy of the certificate is written to `~/.bashquest/<your-name>.certificate.txt` so it's yours to keep.
 
+Right after that, BashQuest detects your actual OS (Arch, Ubuntu/Debian, Fedora/RHEL, openSUSE, or macOS) and prints the real package-manager command to start ricing your own desktop for real: a window manager, compositor, launcher, and bar, not the simulated one from Level 61. If it can't identify your distro, it shows the command for the three most common ones instead.
+
 ---
 
 ## Tips

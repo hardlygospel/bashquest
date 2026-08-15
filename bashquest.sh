@@ -3430,6 +3430,64 @@ run_level_61() {
     graduation_ceremony
 }
 
+# Detects the real host (via /etc/os-release, or Darwin for macOS) and
+# prints the actual package-manager command to start ricing for real:
+# no more simulation, the graduate's own machine. Falls back to a short
+# multi-distro list when detection can't pin down a specific package
+# manager (unknown distro, no /etc/os-release, etc.).
+ricing_pathway() {
+    local distro="" os_name
+    os_name=$(uname -s 2>/dev/null || echo "")
+    if [ "$os_name" = "Darwin" ]; then
+        distro="macos"
+    elif [ -f /etc/os-release ]; then
+        distro=$(. /etc/os-release 2>/dev/null && echo "$ID")
+    fi
+
+    printf '%b\n' "\n${LMAGENTA}╔═══════════════════════════════════════════════════════════════════════╗"
+    printf '║%b%-75s%b║\n' "${WHITE}${BOLD}" "  🎨  START RICING FOR REAL" "${NC}${LMAGENTA}"
+    printf '║%75s║\n' ""
+    printf '║%b%-75s%b║\n' "${WHITE}" "  You just learned the theory. Here's the actual install command" "${LMAGENTA}"
+    printf '║%b%-75s%b║\n' "${WHITE}" "  for your own machine: window manager, compositor, launcher, bar." "${LMAGENTA}"
+    printf '║%75s║\n' ""
+
+    case "$distro" in
+        arch|manjaro|endeavouros|garuda)
+            printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  Arch detected:" "${NC}${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  sudo pacman -S i3-wm picom rofi polybar alacritty stow" "${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${DIM}" "  AwesomeWM and extras live in the AUR: yay -S awesome" "${LMAGENTA}"
+            ;;
+        ubuntu|debian|pop|linuxmint|elementary|zorin)
+            printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  Ubuntu/Debian detected:" "${NC}${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  sudo apt install i3 picom rofi polybar alacritty stow awesome" "${LMAGENTA}"
+            ;;
+        fedora|rhel|centos|rocky|almalinux)
+            printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  Fedora/RHEL detected:" "${NC}${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  sudo dnf install i3 picom rofi polybar alacritty stow awesome" "${LMAGENTA}"
+            ;;
+        opensuse*|sles)
+            printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  openSUSE detected:" "${NC}${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  sudo zypper install i3 picom rofi polybar alacritty stow awesome" "${LMAGENTA}"
+            ;;
+        macos)
+            printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  macOS detected (no X11/Wayland WM here, use the native stack):" "${NC}${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  brew install koekeishiya/formulae/yabai koekeishiya/formulae/skhd" "${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${DIM}" "  yabai tiles windows, skhd handles keybinds, sketchybar for a bar" "${LMAGENTA}"
+            ;;
+        *)
+            printf '║%b%-75s%b║\n' "${WHITE}" "  Pick your distro:" "${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  Arch:    sudo pacman -S i3-wm picom rofi polybar alacritty stow" "${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  Ubuntu:  sudo apt install i3 picom rofi polybar alacritty stow" "${LMAGENTA}"
+            printf '║%b%-75s%b║\n' "${YELLOW}" "  Fedora:  sudo dnf install i3 picom rofi polybar alacritty stow" "${LMAGENTA}"
+            ;;
+    esac
+
+    printf '║%75s║\n' ""
+    printf '║%b%-75s%b║\n' "${DIM}" "  Then: git init --bare \$HOME/.dotfiles, and start committing configs." "${LMAGENTA}"
+    printf '║%b%-75s%b║\n' "${DIM}" "  Inspiration: reddit.com/r/unixporn" "${LMAGENTA}"
+    printf '%b\n' "╚═══════════════════════════════════════════════════════════════════════╝${NC}"
+}
+
 # The final beat of the game. Not just a banner: a certificate written to
 # disk the player can actually keep, plus a closing speech that says the
 # quiet part out loud: this was never a game, it was onboarding.
@@ -3515,6 +3573,8 @@ graduation_ceremony() {
         "A copy of this is saved at ${cert_file}." \
         "I'm Tony Hosaroygard, github.com/hardlygospel, and this is everything I know." \
         "Go build something, ${PLAYER_NAME}."
+
+    ricing_pathway
 
     PLAYER_LEVEL=$((TOTAL_LEVELS + 1)); save_progress
     press_enter; main_menu
