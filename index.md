@@ -4,6 +4,8 @@ nav_order: 1
 permalink: /
 ---
 
+![BashQuest — Master the Shell](assets/banner.png)
+
 # BashQuest 🐧
 {: .no_toc }
 
