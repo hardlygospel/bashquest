@@ -1,19 +1,6 @@
 ---
 title: "Levels 29–34: Storage & Filesystems"
-parent: Levels
-nav_order: 6
----
-
-# Levels 29–34: Storage & Filesystems
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "Disks & partition tables, partitioning, filesystems, mounting & fstab, LVM volumes, resize & snapshots."
 ---
 
 ## Level 29: Disks & Partition Tables
@@ -42,8 +29,9 @@ nav_order: 6
 | `partprobe /dev/sdb` | Force the kernel to reread the partition table | No reboot needed after repartitioning |
 | `parted /dev/sdb rm 1` | Delete a partition by number | Destructive, double-check the number |
 
-{: .warning }
-Nothing fdisk does is committed until `w`. `q` discards every change and exits safely.
+<Warning>
+  Nothing fdisk does is committed until `w`. `q` discards every change and exits safely.
+</Warning>
 
 ---
 
@@ -101,5 +89,6 @@ lvcreate -L 2G -s -n data_snap /dev/data_vg/data_lv   # snapshot before a risky 
 lvremove /dev/data_vg/data_snap        # clean up when it's no longer needed
 ```
 
-{: .tip }
-A snapshot is a rollback point, not a backup. Take one before anything risky, and remove it once you've confirmed the change worked.
+<Tip>
+  A snapshot is a rollback point, not a backup. Take one before anything risky, and remove it once you've confirmed the change worked.
+</Tip>

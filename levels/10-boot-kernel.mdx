@@ -1,19 +1,6 @@
 ---
 title: "Levels 50–54: Boot Process & Kernel"
-parent: Levels
-nav_order: 10
----
-
-# Levels 50–54: Boot Process & Kernel
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "Boot process, GRUB2, alternative boot managers, kernel panics and recovery, building a kernel."
 ---
 
 ## Level 50: Boot Process Overview
@@ -38,8 +25,9 @@ nav_order: 10
 | `ls` (at a `grub rescue>` prompt) | List partitions GRUB can see |
 | `e` (at the GRUB menu) | Edit a boot entry's kernel parameters for one boot |
 
-{: .warning }
-Always edit `/etc/default/grub`, never `grub.cfg` directly. `update-grub` regenerates the real config from it.
+<Warning>
+  Always edit `/etc/default/grub`, never `grub.cfg` directly. `update-grub` regenerates the real config from it.
+</Warning>
 
 ---
 
@@ -68,8 +56,9 @@ Always edit `/etc/default/grub`, never `grub.cfg` directly. `update-grub` regene
 | `update-initramfs -u` (Debian) / `dracut -f` (RHEL) | Rebuild the initramfs after a driver fix |
 | `touch /forcefsck` | Force a filesystem check on the next boot |
 
-{: .tip }
-The current boot's logs won't show a crash, it happened on the boot before. `journalctl -b -1` is the single most useful command after an unexpected reboot.
+<Tip>
+  The current boot's logs won't show a crash, it happened on the boot before. `journalctl -b -1` is the single most useful command after an unexpected reboot.
+</Tip>
 
 ---
 

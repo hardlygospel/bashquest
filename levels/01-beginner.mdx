@@ -1,19 +1,6 @@
 ---
 title: "Levels 1–4: Beginner"
-parent: Levels
-nav_order: 1
----
-
-# Levels 1–4: Beginner
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "Navigation & Basics, File Operations, Text & Search, Permissions & Users."
 ---
 
 ## Level 1: Navigation & Basics
@@ -66,8 +53,9 @@ nav_order: 1
 | `J` | xz compression |
 | `f` | Next argument is the filename |
 
-{: .warning }
-`rm` is permanent. Linux has no recycle bin. Double-check before running `rm -rf`.
+<Warning>
+  `rm` is permanent. Linux has no recycle bin. Double-check before running `rm -rf`.
+</Warning>
 
 ---
 
@@ -137,5 +125,6 @@ This finds ERROR lines, sorts them, counts each unique one, then sorts by freque
 | `4` | r-- (4) |
 | `0` | --- (none) |
 
-{: .tip }
-Private SSH keys must be `chmod 600`. SSH will refuse to use a key that's group- or world-readable.
+<Tip>
+  Private SSH keys must be `chmod 600`. SSH will refuse to use a key that's group- or world-readable.
+</Tip>

@@ -1,19 +1,6 @@
 ---
 title: "Levels 9–14: Pipes & Patterns"
-parent: Levels
-nav_order: 3
----
-
-# Levels 9–14: Pipes & Patterns
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "Advanced Piping, I/O Redirection, Regular Expressions, Advanced grep/sed/awk."
 ---
 
 ## Level 9: Advanced Piping
@@ -127,8 +114,9 @@ grep -E 'error|warning|fatal'  # Any of three words
 grep -v '^#' config.conf       # Non-comment lines
 ```
 
-{: .note }
-Basic regex (BRE) requires `\+` `\|` `\(`. Extended regex (ERE, enabled with `-E` or `egrep`) uses `+` `|` `(` without backslashes. Always prefer `-E` for readability.
+<Note>
+  Basic regex (BRE) requires `\+` `\|` `\(`. Extended regex (ERE, enabled with `-E` or `egrep`) uses `+` `|` `(` without backslashes. Always prefer `-E` for readability.
+</Note>
 
 ---
 
@@ -206,8 +194,9 @@ sed -i.bak 's/foo/bar/g' file.txt
 sed -i '' 's/foo/bar/g' file.txt
 ```
 
-{: .mac }
-macOS ships BSD sed. The `-i` flag behaves differently: it requires an extension argument. Use `-i.bak` for a backup (works on both platforms) or `-i ''` for no backup on macOS only.
+<Info>
+  macOS ships BSD sed. The `-i` flag behaves differently: it requires an extension argument. Use `-i.bak` for a backup (works on both platforms) or `-i ''` for no backup on macOS only.
+</Info>
 
 ---
 

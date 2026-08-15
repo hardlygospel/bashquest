@@ -1,19 +1,6 @@
 ---
 title: "Levels 15–20: Power Tools"
-parent: Levels
-nav_order: 4
----
-
-# Levels 15–20: Power Tools
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "xargs & find -exec, Disk & Storage, System Information, User Management, SSH & Keys, Environment & Shell."
 ---
 
 ## Level 15: xargs & find -exec
@@ -134,8 +121,9 @@ find /var/log -name '*.gz' -mtime +30 -delete
 | `sudo command` | Run one command as root |
 | `visudo` | Safely edit /etc/sudoers |
 
-{: .warning }
-**Always use `usermod -aG`** (append + groups), never `usermod -G` alone. Without `-a`, the command **replaces** all group memberships: potentially locking the user out of everything they had access to.
+<Warning>
+  **Always use `usermod -aG`** (append + groups), never `usermod -G` alone. Without `-a`, the command **replaces** all group memberships: potentially locking the user out of everything they had access to.
+</Warning>
 
 **`/etc/passwd` format:**
 
@@ -217,8 +205,9 @@ After adding this, `ssh webserver` works without typing the full details.
 | `/etc/environment` | System-wide variables (Debian/Ubuntu) |
 | `/etc/profile` | System-wide login shell config |
 
-{: .tip }
-Put `source ~/.bashrc` inside `~/.bash_profile` to ensure your aliases and functions are always loaded, whether you're in a login shell or not.
+<Tip>
+  Put `source ~/.bashrc` inside `~/.bash_profile` to ensure your aliases and functions are always loaded, whether you're in a login shell or not.
+</Tip>
 
 **Useful PS1 escape sequences:**
 

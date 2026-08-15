@@ -1,19 +1,6 @@
 ---
 title: "Levels 35–39: File Editing & Sharing"
-parent: Levels
-nav_order: 7
----
-
-# Levels 35–39: File Editing & Sharing
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "Vim essentials, ACLs, Samba, NFS, and rsync backups."
 ---
 
 ## Level 35: Vim Essentials
@@ -87,5 +74,6 @@ rsync -avzn home/ /mnt/backup/                   # dry run, preview only
 rsync -avz --progress home/ /mnt/backup/         # live progress on a large transfer
 ```
 
-{: .warning }
-Always dry-run (`-n` or `--dry-run`) a sync that uses `--delete` before trusting it against anything that matters.
+<Warning>
+  Always dry-run (`-n` or `--dry-run`) a sync that uses `--delete` before trusting it against anything that matters.
+</Warning>

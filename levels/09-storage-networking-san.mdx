@@ -1,19 +1,6 @@
 ---
 title: "Levels 46–49: Storage Networking & SAN"
-parent: Levels
-nav_order: 9
----
-
-# Levels 46–49: Storage Networking & SAN
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "iSCSI initiators and targets, NFS/SMB at scale, multipath, and Fibre Channel."
 ---
 
 ## Level 46: iSCSI Initiators & Targets
@@ -55,8 +42,9 @@ nav_order: 9
 | `systemctl restart multipathd` | Restart the multipath daemon |
 | `multipath -f mpatha` | Flush one named device map |
 
-{: .tip }
-A WWN (World Wide Name) is burned into the storage hardware and never changes, even if Linux renames `/dev/sdb` after a reboot. SAN zoning is configured against WWNs for exactly this reason.
+<Tip>
+  A WWN (World Wide Name) is burned into the storage hardware and never changes, even if Linux renames `/dev/sdb` after a reboot. SAN zoning is configured against WWNs for exactly this reason.
+</Tip>
 
 ---
 

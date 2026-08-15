@@ -1,0 +1,64 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "BashQuest",
+  "description": "Interactive terminal game teaching Linux and Bash: 61 levels from ls to kernel builds and desktop ricing",
+  "colors": {
+    "primary": "#22C55E",
+    "light": "#4ADE80",
+    "dark": "#15803D"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "index",
+          "getting-started/overview",
+          "getting-started/installation",
+          "getting-started/how-to-play"
+        ]
+      },
+      {
+        "group": "Levels",
+        "pages": [
+          "levels/overview",
+          "levels/01-beginner",
+          "levels/02-intermediate",
+          "levels/03-pipes-and-patterns",
+          "levels/04-power-tools",
+          "levels/05-expert",
+          "levels/06-storage-filesystems",
+          "levels/07-file-editing-sharing",
+          "levels/08-networking",
+          "levels/09-storage-networking-san",
+          "levels/10-boot-kernel",
+          "levels/11-media-management",
+          "levels/12-desktop-ricing"
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": ["reference"]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/hardlygospel/bashquest"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Download",
+      "href": "https://raw.githubusercontent.com/hardlygospel/bashquest/main/bashquest.sh"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/hardlygospel/bashquest"
+    }
+  }
+}

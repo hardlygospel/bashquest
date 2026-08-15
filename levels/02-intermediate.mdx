@@ -1,19 +1,6 @@
 ---
 title: "Levels 5–8: Intermediate"
-parent: Levels
-nav_order: 2
----
-
-# Levels 5–8: Intermediate
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>Contents</summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
-
+description: "Process Management, Text Processing, Networking, Shell Scripting Basics."
 ---
 
 ## Level 5: Process Management
@@ -44,8 +31,9 @@ nav_order: 2
 | `STAT` | State: R=running, S=sleeping, Z=zombie, T=stopped |
 | `COMMAND` | The command that was run |
 
-{: .warning }
-`kill -9` cannot be caught or ignored by the process: it terminates immediately with no cleanup. Use it only when a normal `kill` has failed.
+<Warning>
+  `kill -9` cannot be caught or ignored by the process: it terminates immediately with no cleanup. Use it only when a normal `kill` has failed.
+</Warning>
 
 ---
 
@@ -144,5 +132,6 @@ echo "Hello from $NAME"
 | `-z "$var"` | Variable is empty |
 | `-n "$var"` | Variable is not empty |
 
-{: .tip }
-Always quote variables in tests: `[ -f "$FILE" ]` not `[ -f $FILE ]`. An unquoted variable with spaces breaks the test.
+<Tip>
+  Always quote variables in tests: `[ -f "$FILE" ]` not `[ -f $FILE ]`. An unquoted variable with spaces breaks the test.
+</Tip>
