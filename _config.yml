@@ -40,6 +40,7 @@ callouts:
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
+  - jekyll-include-cache
 
 # README.md has no front matter (it's the GitHub-facing landing page, kept
 # free of Jekyll/kramdown syntax so it renders cleanly on github.com).
