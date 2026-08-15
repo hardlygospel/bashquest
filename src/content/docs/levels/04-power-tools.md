@@ -121,9 +121,9 @@ find /var/log -name '*.gz' -mtime +30 -delete
 | `sudo command` | Run one command as root |
 | `visudo` | Safely edit /etc/sudoers |
 
-<Warning>
-  **Always use `usermod -aG`** (append + groups), never `usermod -G` alone. Without `-a`, the command **replaces** all group memberships: potentially locking the user out of everything they had access to.
-</Warning>
+:::caution
+**Always use `usermod -aG`** (append + groups), never `usermod -G` alone. Without `-a`, the command **replaces** all group memberships: potentially locking the user out of everything they had access to.
+:::
 
 **`/etc/passwd` format:**
 
@@ -205,9 +205,9 @@ After adding this, `ssh webserver` works without typing the full details.
 | `/etc/environment` | System-wide variables (Debian/Ubuntu) |
 | `/etc/profile` | System-wide login shell config |
 
-<Tip>
-  Put `source ~/.bashrc` inside `~/.bash_profile` to ensure your aliases and functions are always loaded, whether you're in a login shell or not.
-</Tip>
+:::tip
+Put `source ~/.bashrc` inside `~/.bash_profile` to ensure your aliases and functions are always loaded, whether you're in a login shell or not.
+:::
 
 **Useful PS1 escape sequences:**
 

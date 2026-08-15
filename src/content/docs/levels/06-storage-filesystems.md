@@ -29,9 +29,9 @@ description: "Disks & partition tables, partitioning, filesystems, mounting & fs
 | `partprobe /dev/sdb` | Force the kernel to reread the partition table | No reboot needed after repartitioning |
 | `parted /dev/sdb rm 1` | Delete a partition by number | Destructive, double-check the number |
 
-<Warning>
-  Nothing fdisk does is committed until `w`. `q` discards every change and exits safely.
-</Warning>
+:::caution
+Nothing fdisk does is committed until `w`. `q` discards every change and exits safely.
+:::
 
 ---
 
@@ -89,6 +89,6 @@ lvcreate -L 2G -s -n data_snap /dev/data_vg/data_lv   # snapshot before a risky 
 lvremove /dev/data_vg/data_snap        # clean up when it's no longer needed
 ```
 
-<Tip>
-  A snapshot is a rollback point, not a backup. Take one before anything risky, and remove it once you've confirmed the change worked.
-</Tip>
+:::tip
+A snapshot is a rollback point, not a backup. Take one before anything risky, and remove it once you've confirmed the change worked.
+:::

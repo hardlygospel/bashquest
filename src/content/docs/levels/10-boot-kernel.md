@@ -25,9 +25,9 @@ description: "Boot process, GRUB2, alternative boot managers, kernel panics and 
 | `ls` (at a `grub rescue>` prompt) | List partitions GRUB can see |
 | `e` (at the GRUB menu) | Edit a boot entry's kernel parameters for one boot |
 
-<Warning>
-  Always edit `/etc/default/grub`, never `grub.cfg` directly. `update-grub` regenerates the real config from it.
-</Warning>
+:::caution
+Always edit `/etc/default/grub`, never `grub.cfg` directly. `update-grub` regenerates the real config from it.
+:::
 
 ---
 
@@ -56,9 +56,9 @@ description: "Boot process, GRUB2, alternative boot managers, kernel panics and 
 | `update-initramfs -u` (Debian) / `dracut -f` (RHEL) | Rebuild the initramfs after a driver fix |
 | `touch /forcefsck` | Force a filesystem check on the next boot |
 
-<Tip>
-  The current boot's logs won't show a crash, it happened on the boot before. `journalctl -b -1` is the single most useful command after an unexpected reboot.
-</Tip>
+:::tip
+The current boot's logs won't show a crash, it happened on the boot before. `journalctl -b -1` is the single most useful command after an unexpected reboot.
+:::
 
 ---
 

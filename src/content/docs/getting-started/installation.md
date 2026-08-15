@@ -12,9 +12,9 @@ description: "System requirements and how to download and run BashQuest on Linux
 | **Dependencies** | None: pure Bash, no external tools needed |
 | **Disk** | ~60 KB for the script |
 
-<Note>
-  macOS ships Bash 3.2 by default (due to GPL licensing). BashQuest is fully compatible with 3.2+. If you have Bash 5 via Homebrew, it works there too.
-</Note>
+:::note
+macOS ships Bash 3.2 by default (due to GPL licensing). BashQuest is fully compatible with 3.2+. If you have Bash 5 via Homebrew, it works there too.
+:::
 
 ---
 

@@ -91,9 +91,9 @@ atrm 3        # Remove at job #3
 | `logger 'message'` | Write to system log from script |
 | `logger -t mytag 'message'` | Write with tag |
 
-<Tip>
-  Always use `grep --line-buffered` when piping from `tail -f`. Without it, grep holds output in its buffer and filtered lines may not appear immediately.
-</Tip>
+:::tip
+Always use `grep --line-buffered` when piping from `tail -f`. Without it, grep holds output in its buffer and filtered lines may not appear immediately.
+:::
 
 ---
 
@@ -203,9 +203,9 @@ tar -tzf archive.tar.gz         # list contents
 | `${var:-default}` | Use default if var is unset/empty | `${PORT:-8080}` |
 | `${var:=default}` | Assign default if unset/empty | `${DIR:=/tmp}` |
 
-<Info>
-  macOS ships Bash 3.2 which does not support `${var^^}` or `${var,,}`. Use `echo "$var" | tr 'a-z' 'A-Z'` instead.
-</Info>
+:::note
+macOS ships Bash 3.2 which does not support `${var^^}` or `${var,,}`. Use `echo "$var" | tr 'a-z' 'A-Z'` instead.
+:::
 
 **`printf` formatting:**
 
@@ -260,9 +260,9 @@ for key in "${!PORTS[@]}"; do
 done
 ```
 
-<Info>
-  macOS Bash 3.2 does not support `declare -A` (associative arrays) or negative indices. Install Bash 5 via Homebrew for full support: `brew install bash`.
-</Info>
+:::note
+macOS Bash 3.2 does not support `declare -A` (associative arrays) or negative indices. Install Bash 5 via Homebrew for full support: `brew install bash`.
+:::
 
 ---
 

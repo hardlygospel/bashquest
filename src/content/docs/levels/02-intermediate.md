@@ -31,9 +31,9 @@ description: "Process Management, Text Processing, Networking, Shell Scripting B
 | `STAT` | State: R=running, S=sleeping, Z=zombie, T=stopped |
 | `COMMAND` | The command that was run |
 
-<Warning>
-  `kill -9` cannot be caught or ignored by the process: it terminates immediately with no cleanup. Use it only when a normal `kill` has failed.
-</Warning>
+:::caution
+`kill -9` cannot be caught or ignored by the process: it terminates immediately with no cleanup. Use it only when a normal `kill` has failed.
+:::
 
 ---
 
@@ -132,6 +132,6 @@ echo "Hello from $NAME"
 | `-z "$var"` | Variable is empty |
 | `-n "$var"` | Variable is not empty |
 
-<Tip>
-  Always quote variables in tests: `[ -f "$FILE" ]` not `[ -f $FILE ]`. An unquoted variable with spaces breaks the test.
-</Tip>
+:::tip
+Always quote variables in tests: `[ -f "$FILE" ]` not `[ -f $FILE ]`. An unquoted variable with spaces breaks the test.
+:::

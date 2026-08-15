@@ -42,9 +42,9 @@ description: "iSCSI initiators and targets, NFS/SMB at scale, multipath, and Fib
 | `systemctl restart multipathd` | Restart the multipath daemon |
 | `multipath -f mpatha` | Flush one named device map |
 
-<Tip>
-  A WWN (World Wide Name) is burned into the storage hardware and never changes, even if Linux renames `/dev/sdb` after a reboot. SAN zoning is configured against WWNs for exactly this reason.
-</Tip>
+:::tip
+A WWN (World Wide Name) is burned into the storage hardware and never changes, even if Linux renames `/dev/sdb` after a reboot. SAN zoning is configured against WWNs for exactly this reason.
+:::
 
 ---
 

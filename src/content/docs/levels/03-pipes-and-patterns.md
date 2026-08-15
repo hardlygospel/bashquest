@@ -114,9 +114,9 @@ grep -E 'error|warning|fatal'  # Any of three words
 grep -v '^#' config.conf       # Non-comment lines
 ```
 
-<Note>
-  Basic regex (BRE) requires `\+` `\|` `\(`. Extended regex (ERE, enabled with `-E` or `egrep`) uses `+` `|` `(` without backslashes. Always prefer `-E` for readability.
-</Note>
+:::note
+Basic regex (BRE) requires `\+` `\|` `\(`. Extended regex (ERE, enabled with `-E` or `egrep`) uses `+` `|` `(` without backslashes. Always prefer `-E` for readability.
+:::
 
 ---
 
@@ -194,9 +194,9 @@ sed -i.bak 's/foo/bar/g' file.txt
 sed -i '' 's/foo/bar/g' file.txt
 ```
 
-<Info>
-  macOS ships BSD sed. The `-i` flag behaves differently: it requires an extension argument. Use `-i.bak` for a backup (works on both platforms) or `-i ''` for no backup on macOS only.
-</Info>
+:::note
+macOS ships BSD sed. The `-i` flag behaves differently: it requires an extension argument. Use `-i.bak` for a backup (works on both platforms) or `-i ''` for no backup on macOS only.
+:::
 
 ---
 

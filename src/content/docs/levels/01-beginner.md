@@ -53,9 +53,9 @@ description: "Navigation & Basics, File Operations, Text & Search, Permissions &
 | `J` | xz compression |
 | `f` | Next argument is the filename |
 
-<Warning>
-  `rm` is permanent. Linux has no recycle bin. Double-check before running `rm -rf`.
-</Warning>
+:::caution
+`rm` is permanent. Linux has no recycle bin. Double-check before running `rm -rf`.
+:::
 
 ---
 
@@ -125,6 +125,6 @@ This finds ERROR lines, sorts them, counts each unique one, then sorts by freque
 | `4` | r-- (4) |
 | `0` | --- (none) |
 
-<Tip>
-  Private SSH keys must be `chmod 600`. SSH will refuse to use a key that's group- or world-readable.
-</Tip>
+:::tip
+Private SSH keys must be `chmod 600`. SSH will refuse to use a key that's group- or world-readable.
+:::

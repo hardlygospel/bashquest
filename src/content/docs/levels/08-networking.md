@@ -37,9 +37,9 @@ description: "IP addressing, routing, DNS, firewalls, VLANs, bonding, and troubl
 | `cat /etc/resolv.conf` | Show configured DNS resolvers |
 | `dig -x 8.8.8.8` | Reverse lookup, IP to hostname |
 
-<Tip>
-  Half of "the network is down" tickets are actually DNS. `dig` bypasses any browser or OS cache.
-</Tip>
+:::tip
+Half of "the network is down" tickets are actually DNS. `dig` bypasses any browser or OS cache.
+:::
 
 ---
 
@@ -53,9 +53,9 @@ description: "IP addressing, routing, DNS, firewalls, VLANs, bonding, and troubl
 | `ufw allow 22` | Allow a port, the simple way |
 | `ufw enable` | Turn the firewall on |
 
-<Warning>
-  Confirm your SSH rule is in place **before** enabling a firewall on a remote box, or you can lock yourself out instantly.
-</Warning>
+:::caution
+Confirm your SSH rule is in place **before** enabling a firewall on a remote box, or you can lock yourself out instantly.
+:::
 
 ---
 
@@ -83,6 +83,6 @@ A trunk port carries multiple tagged VLANs over one physical link; an access por
 | `ip link add bond0 type bond mode active-backup` | Create a bonded interface |
 | `ip -s link show eth0` | Interface statistics: errors, drops |
 
-<Tip>
-  Rising error or drop counts on an "up" interface usually mean a bad cable, a duplex mismatch, or a failing NIC.
-</Tip>
+:::tip
+Rising error or drop counts on an "up" interface usually mean a bad cable, a duplex mismatch, or a failing NIC.
+:::

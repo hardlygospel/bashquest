@@ -39,6 +39,6 @@ description: "ffmpeg basics, media library organization, and home media server c
 | `df -h /mnt/media` | Confirm free space before a big import |
 | `iotop` | Watch live disk I/O per process during heavy transcoding |
 
-<Tip>
-  `top` and `htop` show CPU and memory well, but a transcode job that's disk-bound rather than CPU-bound only shows up clearly in `iotop`.
-</Tip>
+:::tip
+`top` and `htop` show CPU and memory well, but a transcode job that's disk-bound rather than CPU-bound only shows up clearly in `iotop`.
+:::

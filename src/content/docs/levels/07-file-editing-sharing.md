@@ -74,6 +74,6 @@ rsync -avzn home/ /mnt/backup/                   # dry run, preview only
 rsync -avz --progress home/ /mnt/backup/         # live progress on a large transfer
 ```
 
-<Warning>
-  Always dry-run (`-n` or `--dry-run`) a sync that uses `--delete` before trusting it against anything that matters.
-</Warning>
+:::caution
+Always dry-run (`-n` or `--dry-run`) a sync that uses `--delete` before trusting it against anything that matters.
+:::

@@ -61,10 +61,10 @@ gsettings set org.gnome.desktop.interface gtk-theme "Nordic"
 feh --bg-fill ~/Pictures/wallpaper.jpg
 ```
 
-<Tip>
-  Bare-repo dotfiles need no symlinks and no separate checked-out folder, git just tracks files that are already exactly where they need to be. Stow is the alternative: real files live in a package folder, stow symlinks them into place.
-</Tip>
+:::tip
+Bare-repo dotfiles need no symlinks and no separate checked-out folder, git just tracks files that are already exactly where they need to be. Stow is the alternative: real files live in a package folder, stow symlinks them into place.
+:::
 
 ---
 
-Finish this level and you graduate: a certificate with your name, final stats, and badges, written to `~/.bashquest/<name>.certificate.txt`, plus a closing word from Tasmania. See [how to play](/getting-started/how-to-play#graduation) for what that looks like.
+Finish this level and you graduate: a certificate with your name, final stats, and badges, written to `~/.bashquest/<name>.certificate.txt`, plus a closing word from Tasmania. See [how to play](/bashquest/getting-started/how-to-play/#graduation) for what that looks like.

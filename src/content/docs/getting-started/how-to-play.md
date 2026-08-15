@@ -108,7 +108,7 @@ The leaderboard ranks all player accounts on the machine by total XP. Access it 
 
 ## Tiers & Milestones
 
-The 61 levels are grouped into twelve tiers. Finish the last level of a tier and you get a milestone screen instead of the usual level-complete screen, showing your progress and a preview of what's next. See [levels](/levels/overview) for the full breakdown.
+The 61 levels are grouped into twelve tiers. Finish the last level of a tier and you get a milestone screen instead of the usual level-complete screen, showing your progress and a preview of what's next. See [levels](/bashquest/levels/) for the full breakdown.
 
 From the main menu, **Level Select** (option 2) now opens a topic-jump menu: pick a tier first, then a level within it, rather than scrolling one long flat list.
 
@@ -139,14 +139,14 @@ Clear all 61 levels and you get a graduation ceremony: a certificate with your n
 
 ## Tips
 
-<Tip>
-  Always read the challenge description carefully: it explains **why** the command exists, not just what to type. That context is the actual learning.
-</Tip>
+:::tip
+Always read the challenge description carefully: it explains **why** the command exists, not just what to type. That context is the actual learning.
+:::
 
-<Tip>
-  If you're stuck, use `hint` before `skip`. Hints are free. Skips cost a life.
-</Tip>
+:::tip
+If you're stuck, use `hint` before `skip`. Hints are free. Skips cost a life.
+:::
 
-<Note>
-  The game validates command **syntax and intent**, not exact strings. `ls -la` and `ls -al` are both accepted where either is correct.
-</Note>
+:::note
+The game validates command **syntax and intent**, not exact strings. `ls -la` and `ls -al` are both accepted where either is correct.
+:::
