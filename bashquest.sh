@@ -33,9 +33,119 @@ BG_BLUE=$(printf '\033[44m');  BG_MAGENTA=$(printf '\033[45m')
 BG_YELLOW=$(printf '\033[43m');BG_CYAN=$(printf '\033[46m')
 NC=$(printf '\033[0m')
 
+# Everything this script creates (the save dir, users.db, saves,
+# certificates, the registration lock) is per-player and sensitive (a
+# password hash at minimum); default to owner-only so a shared umask on the
+# host never leaves any of it group/world readable or writable.
+umask 077
+
 SAVE_DIR="$HOME/.bashquest"
 USERS_FILE="$SAVE_DIR/users.db"
+LOCK_DIR="$SAVE_DIR/.register.lock"
 mkdir -p "$SAVE_DIR"
+chmod 700 "$SAVE_DIR" 2>/dev/null
+[ -f "$USERS_FILE" ] && chmod 600 "$USERS_FILE" 2>/dev/null
+
+# A username must start with a letter/digit/underscore and may otherwise
+# contain letters, digits, underscore, dot, or dash. This is deliberately
+# strict: it is what makes usernames safe to (a) drop into a filename
+# (`$SAVE_DIR/$name.save`) with no path-traversal risk - the leading
+# character can never be a dot, so a name can never start with `.` or `..`,
+# and `/` is never a legal character at all; (b) drop into a `grep`
+# pattern - covered defense-in-depth by using `grep -F` everywhere a
+# username is matched, so even a literal `.` or `-` can never be
+# interpreted as a regex metacharacter; and (c) interpolate into `printf
+# '%b'` output - none of backslash or any control character is in the
+# allowed set, so a username can never forge a terminal escape sequence.
+# `:` is deliberately excluded too, so a username can never be confused
+# with the field separator in `users.db`.
+USERNAME_RE='^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
+USERNAME_MAX_LEN=24
+
+valid_username() {
+    local u="$1"
+    [ -n "$u" ] && [ "${#u}" -le "$USERNAME_MAX_LEN" ] && [[ "$u" =~ $USERNAME_RE ]]
+}
+
+# Whether `users.db` already has an entry for this username. `grep -F`
+# (fixed string, no regex interpretation at all) plus an explicit trailing
+# `:` keeps this an exact field match even though `valid_username` already
+# guarantees the name itself can't contain regex metacharacters or a `:` -
+# belt and suspenders, and it's the only form that stays correct if this
+# function is ever reused before that validation runs.
+user_exists() {
+    grep -Fq "$1:" "$USERS_FILE" 2>/dev/null
+}
+
+# Look up the stored hash for a username via awk field-splitting on `:`
+# rather than a `grep` pattern; `$user` still can't contain `:` (excluded
+# from `USERNAME_RE`), but this is the form that stays correct even for a
+# username containing regex-active characters like `.`, and it can't be
+# fooled by a `users.db` line whose *password field* happens to contain the
+# looked-up name as a substring the way a plain `grep` could be.
+stored_hash_for() {
+    awk -F: -v u="$1" '$1 == u { print $2; found=1 } END { if (!found) exit 1 }' "$USERS_FILE" 2>/dev/null
+}
+
+# Portable, atomic advisory lock: `mkdir` either succeeds or fails
+# atomically on every filesystem this script needs to run on, unlike
+# `test -f`/`touch` (which race) or `flock` (not present on macOS, and not
+# guaranteed on every minimal Linux image this could run in either).
+# Registration never blocks on user input while holding this - see
+# register_user - so a long wait here always means real contention, not a
+# slow typist; a lock older than 10s almost certainly means whatever held
+# it died without releasing it, so it's broken rather than left to wedge
+# every future registration forever.
+acquire_lock() {
+    local tries=0 age mtime
+    while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+        mtime=$(stat -f %m "$LOCK_DIR" 2>/dev/null || stat -c %Y "$LOCK_DIR" 2>/dev/null || echo 0)
+        age=$(( $(date +%s) - mtime ))
+        if [ "$age" -gt 10 ]; then
+            rmdir "$LOCK_DIR" 2>/dev/null
+            continue
+        fi
+        tries=$((tries + 1))
+        [ "$tries" -ge 50 ] && return 1
+        sleep 0.1
+    done
+    return 0
+}
+
+release_lock() {
+    rmdir "$LOCK_DIR" 2>/dev/null
+}
+
+# A short-lived claim on a username, held between "this name looked free"
+# and "the account actually exists in users.db" - the exact TOCTOU window
+# registration would otherwise leave open. Deliberately a separate
+# directory of empty marker files rather than a placeholder row in
+# users.db, so a player who closes the connection mid-registration can
+# never leave a half-registered row behind for someone else to trip over;
+# the marker just expires.
+CLAIMS_DIR="$SAVE_DIR/.claims"
+
+# Must be called with the registration lock held. Returns failure if the
+# username is already a real account or already claimed by another
+# in-flight registration.
+claim_username() {
+    local u="$1" now f mtime age
+    mkdir -p "$CLAIMS_DIR" 2>/dev/null
+    now=$(date +%s)
+    for f in "$CLAIMS_DIR"/*; do
+        [ -e "$f" ] || continue
+        mtime=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null || echo 0)
+        age=$(( now - mtime ))
+        [ "$age" -gt 120 ] && rm -f "$f" 2>/dev/null
+    done
+    user_exists "$u" && return 1
+    [ -e "$CLAIMS_DIR/$u" ] && return 1
+    : > "$CLAIMS_DIR/$u"
+}
+
+release_claim() {
+    rm -f "$CLAIMS_DIR/$1" 2>/dev/null
+}
 
 # The whole curriculum in one place. Every "28" that used to be hardcoded
 # throughout the file reads from TOTAL_LEVELS now, so growing the game means
@@ -337,7 +447,7 @@ status_bar() {
 
 press_enter() {
     printf '%b\n' "\n${DIM}Press ${YELLOW}[ENTER]${NC}${DIM} to continue...${NC}"
-    read -r
+    read -r -n 32
 }
 
 # Every menu loop below calls this right after its `read`. A closed stdin
@@ -432,21 +542,113 @@ game_over() {
 
 # ---- SAVE / LOAD ----
 
+# Write-then-rename: never truncate the live save file in place. `mv` onto
+# an existing destination replaces that directory entry outright (a
+# `rename(2)`) rather than opening and writing through it, so this is both
+# atomic (a concurrent reader - the leaderboard, another session's load -
+# only ever sees the old complete file or the new complete file, never a
+# half-written one) and symlink-safe (if something had swapped the save
+# path for a symlink, this replaces the symlink itself instead of
+# following it out to whatever it pointed at).
 save_progress() {
+    local f="$SAVE_DIR/${PLAYER_NAME}.save" tmp
+    tmp=$(mktemp "${SAVE_DIR}/.tmp.XXXXXX" 2>/dev/null) || tmp="${f}.tmp.$$"
     printf 'PLAYER_LEVEL=%s\nPLAYER_XP=%s\nPLAYER_LIVES=%s\nPLAYER_BEST_STREAK=%s\nTOTAL_HINTS_USED=%s\nTOTAL_SKIPS_USED=%s\nTOTAL_LIVES_LOST=%s\nRUN_START_TS=%s\n' \
         "$PLAYER_LEVEL" "$PLAYER_XP" "$PLAYER_LIVES" "$PLAYER_BEST_STREAK" \
         "$TOTAL_HINTS_USED" "$TOTAL_SKIPS_USED" "$TOTAL_LIVES_LOST" "$RUN_START_TS" \
-        > "$SAVE_DIR/${PLAYER_NAME}.save"
+        > "$tmp" && mv -f "$tmp" "$f"
+}
+
+# The fixed set of keys `save_progress` ever writes. Only these keys, and
+# only when the value is a bare non-negative integer, are ever assigned -
+# anything else on a line (an unknown key, a non-numeric value, shell
+# metacharacters) is silently skipped rather than executed. This is what
+# replaced a bare `source "$f"`: sourcing ran the save file as shell code,
+# so a save at a filename-controlled path that another process or session
+# could place or overwrite meant loading a save could run arbitrary
+# commands as whoever runs this script.
+load_progress_safe() {
+    local f="$1" key value
+    while IFS='=' read -r key value; do
+        case "$key" in
+            PLAYER_LEVEL | PLAYER_XP | PLAYER_LIVES | PLAYER_BEST_STREAK | \
+            TOTAL_HINTS_USED | TOTAL_SKIPS_USED | TOTAL_LIVES_LOST | RUN_START_TS)
+                [[ "$value" =~ ^[0-9]+$ ]] && printf -v "$key" '%s' "$value"
+                ;;
+        esac
+    done < "$f"
 }
 
 load_progress() {
     local f="$SAVE_DIR/${PLAYER_NAME}.save"
-    [ -f "$f" ] && source "$f"
+    if [ -L "$f" ]; then
+        # A save path should only ever be a regular file this script wrote
+        # itself. A symlink here means something else placed or swapped it -
+        # never read through it (that used to be the arbitrary-code-exec
+        # vector via `source`, and even with the safe parser above, reading
+        # a stranger's symlink target still isn't this player's own data).
+        printf '%b\n' "${RED}  Warning: this account's save looks tampered with. Starting this session fresh.${NC}"
+        return 1
+    fi
+    [ -f "$f" ] && load_progress_safe "$f"
 }
 
 # ---- AUTH ----
 
-hash_pw() { printf '%s' "$1" | md5 2>/dev/null || printf '%s' "$1" | md5sum | cut -d' ' -f1; }
+# Salted SHA-512 crypt (`openssl passwd -6`, a real per-hash random salt
+# plus 5000 rounds) for every account created from here on. `openssl` ships
+# on every platform this script already special-cases (macOS/Linux, see the
+# md5/md5sum split below), so there is no portability cost to using it.
+hash_pw_new() {
+    if command -v openssl >/dev/null 2>&1; then
+        openssl passwd -6 "$1" 2>/dev/null
+    else
+        # No openssl on this host at all: fall back to the legacy unsalted
+        # md5 rather than failing registration outright. Weak, but no
+        # weaker than every account this script has ever stored before
+        # this change, and `verify_pw` still accepts it.
+        printf '%s' "$1" | { md5 2>/dev/null || md5sum | cut -d' ' -f1; }
+    fi
+}
+
+# Verifies a password against a stored hash of either format: the current
+# `$6$salt$hash` (re-derives the check hash using the salt embedded in the
+# stored value) or a legacy bare 32-hex-char md5 digest from before salted
+# hashing existed, so accounts created before this change keep working.
+verify_pw() {
+    local pw="$1" stored="$2" salt candidate
+    case "$stored" in
+        '$6$'*)
+            command -v openssl >/dev/null 2>&1 || return 1
+            salt=$(printf '%s' "$stored" | cut -d'$' -f3)
+            candidate=$(openssl passwd -6 -salt "$salt" "$pw" 2>/dev/null)
+            [ -n "$candidate" ] && [ "$candidate" = "$stored" ]
+            ;;
+        *)
+            candidate=$(printf '%s' "$pw" | { md5 2>/dev/null || md5sum | cut -d' ' -f1; })
+            [ "$candidate" = "$stored" ]
+            ;;
+    esac
+}
+
+# On a successful login through a legacy unsalted-md5 row, transparently
+# re-hash the just-verified password into the salted format and rewrite
+# that one line, so real accounts age out of the weak format over time
+# instead of only new registrations getting it.
+upgrade_legacy_hash() {
+    local username="$1" password="$2" new_hash tmp
+    command -v openssl >/dev/null 2>&1 || return 0
+    acquire_lock || return 0
+    new_hash=$(hash_pw_new "$password")
+    if [ -n "$new_hash" ] && [ -f "$USERS_FILE" ]; then
+        tmp=$(mktemp "${SAVE_DIR}/.tmp.XXXXXX" 2>/dev/null) || tmp="${USERS_FILE}.tmp.$$"
+        awk -F: -v u="$username" -v h="$new_hash" \
+            'BEGIN{OFS=":"} $1==u {$2=h} {print}' "$USERS_FILE" > "$tmp" \
+            && mv -f "$tmp" "$USERS_FILE"
+        chmod 600 "$USERS_FILE" 2>/dev/null
+    fi
+    release_lock
+}
 
 register_user() {
     clear_screen; print_banner
@@ -455,21 +657,44 @@ register_user() {
     printf '%b\n' "╚═══════════════════════════════╝${NC}\n"
     local username password confirm hashed
     while true; do
-        printf "${YELLOW}Choose a username: ${NC}"; read -r username; require_input $?
+        printf "${YELLOW}Choose a username: ${NC}"; read -r -n "$USERNAME_MAX_LEN" username; require_input $?
         username="${username//[[:space:]]/}"
-        [ -z "$username" ] && printf '%b\n' "${RED}Username cannot be empty.${NC}" && continue
-        grep -q "^${username}:" "$USERS_FILE" 2>/dev/null && printf '%b\n' "${RED}Username taken.${NC}" && continue
+        if ! valid_username "$username"; then
+            printf '%b\n' "${RED}Usernames are ${USERNAME_MAX_LEN} characters or fewer: letters, numbers, underscore, dot, or dash, starting with a letter, number, or underscore.${NC}"
+            continue
+        fi
+        # Claim + lock only around the check-and-reserve step, never while
+        # waiting on the password below - a slow typist shouldn't block
+        # every other registration in flight. This is the actual TOCTOU fix:
+        # the old code checked `grep -q "^${username}:"` and only wrote the
+        # row much later, after collecting and confirming a password, so two
+        # concurrent registrations for the same name could both pass the
+        # check and both eventually append a row.
+        if ! acquire_lock; then
+            printf '%b\n' "${RED}Registration is busy right now, try again in a moment.${NC}"
+            continue
+        fi
+        if ! claim_username "$username"; then
+            release_lock
+            printf '%b\n' "${RED}Username taken.${NC}"
+            continue
+        fi
+        release_lock
         break
     done
     while true; do
-        printf "${YELLOW}Choose a password: ${NC}"; read -rs password; require_input $?; echo
+        printf "${YELLOW}Choose a password: ${NC}"; read -rs -n 128 password; require_input $?; echo
         [ ${#password} -lt 4 ] && printf '%b\n' "${RED}Minimum 4 characters.${NC}" && continue
-        printf "${YELLOW}Confirm password: ${NC}";  read -rs confirm; require_input $?; echo
+        printf "${YELLOW}Confirm password: ${NC}";  read -rs -n 128 confirm; require_input $?; echo
         [ "$password" != "$confirm" ] && printf '%b\n' "${RED}Passwords do not match.${NC}" && continue
         break
     done
-    hashed=$(hash_pw "$password")
+    hashed=$(hash_pw_new "$password")
+    acquire_lock || true
     echo "${username}:${hashed}" >> "$USERS_FILE"
+    chmod 600 "$USERS_FILE" 2>/dev/null
+    release_claim "$username"
+    release_lock
     PLAYER_NAME="$username"; PLAYER_LEVEL=1; PLAYER_XP=0; PLAYER_LIVES=3
     PLAYER_STREAK=0; PLAYER_BEST_STREAK=0
     TOTAL_HINTS_USED=0; TOTAL_SKIPS_USED=0; TOTAL_LIVES_LOST=0; RUN_START_TS=0
@@ -496,12 +721,22 @@ login_user() {
     printf '%b\n' "╚═══════════════════════════════╝${NC}\n"
     printf '%b\n' "${GREEN}BashQuest OS v2.4.1 LTS (GNU/Linux 5.15.0-amd64)${NC}"
     printf '%b\n' "${DIM}$(date)${NC}\n"
-    local attempts=0 username password hashed
+    local attempts=0 username password stored
     while [ $attempts -lt 3 ]; do
-        printf "${WHITE}login: ${NC}";    read -r username; require_input $?
-        printf "${WHITE}Password: ${NC}"; read -rs password; require_input $?; echo
-        hashed=$(hash_pw "$password")
-        if grep -q "^${username}:${hashed}$" "$USERS_FILE" 2>/dev/null; then
+        printf "${WHITE}login: ${NC}";    read -r -n "$USERNAME_MAX_LEN" username; require_input $?
+        printf "${WHITE}Password: ${NC}"; read -rs -n 128 password; require_input $?; echo
+        # Reject before the username ever reaches a lookup. Usernames used
+        # to be interpolated straight into a `grep` pattern here, so a
+        # username like `.*$\|^x` turned the whole login check into a
+        # pattern whose first alternative matches any record at all,
+        # regardless of the password submitted - `valid_username`'s
+        # character set can't express any regex metacharacter, and every
+        # lookup below is fixed-string/field matching regardless.
+        if valid_username "$username" && stored=$(stored_hash_for "$username") && verify_pw "$password" "$stored"; then
+            case "$stored" in
+                '$6$'*) ;;
+                *) upgrade_legacy_hash "$username" "$password" ;;
+            esac
             PLAYER_NAME="$username"; load_progress
             printf '%b\n' "\n${LGREEN}  ✓ Authentication successful.${NC}"
             sleep 0.6; main_menu; return
@@ -524,23 +759,35 @@ autologin() {
     # The caller's handle is already validated upstream (late.sh's arcade
     # handles are 3-20 chars, alnum + underscore, starting with a letter),
     # but PLAYER_NAME feeds straight into save/certificate file paths below,
-    # so strip anything unsafe for a filename regardless of what arrived.
+    # so strip anything unsafe for a filename regardless of what arrived -
+    # and to the same character set `valid_username` requires, so an
+    # autologin identity is exactly as safe to drop into a filename, a
+    # `grep -F`/awk field match, or `printf '%b'` output as a normal one.
     username=$(printf '%s' "$raw" | tr -cd 'A-Za-z0-9_')
     username="${username:0:20}"
-    if [ -z "$username" ]; then
+    if ! valid_username "$username"; then
         startup_screen
         return
     fi
-    if grep -q "^${username}:" "$USERS_FILE" 2>/dev/null; then
+    if user_exists "$username"; then
         PLAYER_NAME="$username"; load_progress
         main_menu
         return
     fi
-    # A literal, unhashed placeholder: hash_pw always returns a 32-char hex
-    # digest, so this can never match a real password and the account stays
-    # unreachable from the normal login screen, exactly as intended for an
-    # identity that isn't supposed to have a separate password at all.
-    echo "${username}:autologin" >> "$USERS_FILE"
+    # A literal, unhashed placeholder: it can never match `verify_pw`
+    # against any real password (it's neither a `$6$`-prefixed salted hash
+    # nor a valid 32-hex-char md5 digest), so the account stays unreachable
+    # from the normal login screen, exactly as intended for an identity
+    # that isn't supposed to have a separate password at all. Same
+    # claim+lock TOCTOU protection as `register_user`.
+    if acquire_lock; then
+        if claim_username "$username"; then
+            echo "${username}:autologin" >> "$USERS_FILE"
+            chmod 600 "$USERS_FILE" 2>/dev/null
+            release_claim "$username"
+        fi
+        release_lock
+    fi
     PLAYER_NAME="$username"; PLAYER_LEVEL=1; PLAYER_XP=0; PLAYER_LIVES=3
     PLAYER_STREAK=0; PLAYER_BEST_STREAK=0
     TOTAL_HINTS_USED=0; TOTAL_SKIPS_USED=0; TOTAL_LIVES_LOST=0; RUN_START_TS=0
@@ -564,28 +811,36 @@ autologin() {
 # ---- MENUS ----
 
 main_menu() {
-    clear_screen; print_banner; status_bar
-    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════╗"
-    printf '%b\n' "║             MAIN MENU                ║"
-    printf '%b\n' "╠══════════════════════════════════════╣"
-    printf '%b\n' "║  ${LGREEN}[1]${LCYAN} Continue Adventure              ║"
-    printf '%b\n' "║  ${YELLOW}[2]${LCYAN} Level Select                    ║"
-    printf '%b\n' "║  ${BLUE}[3]${LCYAN} Command Reference               ║"
-    printf '%b\n' "║  ${MAGENTA}[4]${LCYAN} Leaderboard                    ║"
-    printf '%b\n' "║  ${LMAGENTA}[5]${LCYAN} Achievements                    ║"
-    printf '%b\n' "║  ${RED}[6]${LCYAN} Logout                         ║"
-    printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
-    root_says "$(root_pick "${ROOT_IDLE[@]}")"
-    printf "\n${YELLOW}Choice: ${NC}"; read -r choice; require_input $?
-    case $choice in
-        1) run_current_level ;;
-        2) level_select ;;
-        3) command_reference ;;
-        4) leaderboard ;;
-        5) achievements_panel ;;
-        6) startup_screen ;;
-        *) main_menu ;;
-    esac
+    local choice
+    # A loop, not self-recursion: invalid input used to call `main_menu`
+    # again, which never returns to the caller either (the whole game is
+    # screen functions tail-calling the next screen), so a bot flooding
+    # garbage input here grew the bash call stack by one frame per
+    # rejected choice, forever, with nothing ever unwinding it.
+    while true; do
+        clear_screen; print_banner; status_bar
+        printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════╗"
+        printf '%b\n' "║             MAIN MENU                ║"
+        printf '%b\n' "╠══════════════════════════════════════╣"
+        printf '%b\n' "║  ${LGREEN}[1]${LCYAN} Continue Adventure              ║"
+        printf '%b\n' "║  ${YELLOW}[2]${LCYAN} Level Select                    ║"
+        printf '%b\n' "║  ${BLUE}[3]${LCYAN} Command Reference               ║"
+        printf '%b\n' "║  ${MAGENTA}[4]${LCYAN} Leaderboard                    ║"
+        printf '%b\n' "║  ${LMAGENTA}[5]${LCYAN} Achievements                    ║"
+        printf '%b\n' "║  ${RED}[6]${LCYAN} Logout                         ║"
+        printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
+        root_says "$(root_pick "${ROOT_IDLE[@]}")"
+        printf "\n${YELLOW}Choice: ${NC}"; read -r -n 32 choice; require_input $?
+        case $choice in
+            1) run_current_level; return ;;
+            2) level_select; return ;;
+            3) command_reference; return ;;
+            4) leaderboard; return ;;
+            5) achievements_panel; return ;;
+            6) startup_screen; return ;;
+            *) continue ;;
+        esac
+    done
 }
 
 # Step 1: pick a tier. With 61 levels a flat list stopped being useful, so
@@ -593,58 +848,68 @@ main_menu() {
 # Every tier is always browsable (you can look ahead at what's coming), the
 # individual levels inside still show [LOCKED] same as before.
 level_select() {
-    clear_screen; print_banner; status_bar
-    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════════════════════════╗"
-    printf '%b\n' "║$(printf '%*s%s%*s' 30 '' "JUMP TO TOPIC" 31 '')║"
-    printf '%b\n' "╠══════════════════════════════════════════════════════════════════════════╣${NC}"
-    local entry num name icon start end n
-    for entry in "${TIERS[@]}"; do
-        IFS='|' read -r num name icon start end <<< "$entry"
-        n=$(echo "$num" | tr -d ' ')
-        if [ "$PLAYER_LEVEL" -ge "$start" ]; then
-            printf '%b\n' "${LCYAN}║ ${LGREEN}[${num}]${NC} ${icon} ${WHITE}${BOLD}${name}${NC} ${DIM}(levels ${start}-${end})${NC}"
+    local choice entry num name icon start end n
+    # Loop instead of self-recursion on an invalid tier - see main_menu.
+    while true; do
+        clear_screen; print_banner; status_bar
+        printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════════════════════════╗"
+        printf '%b\n' "║$(printf '%*s%s%*s' 30 '' "JUMP TO TOPIC" 31 '')║"
+        printf '%b\n' "╠══════════════════════════════════════════════════════════════════════════╣${NC}"
+        for entry in "${TIERS[@]}"; do
+            IFS='|' read -r num name icon start end <<< "$entry"
+            n=$(echo "$num" | tr -d ' ')
+            if [ "$PLAYER_LEVEL" -ge "$start" ]; then
+                printf '%b\n' "${LCYAN}║ ${LGREEN}[${num}]${NC} ${icon} ${WHITE}${BOLD}${name}${NC} ${DIM}(levels ${start}-${end})${NC}"
+            else
+                printf '%b\n' "${LCYAN}║ ${DIM}[${num}] ${icon} ${name} (levels ${start}-${end}) [LOCKED]${NC}"
+            fi
+        done
+        printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
+        printf "\n${YELLOW}Enter tier (1-${#TIERS[@]}) or 0 to go back: ${NC}"; read -r -n 32 choice; require_input $?
+        if [ "$choice" = "0" ]; then
+            main_menu; return
+        fi
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#TIERS[@]}" ]; then
+            level_select_tier "$choice"; return
         else
-            printf '%b\n' "${LCYAN}║ ${DIM}[${num}] ${icon} ${name} (levels ${start}-${end}) [LOCKED]${NC}"
+            printf '%b\n' "${RED}  Invalid tier!${NC}"; sleep 1; continue
         fi
     done
-    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
-    printf "\n${YELLOW}Enter tier (1-${#TIERS[@]}) or 0 to go back: ${NC}"; read -r choice; require_input $?
-    [ "$choice" = "0" ] && main_menu && return
-    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#TIERS[@]}" ]; then
-        level_select_tier "$choice"
-    else
-        printf '%b\n' "${RED}  Invalid tier!${NC}"; sleep 1; level_select
-    fi
 }
 
 # Step 2: pick a level within the chosen tier.
 level_select_tier() {
     local tier_num="$1"
     local entry num name icon start end tier_name tier_icon
+    local lvl_num lvl_name lvl_cmds lvl_icon n choice
     IFS='|' read -r num tier_name tier_icon start end <<< "${TIERS[$((tier_num - 1))]}"
 
-    clear_screen; print_banner; status_bar
-    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════════════════════════╗"
-    printf '%b\n' "║ ${tier_icon} ${WHITE}${BOLD}${tier_name}${NC}"
-    printf '%b\n' "${LCYAN}╠══════════════════════════════════════════════════════════════════════════╣${NC}"
-    local lvl_num lvl_name lvl_cmds lvl_icon n
-    for entry in "${LEVELS[@]:$((start - 1)):$((end - start + 1))}"; do
-        IFS='|' read -r lvl_num lvl_name lvl_cmds lvl_icon <<< "$entry"
-        n=$(echo "$lvl_num" | tr -d ' ')
-        if [ "$n" -le "$PLAYER_LEVEL" ]; then
-            printf '%b\n' "${LCYAN}║ ${LGREEN}[${lvl_num}]${NC} ${lvl_icon} ${WHITE}${BOLD}${lvl_name}${NC} ${DIM}${lvl_cmds}${NC}"
+    # Loop instead of self-recursion on an invalid/locked level - see main_menu.
+    while true; do
+        clear_screen; print_banner; status_bar
+        printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════════════════════════════════════════╗"
+        printf '%b\n' "║ ${tier_icon} ${WHITE}${BOLD}${tier_name}${NC}"
+        printf '%b\n' "${LCYAN}╠══════════════════════════════════════════════════════════════════════════╣${NC}"
+        for entry in "${LEVELS[@]:$((start - 1)):$((end - start + 1))}"; do
+            IFS='|' read -r lvl_num lvl_name lvl_cmds lvl_icon <<< "$entry"
+            n=$(echo "$lvl_num" | tr -d ' ')
+            if [ "$n" -le "$PLAYER_LEVEL" ]; then
+                printf '%b\n' "${LCYAN}║ ${LGREEN}[${lvl_num}]${NC} ${lvl_icon} ${WHITE}${BOLD}${lvl_name}${NC} ${DIM}${lvl_cmds}${NC}"
+            else
+                printf '%b\n' "${LCYAN}║ ${DIM}[${lvl_num}] ${lvl_icon} ${lvl_name} ${lvl_cmds} [LOCKED]${NC}"
+            fi
+        done
+        printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
+        printf "\n${YELLOW}Enter level (${start}-${end}) or 0 to go back: ${NC}"; read -r -n 32 choice; require_input $?
+        if [ "$choice" = "0" ]; then
+            level_select; return
+        fi
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge "$start" ] && [ "$choice" -le "$end" ] && [ "$choice" -le "$PLAYER_LEVEL" ]; then
+            dispatch_level "$choice"; return
         else
-            printf '%b\n' "${LCYAN}║ ${DIM}[${lvl_num}] ${lvl_icon} ${lvl_name} ${lvl_cmds} [LOCKED]${NC}"
+            printf '%b\n' "${RED}  Locked or invalid!${NC}"; sleep 1; continue
         fi
     done
-    printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
-    printf "\n${YELLOW}Enter level (${start}-${end}) or 0 to go back: ${NC}"; read -r choice; require_input $?
-    [ "$choice" = "0" ] && level_select && return
-    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge "$start" ] && [ "$choice" -le "$end" ] && [ "$choice" -le "$PLAYER_LEVEL" ]; then
-        dispatch_level "$choice"
-    else
-        printf '%b\n' "${RED}  Locked or invalid!${NC}"; sleep 1; level_select_tier "$tier_num"
-    fi
 }
 
 command_reference() {
@@ -737,22 +1002,26 @@ achievements_panel() {
 }
 
 startup_screen() {
+    local choice
     PLAYER_NAME=""; PLAYER_LEVEL=1; PLAYER_XP=0; PLAYER_LIVES=3
-    clear_screen; print_banner
-    printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════╗"
-    printf '%b\n' "║      WELCOME TO BASHQUEST  🐧         ║"
-    printf '%b\n' "╠══════════════════════════════════════╣"
-    printf '%b\n' "║  ${LGREEN}[1]${LCYAN} Login                          ║"
-    printf '%b\n' "║  ${YELLOW}[2]${LCYAN} Create Account                 ║"
-    printf '%b\n' "║  ${RED}[3]${LCYAN} Quit                           ║"
-    printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
-    printf "${YELLOW}Choice: ${NC}"; read -r choice; require_input $?
-    case $choice in
-        1) login_user ;;
-        2) register_user ;;
-        3) printf '%b\n' "\n${CYAN}Thanks for playing BashQuest! Keep hacking! 🐧${NC}\n"; exit 0 ;;
-        *) startup_screen ;;
-    esac
+    # Loop instead of self-recursion on invalid input - see main_menu.
+    while true; do
+        clear_screen; print_banner
+        printf '%b\n' "\n${LCYAN}╔══════════════════════════════════════╗"
+        printf '%b\n' "║      WELCOME TO BASHQUEST  🐧         ║"
+        printf '%b\n' "╠══════════════════════════════════════╣"
+        printf '%b\n' "║  ${LGREEN}[1]${LCYAN} Login                          ║"
+        printf '%b\n' "║  ${YELLOW}[2]${LCYAN} Create Account                 ║"
+        printf '%b\n' "║  ${RED}[3]${LCYAN} Quit                           ║"
+        printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
+        printf "${YELLOW}Choice: ${NC}"; read -r -n 32 choice; require_input $?
+        case $choice in
+            1) login_user; return ;;
+            2) register_user; return ;;
+            3) printf '%b\n' "\n${CYAN}Thanks for playing BashQuest! Keep hacking! 🐧${NC}\n"; exit 0 ;;
+            *) continue ;;
+        esac
+    done
 }
 
 # ---- GAME ENGINE ----
@@ -791,7 +1060,7 @@ run_challenge() {
         printf '%b\n' "└──────────────────────────────────────────────────┘${NC}"
         printf '%b\n' "\n${WHITE}${desc}${NC}\n"
         printf "${LGREEN}bashquest${NC}${CYAN}@terminal${NC}:${YELLOW}~\$${NC} "
-        read -r user_input; require_input $?
+        read -r -n 1000 user_input; require_input $?
         case "$user_input" in
             hint)
                 TOTAL_HINTS_USED=$((TOTAL_HINTS_USED + 1))
@@ -3612,6 +3881,13 @@ run_current_level() {
 
 trap 'cleanup_game_env' EXIT
 trap 'printf '%b\n' "\n${YELLOW}Use option [5] Logout or [3] Quit to exit cleanly.${NC}"' INT
+# Ctrl+Z would otherwise suspend the whole script via job control, leaving
+# it wedged in the background rather than exiting cleanly - fine at an
+# interactive shell where a user can `fg` it back, meaningless (and only
+# harmful) inside a game hosted over a door/pty with no shell underneath
+# to resume it from. Ignore the signal outright so ^Z is a no-op here,
+# same as it already is at the `less`/`vi` prompts most players know.
+trap '' TSTP
 
 boot_sequence
 if [ -n "${BASHQUEST_AUTOLOGIN:-}" ]; then
