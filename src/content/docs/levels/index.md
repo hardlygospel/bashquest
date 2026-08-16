@@ -1,9 +1,9 @@
 ---
 title: "Levels"
-description: "All 86 levels across seventeen tiers, from basic navigation to enterprise storage, networking, containers, and desktop ricing."
+description: "All 90 levels across eighteen tiers, from basic navigation to enterprise storage, networking, containers, and desktop ricing."
 ---
 
-BashQuest has 86 levels split across seventeen tiers, from basic navigation all the way to storage, enterprise networking, SAN, kernels, containers, and desktop ricing. Each level has 4–8 challenges. Every challenge explains the command's purpose: not just its syntax.
+BashQuest has 90 levels split across eighteen tiers, from basic navigation all the way to storage, enterprise networking, SAN, kernels, containers, and desktop ricing. Each level has 4–8 challenges. Every challenge explains the command's purpose: not just its syntax.
 
 | Tier | Levels | Focus |
 |---|---|---|
@@ -24,6 +24,7 @@ BashQuest has 86 levels split across seventeen tiers, from basic navigation all 
 | **Universal Packages** | 74–77 | Snap install/channels/revert, Flatpak install/remotes |
 | **Terminal Multiplexing** | 78–81 | tmux sessions, windows, panes, detach/reattach |
 | **TUI Toolbelt** | 82–86 | ranger, cmus, mpd/mpc, btop, fzf |
+| **Modern TUI Tools** | 87–90 | Yazi, lazygit, lazydocker, zellij |
 
 ## Every Level and Its Commands
 
@@ -115,3 +116,7 @@ BashQuest has 86 levels split across seventeen tiers, from basic navigation all 
 | 84 | mpd & mpc | `mpd` `mpc update/add/play/status/random` |
 | 85 | btop | `/` `k` `p` `btop -p` |
 | 86 | fzf | `\| fzf` `Ctrl-R` `Ctrl-T` `--preview` |
+| 87 | Yazi | `yazi` `Enter` `y`/`p` `t` |
+| 88 | lazygit | `space` `c` (commit) `P` (push) `5` |
+| 89 | lazydocker | `Enter` `d` (delete) `Tab` `r` (restart) |
+| 90 | zellij | `-s` `attach` `Ctrl-p` `Ctrl-o d` |

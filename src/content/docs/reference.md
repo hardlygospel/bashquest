@@ -1,9 +1,9 @@
 ---
 title: "Command Reference"
-description: "Quick lookup for every command covered across all 86 levels."
+description: "Quick lookup for every command covered across all 90 levels."
 ---
 
-Quick lookup for every command covered across all 86 levels.
+Quick lookup for every command covered across all 90 levels.
 
 ---
 
@@ -759,4 +759,30 @@ git branch | fzf                       # fuzzy-pick from any piped list
 # Ctrl-R = fuzzy search shell history, Ctrl-T = fuzzy-insert a file path
 fzf --preview 'cat {}'                 # preview the highlighted item live
 ps aux | fzf | awk '{print $2}' | xargs kill   # fuzzy-pick a process to kill
+```
+
+---
+
+## Modern TUI Tools
+
+```bash
+# Yazi - the newer, Rust-built file manager (ranger's spiritual successor)
+yazi                    # launch in the current directory
+yazi ~/Downloads        # launch in a specific directory
+# hjkl navigation (same as ranger), y/p = yank/paste, t = new tab
+
+# lazygit - a full-screen TUI for the daily git loop
+lazygit                 # launch in the current repo
+# space = stage/unstage, c = commit, P = push, p = pull, 1-5 = jump to a panel
+
+# lazydocker - a live dashboard for containers, images, and logs
+lazydocker               # launch
+# Enter = view logs, d = delete, Tab = switch panels, r = restart
+
+# zellij - the newer, Rust-built terminal multiplexer
+zellij                          # start a new session
+zellij --session deploy         # start a named session (or: zellij -s deploy)
+zellij list-sessions            # list sessions
+zellij attach deploy            # reattach to a named session
+# Ctrl-p = pane mode, Ctrl-o d = detach (a two-step chord, unlike tmux's single prefix)
 ```

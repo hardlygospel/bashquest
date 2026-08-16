@@ -5,10 +5,10 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blueviolet?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-brightgreen?style=flat-square&logo=linux)](https://github.com/hardlygospel/bashquest)
 [![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)](https://github.com/hardlygospel/bashquest)
-[![Levels](https://img.shields.io/badge/Levels-86-blue?style=flat-square)](https://hardlygospel.github.io/bashquest/levels/)
+[![Levels](https://img.shields.io/badge/Levels-90-blue?style=flat-square)](https://hardlygospel.github.io/bashquest/levels/)
 [![Docs](https://img.shields.io/badge/docs-hardlygospel.github.io%2Fbashquest-9cf?style=flat-square)](https://hardlygospel.github.io/bashquest/)
 
-**An interactive terminal game that turns your shell into a full systems administration training ground.** No slides, no video, no sandboxed browser IDE: you type real commands, against a real (simulated) filesystem, and a mentor character reacts to every answer. 86 levels, 17 tiers, zero dependencies.
+**An interactive terminal game that turns your shell into a full systems administration training ground.** No slides, no video, no sandboxed browser IDE: you type real commands, against a real (simulated) filesystem, and a mentor character reacts to every answer. 90 levels, 18 tiers, zero dependencies.
 
 📖 **Full docs:** [hardlygospel.github.io/bashquest](https://hardlygospel.github.io/bashquest/)
 
@@ -35,7 +35,7 @@
 BashQuest is a single Bash script (`bashquest.sh`, no build step, no installer) that:
 
 - Creates a **pseudo-login system**: register an account, log in, and your progress is saved per user
-- Drops you into 86 **progressive levels** across 17 tiers, from `ls` and `pwd` on day one, through git, Docker, and tmux, to ricing a tiling window manager and a TUI toolbelt by the end
+- Drops you into 90 **progressive levels** across 18 tiers, from `ls` and `pwd` on day one, through git, Docker, and tmux, to ricing a tiling window manager and the newest generation of TUI tools by the end
 - Runs every challenge against a **real simulated environment**: actual files, actual log files, actual directory trees created in a temp sandbox, so the commands you type do something, not just get string-matched against a static answer
 - Validates your answer with **pattern matching**, not exact-string matching, so `ls -la` and `ls -al` are both accepted where either is correct
 - Explains **why** a command exists and when a real sysadmin reaches for it, not just what to type
@@ -47,7 +47,7 @@ It's built for one goal: walk out the other side able to comfortably administrat
 
 ## What you'll learn
 
-Seventeen tiers, building on each other, from absolute basics to topics most "Linux 101" courses never touch:
+Eighteen tiers, building on each other, from absolute basics to topics most "Linux 101" courses never touch:
 
 **Tier 1: Beginner** (levels 1-4)
 - Navigation: `ls`, `cd`, `pwd`, `mkdir`, `rmdir`
@@ -153,12 +153,18 @@ Seventeen tiers, building on each other, from absolute basics to topics most "Li
 - Splitting a window into panes
 - Detach/reattach: surviving a dropped SSH connection
 
-**Tier 17: TUI Toolbelt** (levels 82-86, the finale)
+**Tier 17: TUI Toolbelt** (levels 82-86)
 - ranger, a full-screen keyboard-driven file manager
 - cmus, a terminal music player
 - mpd/mpc, a background music daemon and its client
 - btop, a modern resource monitor
 - fzf, the fuzzy finder that ends up wired into everything
+
+**Tier 18: Modern TUI Tools** (levels 87-90, the finale)
+- Yazi, the newer Rust-built file manager
+- lazygit, a full-screen TUI for the daily git loop
+- lazydocker, a live dashboard for containers, images, and logs
+- zellij, the newer Rust-built terminal multiplexer
 
 See the [full level list](#full-level-list) below for every level by name, or the [levels documentation](https://hardlygospel.github.io/bashquest/levels/) for the complete breakdown with examples.
 
@@ -180,7 +186,7 @@ It's flavor, not a mechanic: nothing Tasmania says changes your score. But it's 
 ## Features
 
 **Gameplay**
-- 86 levels, 4-8 challenges each, 488 challenges total
+- 90 levels, 4-8 challenges each, 509 challenges total
 - 3 lives per session, lose one on a wrong answer or a skip
 - XP earned per correct answer, scaled to challenge difficulty
 - `hint` shows a detailed clue for the current challenge, free of cost
@@ -190,13 +196,13 @@ It's flavor, not a mechanic: nothing Tasmania says changes your score. But it's 
 - Pseudo-login: register/login with hashed passwords, saved per user under `~/.bashquest/`
 - Levels unlock sequentially: clear level N to unlock N+1
 - **Topic jump menu**: pick a tier, then a level within it, instead of scrolling one long list
-- Tier milestone screens at the end of each of the 17 tiers
+- Tier milestone screens at the end of each of the 18 tiers
 - Leaderboard ranking every player account on the machine by total XP
 
 **Presentation**
 - Full ANSI-colour TUI: banners, boxed challenges, a live status bar
 - A fake boot sequence on launch
-- In-game command reference covering all 86 level topics
+- In-game command reference covering all 90 level topics
 - Streak tracking and a 6-badge achievement system (Purist, No Shortcuts, Untouchable, On a Roll, Unstoppable, Graduate)
 
 **Technical**
@@ -218,9 +224,9 @@ Six badges to earn, viewable any time from the main menu:
 | **Untouchable** | Never losing a life |
 | **On a Roll** | A 5-answer streak |
 | **Unstoppable** | A 10-answer streak |
-| **Graduate** | Completing all 86 levels |
+| **Graduate** | Completing all 90 levels |
 
-Clear all 86 levels and you get a full graduation ceremony:
+Clear all 90 levels and you get a full graduation ceremony:
 - A certificate with your name, final XP, best streak, and badge count
 - The certificate is written to disk at `~/.bashquest/<your-name>.certificate.txt`, yours to keep
 - A closing speech from Tasmania
@@ -252,7 +258,7 @@ No dependencies. No installation. Pure Bash.
 4. Type the command. It's checked against a pattern, so equivalent valid answers are accepted, not just one exact string
 5. Correct answers earn XP and may trigger a streak callout. Wrong answers cost a life. `hint` and `skip` are always available mid-challenge
 6. Finish the last level of a tier and get a milestone screen instead of the usual level-complete screen
-7. Finish level 86 and graduate, certificate included
+7. Finish level 90 and graduate, certificate included
 
 ---
 
@@ -346,6 +352,10 @@ No dependencies. No installation. Pure Bash.
 | 84 | mpd & mpc | `mpd` `mpc update/add/play/status/random` |
 | 85 | btop | `btop` `/` (filter) `k` (kill) `p` (preset) |
 | 86 | fzf | `fzf` `Ctrl-R` `Ctrl-T` `--preview` |
+| 87 | Yazi | `yazi` `Enter` `y`/`p` (yank/paste) `t` (tab) |
+| 88 | lazygit | `lazygit` `space` (stage) `c` (commit) `P` (push) |
+| 89 | lazydocker | `lazydocker` `Enter` `d` (delete) `r` (restart) |
+| 90 | zellij | `zellij -s` `attach` `Ctrl-p` `Ctrl-o d` |
 
 ---
 

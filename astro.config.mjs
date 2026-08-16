@@ -10,7 +10,7 @@ export default defineConfig({
 		starlight({
 			title: 'BashQuest',
 			description:
-				'Interactive terminal game teaching Linux and Bash: 86 levels from ls to kernel builds, Docker, git, tmux, and desktop ricing',
+				'Interactive terminal game teaching Linux and Bash: 90 levels from ls to kernel builds, Docker, git, tmux, and desktop ricing',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/hardlygospel/bashquest' },
 			],
@@ -45,6 +45,7 @@ export default defineConfig({
 						{ label: 'Levels 74–77: Universal Packages', slug: 'levels/15-universal-packages' },
 						{ label: 'Levels 78–81: Terminal Multiplexing', slug: 'levels/16-terminal-multiplexing' },
 						{ label: 'Levels 82–86: TUI Toolbelt', slug: 'levels/17-tui-toolbelt' },
+						{ label: 'Levels 87–90: Modern TUI Tools', slug: 'levels/18-modern-tui-tools' },
 					],
 				},
 				{

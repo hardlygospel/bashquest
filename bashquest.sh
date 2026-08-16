@@ -151,7 +151,7 @@ release_claim() {
 # throughout the file reads from TOTAL_LEVELS now, so growing the game means
 # growing this number, the TIERS table below, and the LEVELS table in
 # level_select(), nothing else.
-TOTAL_LEVELS=86
+TOTAL_LEVELS=90
 
 # num|name|icon|start_level|end_level
 TIERS=(
@@ -172,6 +172,7 @@ TIERS=(
     "15|Universal Packages     |📦|74|77"
     "16|Terminal Multiplexing  |🪟|78|81"
     "17|TUI Toolbelt           |🎧|82|86"
+    "18|Modern TUI Tools       |🌟|87|90"
 )
 
 # num|name|cmds|icon, filtered by tier range in level_select_tier().
@@ -262,6 +263,10 @@ LEVELS=(
     "84|mpd & mpc             |mpc play add update status    |🎶"
     "85|btop                  |filter kill preset -p         |📊"
     "86|fzf                   |Ctrl-R Ctrl-T --preview pipe  |🔎"
+    "87|Yazi                  |yazi Enter y p t              |🌟"
+    "88|lazygit                |space c P 5                   |🌟"
+    "89|lazydocker             |Enter d Tab r                 |🌟"
+    "90|zellij                 |-s attach Ctrl-p Ctrl-o d     |🌟"
 )
 
 PLAYER_NAME=""
@@ -973,6 +978,7 @@ command_reference() {
     printf '%b\n' "  ${MAGENTA}PACKAGES 2 ${NC}  snap install  snap refresh  flatpak install  flatpak run"
     printf '%b\n' "  ${BLUE}TMUX       ${NC}  new -s  attach  detach  split-window  select-pane"
     printf '%b\n' "  ${LRED}TUI TOOLS  ${NC}  ranger  cmus  mpc  btop  fzf"
+    printf '%b\n' "  ${LGREEN}MODERN TUI ${NC}  yazi  lazygit  lazydocker  zellij"
     printf '%b\n' "\n${DIM}  In-game: type '${YELLOW}hint${NC}${DIM}' for a clue, '${YELLOW}skip${NC}${DIM}' to skip (costs 1 life).${NC}"
     printf '%b\n' "${DIM}  Platform notes: macOS uses md5/vm_stat/sysctl/brew vs Linux md5sum/free/lscpu/apt.${NC}"
     press_enter; main_menu
@@ -4467,7 +4473,7 @@ run_level_81() {
         "Tier 17: TUI Toolbelt: a full-screen file manager, two different approaches to terminal music, a modern resource monitor, and the fuzzy finder that ends up wired into almost everything."
 }
 
-# ---- TIER 17: TUI TOOLBELT (FINAL) ----
+# ---- TIER 17: TUI TOOLBELT ----
 
 run_level_82() {
     level_intro 82 "ranger" \
@@ -4646,6 +4652,155 @@ run_level_86() {
         'chk "fzf.*kill|kill.*fzf"' 25
 
     cleanup_game_env
+    tier_complete 86 "TUI Toolbelt" \
+        "A full-screen file manager, two different approaches to terminal music, a modern resource monitor, and the fuzzy finder that ends up wired into everything else." \
+        "Tier 18: Modern TUI Tools: the newer generation - a Rust file manager, and dedicated TUI dashboards for git and Docker."
+}
+
+# ---- TIER 18: MODERN TUI TOOLS (FINAL) ----
+
+run_level_87() {
+    level_intro 87 "Yazi" \
+        "ranger proved the concept: vim-keys, full-screen, keyboard-only file management. Yazi is the newer, Rust-built answer to the exact same problem - async I/O so nothing blocks on a slow network mount, built-in image previews, and a plugin system, without giving up a single one of ranger's keybindings." \
+        "🌟   Commands: yazi  |  Enter  |  y / p  |  t"
+    setup_game_env
+
+    run_challenge "Launch Yazi" \
+        "Launch Yazi in the current directory." \
+        "yazi: opens the full-screen, async file browser right where you're standing." \
+        'exact "yazi"' 15
+
+    run_challenge "Open Yazi in a Specific Directory" \
+        "Launch Yazi, starting directly in ${YELLOW}~/Downloads${NC} instead of the current directory." \
+        "yazi ~/Downloads: takes a starting path as its argument, same as ranger's own equivalent." \
+        'chk "^yazi .+"' 15
+
+    run_challenge "Enter a Directory or Open a File" \
+        "Move into the highlighted directory, or open the highlighted file with its default application." \
+        "Enter (or l, matching ranger's own hjkl scheme): Yazi kept ranger's vim-style navigation on purpose, so the muscle memory transfers directly." \
+        'chk "^([Ee]nter|l)$"' 15
+
+    run_challenge "Copy the Highlighted File" \
+        "What key yanks (copies) the currently highlighted file or directory, ready to paste elsewhere?" \
+        "y: yank, exactly like vim's own copy operation. x cuts instead of copying; p pastes either one." \
+        'chk "^y$"' 15
+
+    run_challenge "Open a New Tab" \
+        "Yazi supports multiple tabs, each its own directory view, inside one session. Open a new tab at the current directory." \
+        "t: opens a new tab right where you are. [ and ] switch between whichever tabs are already open." \
+        'chk "^t$"' 15
+
+    cleanup_game_env
+    level_complete 87
+}
+
+run_level_88() {
+    level_intro 88 "lazygit" \
+        "Every git command from the Version Control tier still works exactly the same, typed by hand. lazygit wraps the entire day-to-day loop, status, staging, committing, branching, diffing, into one full-screen view driven entirely by the keyboard, so you see the whole state of a repo at a glance instead of re-running git status between every step." \
+        "🌟   Commands: lazygit  |  space  |  c  |  P"
+    setup_game_env
+
+    run_challenge "Launch lazygit" \
+        "Launch lazygit in the current repository." \
+        "lazygit: opens the full-screen dashboard, files, branches, commits, and stash all visible in one view." \
+        'exact "lazygit"' 15
+
+    run_challenge "Stage a File" \
+        "In lazygit's file panel, stage the currently highlighted file." \
+        "space: toggles staged/unstaged on the highlighted file, the single key you'll press more than any other in lazygit." \
+        'chk "^space$"' 15
+
+    run_challenge "Commit Staged Changes" \
+        "Open the commit-message prompt for whatever's currently staged." \
+        "c: opens a text box for the commit message right there, Enter confirms it." \
+        'chk "^c$"' 15
+
+    run_challenge "Push the Current Branch" \
+        "Push your current branch from inside lazygit." \
+        "P (capital): pushes the current branch. Lowercase p is pull, a pattern lazygit uses throughout - push and pull, capital and lowercase." \
+        'chk "^P$"' 20
+
+    run_challenge "Jump to the Commit Log Panel" \
+        "Switch focus to lazygit's commit log panel to browse full history." \
+        "5: lazygit's five main panels, status, files, branches, commits, stash, are numbered 1 through 5 for a quick jump straight to any of them." \
+        'chk "^5$"' 20
+
+    cleanup_game_env
+    level_complete 88
+}
+
+run_level_89() {
+    level_intro 89 "lazydocker" \
+        "docker ps, docker logs -f, docker stats: three separate commands just to get a live picture of what's running. lazydocker puts containers, images, volumes, and their live logs and stats in one full-screen dashboard, updating in real time." \
+        "🌟   Commands: lazydocker  |  Enter  |  d  |  Tab"
+    setup_game_env
+
+    run_challenge "Launch lazydocker" \
+        "Launch lazydocker." \
+        "lazydocker: opens the full-screen dashboard covering every container, image, volume, and network on the host." \
+        'exact "lazydocker"' 15
+
+    run_challenge "View a Container's Live Logs" \
+        "Select a container in lazydocker and view its live log output." \
+        "Enter (or clicking it): opens the log panel for whichever container is highlighted, streaming live, no separate docker logs -f needed." \
+        'chk "^[Ee]nter$"' 15
+
+    run_challenge "Remove a Container" \
+        "Remove the highlighted container entirely, from inside lazydocker." \
+        "d: the remove/delete key throughout lazydocker's panels, works on containers, images, and volumes alike." \
+        'chk "^d$"' 15
+
+    run_challenge "Switch Between Panels" \
+        "Move focus from the containers panel over to the images panel." \
+        "Tab (arrow keys and clicking both work too): cycles focus between lazydocker's panels, containers, images, volumes, networks, the same idea as tmux panes." \
+        'chk "^[Tt]ab$"' 15
+
+    run_challenge "Restart a Container" \
+        "Restart the highlighted, currently-running container." \
+        "r: restarts whichever container is highlighted, without needing to separately stop it and start it again." \
+        'chk "^r$"' 15
+
+    cleanup_game_env
+    level_complete 89
+}
+
+run_level_90() {
+    level_intro 90 "zellij" \
+        "tmux has been the standard multiplexer for decades, and everything from the Terminal Multiplexing tier still works exactly the same. zellij is the newer, Rust-built alternative: the same core idea, sessions that survive a dropped connection, windows and panes, with discoverable on-screen keybinding hints and a plugin system, built for people who never memorized tmux's own muscle memory in the first place." \
+        "🌟   Commands: zellij  |  Ctrl-p  |  Ctrl-t  |  Ctrl-o d"
+    setup_game_env
+
+    run_challenge "Start a New Session" \
+        "Start a new zellij session." \
+        "zellij: launches a fresh session, dropping you straight into a single full-screen pane with the status bar visible at the bottom." \
+        'exact "zellij"' 15
+
+    run_challenge "Start a Named Session" \
+        "Start a new zellij session named ${YELLOW}deploy${NC}." \
+        "zellij --session deploy (or the shorthand zellij -s deploy): names it up front, same reasoning as naming a tmux session." \
+        'chk "^zellij --session .+|^zellij -s .+"' 20
+
+    run_challenge "List Running Sessions" \
+        "List every zellij session currently running." \
+        "zellij list-sessions: shows every session by name and whether it's currently attached, the zellij equivalent of tmux ls." \
+        'chk "^zellij list-sessions$"' 20
+
+    run_challenge "Attach to a Session" \
+        "Reattach to the existing ${YELLOW}deploy${NC} session." \
+        "zellij attach deploy: no -t flag needed, just the session name directly as the argument." \
+        'chk "^zellij attach .+"' 20
+
+    run_challenge "Open Pane Mode" \
+        "zellij's keybindings are organized into modes, shown live at the bottom of the screen. Which key opens pane mode, for splitting and navigating panes?" \
+        "Ctrl-p: opens pane mode, and the status bar shows exactly which keys do what while you're in it - the discoverability tmux never had built in." \
+        'chk "[Cc]trl.?[Pp]|\\^P"' 20
+
+    run_challenge "Detach From a Session" \
+        "Detach from the current zellij session, leaving it running in the background." \
+        "Ctrl-o d: Ctrl-o opens session mode, d detaches, a two-step chord instead of tmux's single prefix-then-key. One of the bigger practical differences between the two." \
+        'chk "[Cc]trl.?[Oo]"' 20
+
+    cleanup_game_env
     graduation_ceremony
 }
 
@@ -4743,7 +4898,7 @@ graduation_ceremony() {
     printf '║%b%-75s%b║\n' "${WHITE}" "  This certifies that" "${YELLOW}"
     printf '║%b%-75s%b║\n' "${LCYAN}${BOLD}" "  ${PLAYER_NAME}" "${NC}${YELLOW}"
     printf '║%75s║\n' ""
-    printf '║%b%-75s%b║\n' "${WHITE}" "  has completed all ${TOTAL_LEVELS} levels across all seventeen tiers, from" "${YELLOW}"
+    printf '║%b%-75s%b║\n' "${WHITE}" "  has completed all ${TOTAL_LEVELS} levels across all eighteen tiers, from" "${YELLOW}"
     printf '║%b%-75s%b║\n' "${WHITE}" "  basic navigation to storage, networking, SAN, containers, and ricing," "${YELLOW}"
     printf '║%75s║\n' ""
     printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  and is certified ready to administrate a corporate network AND" "${NC}${YELLOW}"
@@ -4758,12 +4913,13 @@ graduation_ceremony() {
         echo "BASHQUEST - CERTIFICATE OF COMPLETION"
         echo ""
         echo "This certifies that ${PLAYER_NAME}"
-        echo "has completed all ${TOTAL_LEVELS} levels of BashQuest across all seventeen tiers:"
+        echo "has completed all ${TOTAL_LEVELS} levels of BashQuest across all eighteen tiers:"
         echo "Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert,"
         echo "Storage & Filesystems, File Editing & Sharing, Networking,"
         echo "Storage Networking & SAN, Boot Process & Kernel, Media Management,"
         echo "Desktop Ricing, Git & Version Control, Docker & Containers,"
-        echo "Universal Packages, Terminal Multiplexing, and the TUI Toolbelt."
+        echo "Universal Packages, Terminal Multiplexing, the TUI Toolbelt,"
+        echo "and Modern TUI Tools."
         echo ""
         echo "Certified ready to administrate a corporate network AND run a"
         echo "genuinely great-looking home setup."
@@ -4781,7 +4937,7 @@ graduation_ceremony() {
 
     printf '\n'
     root_speech \
-        "${TOTAL_LEVELS} levels. Seventeen tiers. Every fire I put in front of you, lit on purpose." \
+        "${TOTAL_LEVELS} levels. Eighteen tiers. Every fire I put in front of you, lit on purpose." \
         "You started at ls and pwd. You're finishing having built and grown storage" \
         "with LVM, shared it over Samba and NFS, run a real network with VLANs and" \
         "a firewall, connected to a SAN over iSCSI, recovered from a kernel panic," \
@@ -4790,7 +4946,8 @@ graduation_ceremony() {
         "where to start. That's not a course anymore. That's the job." \
         "Then you kept going: real version control, containers built and orchestrated" \
         "from scratch, sandboxed cross-distro packaging, sessions that outlive a dropped" \
-        "SSH connection, and a whole toolbelt of TUI programs that never touch a mouse." \
+        "SSH connection, a whole toolbelt of TUI programs that never touch a mouse, and" \
+        "the newer generation of those same tools too - the ones that just shipped." \
         "And when the pager's finally quiet, you now also know how to make your own" \
         "desktop look genuinely good instead of just functional. That part matters too." \
         "A copy of this is saved at ${cert_file}." \
@@ -4828,7 +4985,8 @@ dispatch_level() {
         73) run_level_73 ;; 74) run_level_74 ;; 75) run_level_75 ;; 76) run_level_76 ;;
         77) run_level_77 ;; 78) run_level_78 ;; 79) run_level_79 ;; 80) run_level_80 ;;
         81) run_level_81 ;; 82) run_level_82 ;; 83) run_level_83 ;; 84) run_level_84 ;;
-        85) run_level_85 ;; 86) run_level_86 ;;
+        85) run_level_85 ;; 86) run_level_86 ;; 87) run_level_87 ;; 88) run_level_88 ;;
+        89) run_level_89 ;; 90) run_level_90 ;;
         *) printf '%b\n' "\n${LGREEN}  🏆 All ${TOTAL_LEVELS} levels complete, true master!${NC}"; press_enter; main_menu ;;
     esac
 }

@@ -1,6 +1,6 @@
 ---
 title: "Levels 82–86: TUI Toolbelt"
-description: "ranger, cmus, mpd/mpc, btop, and fzf: the graduation tier, a keyboard-only toolbelt that never leaves the terminal."
+description: "ranger, cmus, mpd/mpc, btop, and fzf: a keyboard-only toolbelt that never leaves the terminal."
 ---
 
 ## Level 82: ranger
@@ -78,4 +78,4 @@ fzf reads lines from stdin and writes the selected line to stdout, nothing more.
 
 ---
 
-Finish this level and you graduate: a certificate with your name, final stats, and badges, written to `~/.bashquest/<name>.certificate.txt`, plus a closing word from Tasmania. See [how to play](/bashquest/getting-started/how-to-play/#graduation) for what that looks like.
+Finish this tier and move on to [Modern TUI Tools](/bashquest/levels/18-modern-tui-tools/): the newer generation of these same ideas, plus dedicated TUI dashboards for git and Docker.
