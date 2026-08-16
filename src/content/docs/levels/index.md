@@ -1,9 +1,9 @@
 ---
 title: "Levels"
-description: "All 61 levels across twelve tiers, from basic navigation to enterprise storage, networking, and desktop ricing."
+description: "All 86 levels across seventeen tiers, from basic navigation to enterprise storage, networking, containers, and desktop ricing."
 ---
 
-BashQuest has 61 levels split across twelve tiers, from basic navigation all the way to storage, enterprise networking, SAN, kernels, and desktop ricing. Each level has 5–8 challenges. Every challenge explains the command's purpose: not just its syntax.
+BashQuest has 86 levels split across seventeen tiers, from basic navigation all the way to storage, enterprise networking, SAN, kernels, containers, and desktop ricing. Each level has 4–8 challenges. Every challenge explains the command's purpose: not just its syntax.
 
 | Tier | Levels | Focus |
 |---|---|---|
@@ -19,6 +19,11 @@ BashQuest has 61 levels split across twelve tiers, from basic navigation all the
 | **Boot Process & Kernel** | 50–54 | Boot process, GRUB, alternative boot managers, kernel panics, building a kernel |
 | **Media Management** | 55–57 | ffmpeg, library organization, home media servers |
 | **Desktop Ricing** | 58–61 | X11/Wayland, i3, AwesomeWM, compositors, dotfiles |
+| **Git & Version Control** | 62–67 | init/status/config, staging, history, branching, remotes, undo |
+| **Docker & Containers** | 68–73 | Images, running/exec/logs, building, volumes/networks, Compose, cleanup |
+| **Universal Packages** | 74–77 | Snap install/channels/revert, Flatpak install/remotes |
+| **Terminal Multiplexing** | 78–81 | tmux sessions, windows, panes, detach/reattach |
+| **TUI Toolbelt** | 82–86 | ranger, cmus, mpd/mpc, btop, fzf |
 
 ## Every Level and Its Commands
 
@@ -85,3 +90,28 @@ BashQuest has 61 levels split across twelve tiers, from basic navigation all the
 | 59 | i3 Window Manager | `mod+enter` workspaces, config |
 | 60 | AwesomeWM & Compositors | `rc.lua` `picom` |
 | 61 | Dotfiles & Theming | `stow` `git` bare-repo dotfiles |
+| 62 | Git Basics | `git init` `status` `config --global` |
+| 63 | Staging & Committing | `add` `commit -m` `-am` `diff --staged` |
+| 64 | History & Diffs | `log` `--oneline` `diff` `show` `blame` |
+| 65 | Branching & Merging | `branch` `switch -c` `merge` `branch -d` |
+| 66 | Remotes | `clone` `remote add` `push -u` `pull` `fetch` |
+| 67 | Undo & Ignore | `restore` `reset --soft` `revert` `stash` `.gitignore` |
+| 68 | Images & Containers | `docker run -d` `-p` `ps -a` `images` |
+| 69 | Logs, Exec & Inspecting | `logs -f` `exec -it` `inspect` `stats` |
+| 70 | Building Images | `Dockerfile` `FROM` `build -t` `tag` `push` |
+| 71 | Volumes & Networks | `volume create` `-v` `network create` |
+| 72 | Docker Compose | `compose up -d` `--scale` `logs -f` `down` |
+| 73 | Cleanup & Pruning | `container/image/system prune` `rm -f` `df` |
+| 74 | Installing with Snap | `snap install` `list` `info` `--classic` |
+| 75 | Snap Channels & Updates | `refresh` `--channel=edge` `revert` `disable` |
+| 76 | Installing with Flatpak | `flatpak install` `run` `list` `--unused` |
+| 77 | Flatpak Remotes | `remote-add` `remotes` `update` `search` |
+| 78 | Starting tmux | `new -s` `ls` `attach -t` `kill-session` |
+| 79 | Windows in a Session | `new-window -n` `rename-window` `next-window` |
+| 80 | Panes | `split-window -h/-v` `select-pane -R` `resize-pane` |
+| 81 | Detach & Reattach | `detach` `attach` `attach -d` `ls` |
+| 82 | ranger | `ranger` `hjkl` `S` `/` |
+| 83 | cmus | `:add` `c` `b` `cmus-remote -n` |
+| 84 | mpd & mpc | `mpd` `mpc update/add/play/status/random` |
+| 85 | btop | `/` `k` `p` `btop -p` |
+| 86 | fzf | `\| fzf` `Ctrl-R` `Ctrl-T` `--preview` |

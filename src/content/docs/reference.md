@@ -1,9 +1,9 @@
 ---
 title: "Command Reference"
-description: "Quick lookup for every command covered across all 61 levels."
+description: "Quick lookup for every command covered across all 86 levels."
 ---
 
-Quick lookup for every command covered across all 61 levels.
+Quick lookup for every command covered across all 86 levels.
 
 ---
 
@@ -579,4 +579,184 @@ alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 stow nvim                        # deploy a dotfiles package
 gsettings set org.gnome.desktop.interface gtk-theme "Nordic"
 feh --bg-fill ~/Pictures/wallpaper.jpg   # set wallpaper
+```
+
+---
+
+## Git & Version Control
+
+```bash
+git init                              # turn a directory into a repo
+git config --global user.name "You"  # set your identity
+git config --global user.email "you@example.com"
+git status                            # what's changed/staged/untracked
+git status -s                         # compact one-line-per-file status
+
+git add file                          # stage a file
+git add .                             # stage everything
+git commit -m "message"               # commit staged changes
+git commit -am "message"              # stage tracked changes + commit
+git diff                              # unstaged changes
+git diff --staged                     # staged changes (--cached also works)
+
+git log                               # full commit history
+git log --oneline                     # compact history
+git show <hash>                       # inspect one commit
+git blame file                        # who last changed each line
+
+git branch                            # list branches
+git branch name                       # create a branch
+git switch name                       # switch branches (or: git checkout name)
+git switch -c name                    # create + switch (or: git checkout -b name)
+git merge name                        # merge a branch into the current one
+git branch -d name                    # delete a merged branch
+
+git clone url                         # copy a remote repo locally
+git remote add origin url             # register a remote
+git remote -v                         # list remotes
+git push -u origin main               # push + track upstream
+git pull                              # fetch + merge
+git fetch                             # download without merging
+
+git restore --staged file             # unstage (keep the edits)
+git restore file                      # discard uncommitted edits
+git reset --soft HEAD~1               # undo last commit, keep it staged
+git revert HEAD                       # undo a commit with a new commit (safe for pushed history)
+git stash                             # shelve uncommitted changes
+git stash pop                         # bring them back
+echo node_modules >> .gitignore       # stop tracking a path forever
+```
+
+---
+
+## Docker & Containers
+
+```bash
+docker pull nginx                     # download an image
+docker run -d nginx                   # run detached
+docker run -d -p 8080:80 nginx        # run detached, publish a port
+docker ps                             # running containers
+docker ps -a                          # every container, running or not
+docker images                         # local images
+
+docker logs -f web                    # follow a container's logs
+docker exec -it web bash              # interactive shell inside a container
+docker inspect web                    # full container detail (JSON)
+docker stats                          # live resource usage
+docker stop web                       # stop cleanly
+docker rm web                         # remove a stopped container
+docker rm -f web                      # force-stop and remove
+
+# Dockerfile: FROM sets the base image
+docker build -t myapp:latest .        # build from the current directory
+docker tag myapp:latest myapp:v2      # add a second tag
+docker push myrepo/myapp:latest       # push to a registry
+
+docker volume create dbdata           # named volume
+docker run -d -v dbdata:/var/lib/postgresql/data postgres
+docker volume ls                      # list volumes
+docker network create appnet          # custom network
+docker run -d --network appnet redis  # attach a container to it
+
+docker compose up -d                  # bring up the whole stack, detached
+docker compose logs -f                # follow every service's logs
+docker compose up -d --scale worker=3 # scale one service
+docker compose down                   # tear the stack down
+
+docker container prune                # remove stopped containers
+docker image prune                    # remove dangling images
+docker system prune                   # remove all of the above at once
+docker system df                      # see what's using disk space
+```
+
+---
+
+## Universal Packages (Snap & Flatpak)
+
+```bash
+snap install spotify                  # install a snap
+snap list                             # installed snaps
+snap info spotify                     # details before installing
+snap remove spotify                   # uninstall
+snap install code --classic           # full-system-access confinement
+
+snap refresh                          # update every installed snap
+snap install mytool --channel=edge    # track a specific release channel
+snap list --all mytool                # every kept revision
+snap revert mytool                    # roll back a bad update
+snap disable mytool                   # disable without uninstalling
+
+flatpak install flathub org.gimp.GIMP # install from a remote
+flatpak run org.gimp.GIMP             # launch by app ID
+flatpak list                          # installed flatpaks
+flatpak uninstall org.gimp.GIMP       # remove an app
+flatpak uninstall --unused            # clean up orphaned runtimes
+
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak remotes                       # configured remotes
+flatpak update                        # update everything
+flatpak search video editor           # search flathub
+```
+
+---
+
+## Terminal Multiplexing (tmux)
+
+```bash
+tmux new -s deploy               # start a named session
+tmux ls                          # list sessions
+tmux attach -t deploy            # reattach to a session
+tmux kill-session -t deploy      # end a session entirely
+
+tmux new-window                  # new window in the session
+tmux new-window -n logs          # create + name it in one step
+tmux rename-window deploy        # rename the current window
+tmux next-window                 # cycle to the next window
+tmux list-windows                # list windows in the session
+
+tmux split-window -h             # split side by side
+tmux split-window -v             # split stacked
+tmux select-pane -R              # move focus right (-L/-U/-D too)
+tmux resize-pane -R 10           # resize by 10 cells
+tmux kill-pane                   # close the current pane
+
+tmux detach                      # leave the session running, disconnect (Ctrl-b d)
+tmux attach                      # reattach to the most recent session
+tmux attach -d                   # reattach, kicking other clients off
+```
+
+---
+
+## TUI Toolbelt
+
+```bash
+# ranger - keyboard-driven file manager
+ranger                # launch in the current directory
+ranger /var/log       # launch in a specific directory
+# hjkl = down/up/back/into (same as vim), S = drop to a shell here, / = search
+
+# cmus - terminal music player
+cmus                   # launch
+:add ~/Music           # command mode: add a library path
+# c = play/pause, b = next track
+cmus-remote -n         # control a detached instance from another terminal
+
+# mpd/mpc - background music daemon + client
+mpd                     # start the daemon
+mpc update              # rescan the music directory
+mpc add "Artist/Album/Track.flac"
+mpc play                # start playback
+mpc status              # what's playing right now
+mpc random              # toggle shuffle
+
+# btop - modern resource monitor
+btop                    # launch
+# / = filter processes, k = kill selected, p = cycle presets
+btop -p 2                # launch straight into preset 2
+
+# fzf - fuzzy finder
+git branch | fzf                       # fuzzy-pick from any piped list
+# Ctrl-R = fuzzy search shell history, Ctrl-T = fuzzy-insert a file path
+fzf --preview 'cat {}'                 # preview the highlighted item live
+ps aux | fzf | awk '{print $2}' | xargs kill   # fuzzy-pick a process to kill
 ```

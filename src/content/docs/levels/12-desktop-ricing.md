@@ -45,7 +45,7 @@ description: "X11/Wayland and window managers, i3, AwesomeWM & compositors, dotf
 
 ## Level 61: Dotfiles & Theming
 
-> *The final skill: managing every config you just spent three levels tuning, so one command reproduces your whole setup on a new machine.*
+> *The tier's closing skill: managing every config you just spent three levels tuning, so one command reproduces your whole setup on a new machine.*
 
 ```bash
 # The "dotfiles as a bare repo" trick
@@ -67,4 +67,4 @@ Bare-repo dotfiles need no symlinks and no separate checked-out folder, git just
 
 ---
 
-Finish this level and you graduate: a certificate with your name, final stats, and badges, written to `~/.bashquest/<name>.certificate.txt`, plus a closing word from Tasmania. See [how to play](/bashquest/getting-started/how-to-play/#graduation) for what that looks like.
+Finish this level and the run keeps going: five more tiers cover git, Docker, snap/flatpak, tmux, and a TUI toolbelt before graduation. See [Git & Version Control](/bashquest/levels/13-git-version-control/) for what's next, or [how to play](/bashquest/getting-started/how-to-play/#graduation) for what the actual graduation ceremony looks like at the end of level 86.

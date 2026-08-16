@@ -5,10 +5,10 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blueviolet?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-brightgreen?style=flat-square&logo=linux)](https://github.com/hardlygospel/bashquest)
 [![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)](https://github.com/hardlygospel/bashquest)
-[![Levels](https://img.shields.io/badge/Levels-61-blue?style=flat-square)](https://hardlygospel.github.io/bashquest/levels/)
+[![Levels](https://img.shields.io/badge/Levels-86-blue?style=flat-square)](https://hardlygospel.github.io/bashquest/levels/)
 [![Docs](https://img.shields.io/badge/docs-hardlygospel.github.io%2Fbashquest-9cf?style=flat-square)](https://hardlygospel.github.io/bashquest/)
 
-**An interactive terminal game that turns your shell into a full systems administration training ground.** No slides, no video, no sandboxed browser IDE: you type real commands, against a real (simulated) filesystem, and a mentor character reacts to every answer. 61 levels, 12 tiers, zero dependencies.
+**An interactive terminal game that turns your shell into a full systems administration training ground.** No slides, no video, no sandboxed browser IDE: you type real commands, against a real (simulated) filesystem, and a mentor character reacts to every answer. 86 levels, 17 tiers, zero dependencies.
 
 📖 **Full docs:** [hardlygospel.github.io/bashquest](https://hardlygospel.github.io/bashquest/)
 
@@ -35,7 +35,7 @@
 BashQuest is a single Bash script (`bashquest.sh`, no build step, no installer) that:
 
 - Creates a **pseudo-login system**: register an account, log in, and your progress is saved per user
-- Drops you into 61 **progressive levels** across 12 tiers, from `ls` and `pwd` on day one to building a kernel and ricing a tiling window manager by the end
+- Drops you into 86 **progressive levels** across 17 tiers, from `ls` and `pwd` on day one, through git, Docker, and tmux, to ricing a tiling window manager and a TUI toolbelt by the end
 - Runs every challenge against a **real simulated environment**: actual files, actual log files, actual directory trees created in a temp sandbox, so the commands you type do something, not just get string-matched against a static answer
 - Validates your answer with **pattern matching**, not exact-string matching, so `ls -la` and `ls -al` are both accepted where either is correct
 - Explains **why** a command exists and when a real sysadmin reaches for it, not just what to type
@@ -47,7 +47,7 @@ It's built for one goal: walk out the other side able to comfortably administrat
 
 ## What you'll learn
 
-Twelve tiers, building on each other, from absolute basics to topics most "Linux 101" courses never touch:
+Seventeen tiers, building on each other, from absolute basics to topics most "Linux 101" courses never touch:
 
 **Tier 1: Beginner** (levels 1-4)
 - Navigation: `ls`, `cd`, `pwd`, `mkdir`, `rmdir`
@@ -119,11 +119,46 @@ Twelve tiers, building on each other, from absolute basics to topics most "Linux
 - Organizing a large media library, integrity checking
 - Home media server fundamentals (hardware transcode, layout)
 
-**Tier 12: Desktop Ricing** (levels 58-61, the finale)
+**Tier 12: Desktop Ricing** (levels 58-61)
 - X11 vs Wayland, window manager fundamentals
 - The i3 tiling window manager
 - AwesomeWM and compositors (picom)
 - Dotfiles management and theming
+
+**Tier 13: Git & Version Control** (levels 62-67)
+- Init, status, and identity config
+- Staging, committing, and inspecting diffs
+- Reading history: `log`, `diff`, `show`, `blame`
+- Branching, switching, and merging
+- Remotes: clone, push, pull, fetch
+- Undoing mistakes: `reset`, `revert`, `stash`, `.gitignore`
+
+**Tier 14: Docker & Containers** (levels 68-73)
+- Pulling images, running and inspecting containers
+- Logs, `exec`, and live resource stats
+- Building your own images with a Dockerfile
+- Volumes and custom networks
+- Docker Compose for multi-container stacks
+- Cleanup and pruning
+
+**Tier 15: Universal Packages** (levels 74-77)
+- Installing, listing, and removing snaps
+- Snap channels, refresh, and reverting a bad update
+- Installing and running Flatpak apps
+- Flatpak remotes and how it differs from snap
+
+**Tier 16: Terminal Multiplexing** (levels 78-81)
+- Starting and listing tmux sessions
+- Windows inside a session
+- Splitting a window into panes
+- Detach/reattach: surviving a dropped SSH connection
+
+**Tier 17: TUI Toolbelt** (levels 82-86, the finale)
+- ranger, a full-screen keyboard-driven file manager
+- cmus, a terminal music player
+- mpd/mpc, a background music daemon and its client
+- btop, a modern resource monitor
+- fzf, the fuzzy finder that ends up wired into everything
 
 See the [full level list](#full-level-list) below for every level by name, or the [levels documentation](https://hardlygospel.github.io/bashquest/levels/) for the complete breakdown with examples.
 
@@ -145,7 +180,7 @@ It's flavor, not a mechanic: nothing Tasmania says changes your score. But it's 
 ## Features
 
 **Gameplay**
-- 61 levels, 5-8 challenges each, 359 challenges total
+- 86 levels, 4-8 challenges each, 488 challenges total
 - 3 lives per session, lose one on a wrong answer or a skip
 - XP earned per correct answer, scaled to challenge difficulty
 - `hint` shows a detailed clue for the current challenge, free of cost
@@ -155,13 +190,13 @@ It's flavor, not a mechanic: nothing Tasmania says changes your score. But it's 
 - Pseudo-login: register/login with hashed passwords, saved per user under `~/.bashquest/`
 - Levels unlock sequentially: clear level N to unlock N+1
 - **Topic jump menu**: pick a tier, then a level within it, instead of scrolling one long list
-- Tier milestone screens at the end of each of the 12 tiers
+- Tier milestone screens at the end of each of the 17 tiers
 - Leaderboard ranking every player account on the machine by total XP
 
 **Presentation**
 - Full ANSI-colour TUI: banners, boxed challenges, a live status bar
 - A fake boot sequence on launch
-- In-game command reference covering all 61 level topics
+- In-game command reference covering all 86 level topics
 - Streak tracking and a 6-badge achievement system (Purist, No Shortcuts, Untouchable, On a Roll, Unstoppable, Graduate)
 
 **Technical**
@@ -183,9 +218,9 @@ Six badges to earn, viewable any time from the main menu:
 | **Untouchable** | Never losing a life |
 | **On a Roll** | A 5-answer streak |
 | **Unstoppable** | A 10-answer streak |
-| **Graduate** | Completing all 61 levels |
+| **Graduate** | Completing all 86 levels |
 
-Clear all 61 levels and you get a full graduation ceremony:
+Clear all 86 levels and you get a full graduation ceremony:
 - A certificate with your name, final XP, best streak, and badge count
 - The certificate is written to disk at `~/.bashquest/<your-name>.certificate.txt`, yours to keep
 - A closing speech from Tasmania
@@ -217,7 +252,7 @@ No dependencies. No installation. Pure Bash.
 4. Type the command. It's checked against a pattern, so equivalent valid answers are accepted, not just one exact string
 5. Correct answers earn XP and may trigger a streak callout. Wrong answers cost a life. `hint` and `skip` are always available mid-challenge
 6. Finish the last level of a tier and get a milestone screen instead of the usual level-complete screen
-7. Finish level 61 and graduate, certificate included
+7. Finish level 86 and graduate, certificate included
 
 ---
 
@@ -286,6 +321,31 @@ No dependencies. No installation. Pure Bash.
 | 59 | i3 Window Manager | `mod+enter` workspaces, config |
 | 60 | AwesomeWM & Compositors | `rc.lua` `picom` |
 | 61 | Dotfiles & Theming | `stow` `git` bare-repo dotfiles |
+| 62 | Git Basics | `git init` `git status` `git config` |
+| 63 | Staging & Committing | `git add` `git commit -m` `-am` `git diff --staged` |
+| 64 | History & Diffs | `git log` `git diff` `git show` `git blame` |
+| 65 | Branching & Merging | `git branch` `git switch` `git merge` |
+| 66 | Remotes | `git clone` `git remote` `push` `pull` `fetch` |
+| 67 | Undo & Ignore | `git reset` `revert` `stash` `.gitignore` |
+| 68 | Images & Containers | `docker run` `docker ps` `docker images` |
+| 69 | Logs, Exec & Inspecting | `docker logs -f` `exec -it` `inspect` |
+| 70 | Building Images | `Dockerfile` `docker build -t` `tag` `push` |
+| 71 | Volumes & Networks | `docker volume` `-v` `docker network` |
+| 72 | Docker Compose | `docker compose up -d` `down` `logs -f` |
+| 73 | Cleanup & Pruning | `docker system prune` `rm -f` `rmi` |
+| 74 | Installing with Snap | `snap install` `list` `remove` `--classic` |
+| 75 | Snap Channels & Updates | `snap refresh` `--channel` `revert` |
+| 76 | Installing with Flatpak | `flatpak install` `run` `list` `uninstall` |
+| 77 | Flatpak Remotes | `flatpak remote-add` `remotes` `update` |
+| 78 | Starting tmux | `tmux new -s` `ls` `attach -t` `kill-session` |
+| 79 | Windows in a Session | `new-window` `rename-window` `next-window` |
+| 80 | Panes | `split-window -h/-v` `select-pane` `resize-pane` |
+| 81 | Detach & Reattach | `tmux detach` `attach` `attach -d` `ls` |
+| 82 | ranger | `ranger` `hjkl` `S` (shell) `/` (search) |
+| 83 | cmus | `cmus` `:add` `c` `b` `cmus-remote -n` |
+| 84 | mpd & mpc | `mpd` `mpc update/add/play/status/random` |
+| 85 | btop | `btop` `/` (filter) `k` (kill) `p` (preset) |
+| 86 | fzf | `fzf` `Ctrl-R` `Ctrl-T` `--preview` |
 
 ---
 

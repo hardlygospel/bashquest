@@ -151,7 +151,7 @@ release_claim() {
 # throughout the file reads from TOTAL_LEVELS now, so growing the game means
 # growing this number, the TIERS table below, and the LEVELS table in
 # level_select(), nothing else.
-TOTAL_LEVELS=61
+TOTAL_LEVELS=86
 
 # num|name|icon|start_level|end_level
 TIERS=(
@@ -167,6 +167,11 @@ TIERS=(
     "10|Boot Process & Kernel  |🥾|50|54"
     "11|Media Management       |🎬|55|57"
     "12|Desktop Ricing         |🎨|58|61"
+    "13|Git & Version Control  |🌿|62|67"
+    "14|Docker & Containers    |🐳|68|73"
+    "15|Universal Packages     |📦|74|77"
+    "16|Terminal Multiplexing  |🪟|78|81"
+    "17|TUI Toolbelt           |🎧|82|86"
 )
 
 # num|name|cmds|icon, filtered by tier range in level_select_tier().
@@ -232,6 +237,31 @@ LEVELS=(
     "59|i3 Window Manager     |mod+enter workspaces config   |🪟"
     "60|AwesomeWM & Compositors|rc.lua picom                 |🎨"
     "61|Dotfiles & Theming    |stow git bare-repo dotfiles   |🌈"
+    "62|Git Basics            |git init status config        |🌿"
+    "63|Staging & Committing  |add commit -m -am diff        |📸"
+    "64|History & Diffs       |log diff show blame           |🕰️ "
+    "65|Branching & Merging   |branch switch checkout merge  |🌱"
+    "66|Remotes               |clone remote push pull fetch  |☁️ "
+    "67|Undo & Ignore         |reset revert stash gitignore  |🧯"
+    "68|Images & Containers   |docker run ps images pull     |🐳"
+    "69|Logs, Exec & Inspect  |logs -f exec -it inspect      |🔍"
+    "70|Building Images       |Dockerfile build -t tag push  |🧱"
+    "71|Volumes & Networks    |volume create -v network      |🔌"
+    "72|Docker Compose        |compose up -d down logs       |📋"
+    "73|Cleanup & Pruning     |system prune rm rmi df        |🧹"
+    "74|Installing with Snap  |snap install list remove      |📦"
+    "75|Snap Channels&Updates |refresh channel revert        |🔄"
+    "76|Installing w/ Flatpak |flatpak install run list      |📱"
+    "77|Flatpak Remotes       |remote-add remotes update     |🌐"
+    "78|Starting tmux         |new -s ls attach kill-session |🪟"
+    "79|Windows in a Session  |new-window rename next-window |🗂️ "
+    "80|Panes                 |split-window -h -v resize     |🪟"
+    "81|Detach & Reattach     |detach attach -d ls           |🔌"
+    "82|ranger                |hjkl S shell / search         |📂"
+    "83|cmus                  |:add c b cmus-remote          |🎵"
+    "84|mpd & mpc             |mpc play add update status    |🎶"
+    "85|btop                  |filter kill preset -p         |📊"
+    "86|fzf                   |Ctrl-R Ctrl-T --preview pipe  |🔎"
 )
 
 PLAYER_NAME=""
@@ -938,6 +968,11 @@ command_reference() {
     printf '%b\n' "  ${BLUE}BOOT/KERNEL${NC}  update-grub  bootctl  journalctl -b  dmesg  make"
     printf '%b\n' "  ${LRED}MEDIA      ${NC}  ffmpeg  ffprobe  sha256sum  iotop  find -size"
     printf '%b\n' "  ${LGREEN}RICING     ${NC}  i3-msg  bindsym  picom  stow  gsettings  feh"
+    printf '%b\n' "  ${YELLOW}GIT        ${NC}  init  add  commit  branch  switch  merge  push  pull"
+    printf '%b\n' "  ${LCYAN}DOCKER     ${NC}  run  ps  exec  build  Dockerfile  compose  volume  network"
+    printf '%b\n' "  ${MAGENTA}PACKAGES 2 ${NC}  snap install  snap refresh  flatpak install  flatpak run"
+    printf '%b\n' "  ${BLUE}TMUX       ${NC}  new -s  attach  detach  split-window  select-pane"
+    printf '%b\n' "  ${LRED}TUI TOOLS  ${NC}  ranger  cmus  mpc  btop  fzf"
     printf '%b\n' "\n${DIM}  In-game: type '${YELLOW}hint${NC}${DIM}' for a clue, '${YELLOW}skip${NC}${DIM}' to skip (costs 1 life).${NC}"
     printf '%b\n' "${DIM}  Platform notes: macOS uses md5/vm_stat/sysctl/brew vs Linux md5sum/free/lscpu/apt.${NC}"
     press_enter; main_menu
@@ -3557,7 +3592,7 @@ run_level_57() {
         "Tier 12: Desktop Ricing: window managers, i3, awesomewm, and dotfiles."
 }
 
-# ---- TIER 12: DESKTOP RICING (FINAL) ----
+# ---- TIER 12: DESKTOP RICING ----
 
 run_level_58() {
     level_intro 58 "X11, Wayland &amp; Window Managers" \
@@ -3696,6 +3731,921 @@ run_level_61() {
         'chk "^feh --bg-fill"' 20
 
     cleanup_game_env
+    tier_complete 61 "Desktop Ricing" \
+        "Window managers, both X11 and Wayland, tiling with i3, Lua-scripted AwesomeWM and compositors, and dotfiles management, so your whole setup reproduces itself on a new machine in minutes." \
+        "Tier 13: Git & Version Control: the history and collaboration layer underneath everything you build from here on."
+}
+
+# ---- TIER 13: GIT & VERSION CONTROL ----
+
+run_level_62() {
+    level_intro 62 "Git Basics" \
+        "Every file you've touched in this game has been disposable simulation state. Real work needs a real history: what changed, when, and why. Git is that history, and it starts with the two commands you'll type more than almost anything else you learn from here on." \
+        "🌿   Commands: git init  |  git status  |  git config"
+    setup_game_env
+
+    run_challenge "Initialize a Repository" \
+        "Turn the current directory into a git repository." \
+        "git init: creates the hidden .git/ directory that turns any folder into a repo. Versioning starts from nothing until you run this." \
+        'exact "git init"' 15
+
+    run_challenge "Set Your Identity" \
+        "Git refuses to record who made a commit until you tell it. Set your global git username to ${YELLOW}Tasmania${NC}." \
+        "git config --global user.name \"Tasmania\": --global applies it to every repo on this machine, not just the current one." \
+        'chk "^git config --global user\\.name"' 15
+
+    run_challenge "Set Your Email" \
+        "Do the same for your email: set your global git email to ${YELLOW}tasmania@bashquest.local${NC}." \
+        "git config --global user.email \"...\": every commit is stamped with both name and email, permanently, so get this right once and forget it." \
+        'chk "^git config --global user\\.email"' 15
+
+    run_challenge "Check Repository Status" \
+        "See what's changed, staged, or untracked in the current repo." \
+        "git status: the single most-run git command there is. Tells you exactly where things stand before you do anything else." \
+        'exact "git status"' 15
+
+    run_challenge "See a Compact Status" \
+        "Same information as git status, but in a compact, one-line-per-file format." \
+        "git status -s (or --short): same info, faster to eyeball once you know the letter codes." \
+        'chk "^git status -s$|^git status --short$"' 15
+
+    cleanup_game_env
+    level_complete 62
+}
+
+run_level_63() {
+    level_intro 63 "Staging &amp; Committing" \
+        "Git doesn't commit your whole working directory blindly. There's a staging area in between: a deliberate list of exactly what goes into the next commit, built one git add at a time before you ever run git commit." \
+        "📸   Commands: git add  |  git commit  |  git diff --staged"
+    setup_game_env
+
+    run_challenge "Stage a File" \
+        "Stage ${YELLOW}README.md${NC} for the next commit." \
+        "git add README.md: moves the file's current content into the staging area, ready to be committed." \
+        'chk "^git add .+"' 15
+
+    run_challenge "Stage Everything" \
+        "Stage every changed and new file in the repo, in one command." \
+        "git add . (or git add -A): . stages everything under the current directory, -A stages everything in the whole repo regardless of where you're standing." \
+        'chk "^git add \\.$|^git add -A$"' 20
+
+    run_challenge "Commit With a Message" \
+        "Commit your staged changes with the message ${YELLOW}Initial commit${NC}." \
+        "git commit -m \"Initial commit\": -m gives the message inline, no editor pop-up needed." \
+        'chk "^git commit -m "' 20
+
+    run_challenge "Stage and Commit in One Step" \
+        "Every file changed here is already tracked by git, nothing new. Commit all of it with the message ${YELLOW}Fix typo${NC}, skipping the separate git add step entirely." \
+        "git commit -am \"Fix typo\": -a auto-stages every already-tracked, modified file first. It will NOT pick up brand new, never-added files, only ones git already knows about." \
+        'chk "^git commit -am "' 25
+
+    run_challenge "See What's Staged" \
+        "Before committing, review exactly what's sitting in the staging area, not your unstaged working-directory changes." \
+        "git diff --staged (or --cached): plain git diff shows unstaged changes; --staged shows what's actually queued for the next commit." \
+        'chk "^git diff --staged$|^git diff --cached$"' 20
+
+    cleanup_game_env
+    level_complete 63
+}
+
+run_level_64() {
+    level_intro 64 "History &amp; Diffs" \
+        "Every commit you make becomes permanent, inspectable history. Reading that history back, what changed, who changed it, and exactly which lines, is just as much a daily skill as making commits in the first place." \
+        "🕰️   Commands: git log  |  git diff  |  git show  |  git blame"
+    setup_game_env
+
+    run_challenge "View Commit History" \
+        "Show the full commit history of the current repo." \
+        "git log: newest commit first, each with its full hash, author, date, and message." \
+        'exact "git log"' 15
+
+    run_challenge "Compact One-Line History" \
+        "Show the same history, but one line per commit instead of a full block each." \
+        "git log --oneline: abbreviated hash plus the first line of each message, the version you'll actually reach for day to day." \
+        'chk "^git log --oneline$"' 20
+
+    run_challenge "See Unstaged Changes" \
+        "Show what's changed in your working directory that hasn't been staged yet." \
+        "git diff: with no arguments, compares your working directory against the staging area (or the last commit, if nothing's staged)." \
+        'exact "git diff"' 15
+
+    run_challenge "Inspect a Specific Commit" \
+        "Show the full details, message and diff, of the commit with hash ${YELLOW}a1b2c3d${NC}." \
+        "git show a1b2c3d: works with a full hash, a short hash, or a ref like HEAD~2, all the same way." \
+        'chk "^git show .+"' 20
+
+    run_challenge "Blame a Line" \
+        "You need to know who last touched every line of ${YELLOW}deploy.sh${NC}, and when. Show it." \
+        "git blame deploy.sh: annotates every line with the commit, author, and date that last changed it - the fastest way to find who to ask." \
+        'chk "^git blame .+"' 20
+
+    cleanup_game_env
+    level_complete 64
+}
+
+run_level_65() {
+    level_intro 65 "Branching &amp; Merging" \
+        "Branches are how git lets you work on something new without touching what already works. Build the feature on its own branch, keep main stable the whole time, then merge the finished work back in when it's ready." \
+        "🌱   Commands: git branch  |  git switch  |  git merge"
+    setup_game_env
+
+    run_challenge "List Branches" \
+        "List every branch in the current repo." \
+        "git branch: with no arguments, lists local branches and marks the current one with an asterisk." \
+        'exact "git branch"' 15
+
+    run_challenge "Create a New Branch" \
+        "Create a new branch called ${YELLOW}feature-login${NC}, without switching to it yet." \
+        "git branch feature-login: creates the branch pointing at your current commit, but leaves you standing on whatever branch you were already on." \
+        'chk "^git branch [A-Za-z0-9_./-]+$"' 15
+
+    run_challenge "Switch to a Branch" \
+        "Switch your working directory over to the existing ${YELLOW}feature-login${NC} branch." \
+        "git switch feature-login (or the older git checkout feature-login): switch is the newer, dedicated command for changing branches; checkout is the classic all-purpose one that also does this." \
+        'chk "^git switch feature-login$|^git checkout feature-login$"' 20
+
+    run_challenge "Create and Switch in One Step" \
+        "Create a new branch called ${YELLOW}hotfix${NC} and switch to it immediately, in a single command." \
+        "git switch -c hotfix (or git checkout -b hotfix): -c/-b creates the branch and switches to it in one step, the combo you'll actually use most of the time." \
+        'chk "^git switch -c hotfix$|^git checkout -b hotfix$"' 25
+
+    run_challenge "Merge a Branch" \
+        "You're standing on main. Merge the finished ${YELLOW}feature-login${NC} branch into it." \
+        "git merge feature-login: merges the named branch INTO whatever branch you're currently standing on, so you always run this while on the destination, not the source." \
+        'chk "^git merge feature-login$"' 25
+
+    run_challenge "Delete a Merged Branch" \
+        "${YELLOW}feature-login${NC} is merged and no longer needed. Delete it." \
+        "git branch -d feature-login: -d only deletes a branch git can confirm is already fully merged, a built-in safety check. -D forces it regardless." \
+        'chk "^git branch -d feature-login$"' 20
+
+    cleanup_game_env
+    level_complete 65
+}
+
+run_level_66() {
+    level_intro 66 "Remotes" \
+        "So far every repo has lived only on this one machine. A remote is a copy of the repo hosted somewhere else, GitHub, a bare repo on a server, a teammate's machine, and pushing and pulling is how history moves between them." \
+        "☁️   Commands: git clone  |  git remote  |  git push  |  git pull"
+    setup_game_env
+
+    run_challenge "Clone a Repository" \
+        "Clone the repo at ${YELLOW}https://github.com/hardlygospel/bashquest.git${NC} down to a local copy." \
+        "git clone <url>: copies the full history and checks out the default branch, and automatically wires up 'origin' as the remote pointing back at that URL." \
+        'chk "^git clone .+"' 15
+
+    run_challenge "Add a Remote" \
+        "This repo has no remote configured yet. Add one named ${YELLOW}origin${NC} pointing at ${YELLOW}git@github.com:you/repo.git${NC}." \
+        "git remote add origin git@github.com:you/repo.git: registers a remote under a short name (origin is the conventional default) so you never have to type the full URL again." \
+        'chk "^git remote add origin .+"' 20
+
+    run_challenge "List Remotes" \
+        "List every remote configured for this repo, along with their URLs." \
+        "git remote -v: -v (verbose) shows the fetch and push URL for each configured remote, not just its name." \
+        'chk "^git remote -v$"' 15
+
+    run_challenge "Push to a Remote" \
+        "Push your local ${YELLOW}main${NC} branch to origin, linking it as the tracked upstream in the same command." \
+        "git push -u origin main: -u (--set-upstream) links local main to origin/main, so every push after this one just needs a plain git push." \
+        'chk "^git push -u origin main$"' 25
+
+    run_challenge "Pull the Latest Changes" \
+        "Bring your local branch up to date with whatever's new on its remote." \
+        "git pull: fetches from the remote and merges it into your current branch, in one step." \
+        'exact "git pull"' 15
+
+    run_challenge "Fetch Without Merging" \
+        "Download whatever's new on the remote, but don't touch your working files or merge anything yet, just look first." \
+        "git fetch: downloads new commits and updates the remote-tracking branches, but never touches your own working branch until you explicitly merge or pull." \
+        'exact "git fetch"' 20
+
+    cleanup_game_env
+    level_complete 66
+}
+
+run_level_67() {
+    level_intro 67 "Undo &amp; Ignore" \
+        "Mistakes are normal: a bad commit, a change you want to throw away, a file you never wanted tracked in the first place. Git has a real, specific answer for every one of these, and using the wrong one on shared history is exactly how a rescue turns into a real incident." \
+        "🧯   Commands: git reset  |  git revert  |  git stash  |  .gitignore"
+    setup_game_env
+
+    run_challenge "Unstage a File" \
+        "You staged ${YELLOW}config.yml${NC} by mistake. Unstage it, but keep the actual changes in your working directory." \
+        "git restore --staged config.yml (or the older git reset config.yml): removes it from the staging area without touching a single line of the file's actual content." \
+        'chk "^git restore --staged .+|^git reset .+"' 20
+
+    run_challenge "Discard Local Changes" \
+        "Throw away your uncommitted edits to ${YELLOW}config.yml${NC} entirely, reverting it back to its last-committed state." \
+        "git restore config.yml (or the older git checkout -- config.yml): discards uncommitted edits completely and permanently, unlike unstaging, there's no getting these specific edits back." \
+        'chk "^git restore .+|^git checkout -- .+"' 20
+
+    run_challenge "Undo the Last Commit, Keep the Changes" \
+        "You committed too early. Undo the last commit, but keep every change from it staged and ready to re-commit properly." \
+        "git reset --soft HEAD~1: --soft only rewinds the commit pointer, staged changes are left exactly as they were, nothing in your working directory moves at all." \
+        'chk "^git reset --soft HEAD~1$"' 25
+
+    run_challenge "Revert a Published Commit Safely" \
+        "That last commit already got pushed, and a teammate may have already pulled it. Undo it WITHOUT rewriting history, by creating a new commit that reverses it." \
+        "git revert HEAD: creates a brand new commit that undoes the last one. Safe for shared, already-pushed history in a way a reset never is, because nobody else's history gets rewritten out from under them." \
+        'chk "^git revert HEAD$"' 25
+
+    run_challenge "Stash Unfinished Work" \
+        "You need to switch branches right now but you're mid-edit and not ready to commit anything. Shelve your uncommitted changes so your working directory is clean." \
+        "git stash: shelves every uncommitted change onto a stack, out of the way. Bring it back later with git stash pop." \
+        'exact "git stash"' 20
+
+    run_challenge "Ignore Build Artifacts Forever" \
+        "Add a line to ${YELLOW}.gitignore${NC} so git stops tracking the ${YELLOW}node_modules${NC} directory for good." \
+        "echo node_modules >> .gitignore: any pattern listed in .gitignore, one per line, git will simply never track matching paths again, no matter how many times they get regenerated." \
+        'chk "node_modules.*gitignore"' 20
+
+    cleanup_game_env
+    tier_complete 67 "Git & Version Control" \
+        "The full daily loop: init and stage, commit and inspect history, branch and merge, push and pull with a remote, and undo mistakes the right way depending on whether anyone else has already seen them." \
+        "Tier 14: Docker & Containers: images, running containers, building your own, and cleaning up after them."
+}
+
+# ---- TIER 14: DOCKER & CONTAINERS ----
+
+run_level_68() {
+    level_intro 68 "Images &amp; Containers" \
+        "Everything you've automated so far still runs directly on the host, sharing its libraries, its language runtime version, its exact state. Docker packages an application with everything it needs into one portable image you can run identically anywhere, isolated from all of that." \
+        "🐳   Commands: docker run  |  docker ps  |  docker images"
+    setup_game_env
+
+    run_challenge "Pull an Image" \
+        "Download the ${YELLOW}nginx${NC} image without running it yet." \
+        "docker pull nginx: fetches the image (defaulting to the latest tag) from the configured registry, ready to run later." \
+        'chk "^docker pull .+"' 15
+
+    run_challenge "Run a Container in the Background" \
+        "Start an nginx container, detached, so it keeps running after the command returns and doesn't hold your terminal." \
+        "docker run -d nginx: -d detaches. Without it, docker run holds your shell hostage for as long as the container's main process runs." \
+        'chk "^docker run -d .+"' 20
+
+    run_challenge "Run with a Published Port" \
+        "Run nginx detached again, but this time publish it so host port ${YELLOW}8080${NC} reaches the container's port ${YELLOW}80${NC}." \
+        "docker run -d -p 8080:80 nginx: -p host:container maps a host port through to one inside the container's own isolated network namespace." \
+        'chk "^docker run -d -p 8080:80 "' 25
+
+    run_challenge "List Running Containers" \
+        "List every currently running container." \
+        "docker ps: shows only running containers by default, with their ID, image, ports, and uptime." \
+        'exact "docker ps"' 15
+
+    run_challenge "List All Containers" \
+        "List every container, running or not." \
+        "docker ps -a: -a includes stopped and exited containers too, plain docker ps only shows the running ones." \
+        'chk "^docker ps -a$"' 15
+
+    run_challenge "List Local Images" \
+        "List every image currently stored on this machine." \
+        "docker images: shows every image you've pulled or built locally, with its size and when it was created." \
+        'exact "docker images"' 15
+
+    cleanup_game_env
+    level_complete 68
+}
+
+run_level_69() {
+    level_intro 69 "Logs, Exec &amp; Inspecting" \
+        "A running container is mostly a black box from the outside, unless you know how to look inside it: tail its logs, get an actual shell running inside it, or check its live resource usage." \
+        "🔍   Commands: docker logs  |  docker exec  |  docker inspect"
+    setup_game_env
+
+    run_challenge "Follow Container Logs Live" \
+        "Follow the live log output of a container named ${YELLOW}web${NC}, the same way tail -f follows a growing file." \
+        "docker logs -f web: -f follows the log stream live instead of just dumping what's already been written and exiting." \
+        'chk "^docker logs -f .+"' 20
+
+    run_challenge "Open a Shell Inside a Running Container" \
+        "Open an interactive bash shell inside the running ${YELLOW}web${NC} container." \
+        "docker exec -it web bash: -i keeps stdin open, -t allocates a real terminal, together they give you a genuinely interactive shell inside an already-running container." \
+        'chk "^docker exec -it .+"' 20
+
+    run_challenge "Inspect Container Details" \
+        "Show the full low-level configuration and state (JSON) of the ${YELLOW}web${NC} container." \
+        "docker inspect web: dumps everything docker itself knows about the container - IP address, mounts, env vars, restart policy, all of it." \
+        'chk "^docker inspect .+"' 15
+
+    run_challenge "Check Resource Usage Live" \
+        "Watch live CPU, memory, and network usage for every running container, updating continuously." \
+        "docker stats: the docker equivalent of top, but scoped to containers instead of host processes." \
+        'exact "docker stats"' 15
+
+    run_challenge "Stop a Running Container" \
+        "Stop the ${YELLOW}web${NC} container cleanly." \
+        "docker stop web: sends a graceful shutdown signal first, only force-killing it if it hasn't stopped after a timeout." \
+        'chk "^docker stop .+"' 15
+
+    run_challenge "Remove a Stopped Container" \
+        "${YELLOW}web${NC} is stopped and no longer needed. Remove it entirely." \
+        "docker rm web: deletes a stopped container's filesystem and metadata. It refuses to remove a still-running one unless you also pass -f." \
+        'chk "^docker rm .+"' 15
+
+    cleanup_game_env
+    level_complete 69
+}
+
+run_level_70() {
+    level_intro 70 "Building Images" \
+        "Pulling other people's images only gets you so far. A Dockerfile is a plain-text recipe, one instruction per line, for building your OWN image, reproducibly, from a known starting point every single time." \
+        "🧱   Commands: Dockerfile  |  docker build  |  docker tag"
+    setup_game_env
+
+    run_challenge "Name the Build Instructions File" \
+        "What's the exact, case-sensitive filename docker build looks for by default in a directory, to know how to build an image?" \
+        "Dockerfile: capital D, no file extension. It's the literal default filename docker build reads unless you override it with -f." \
+        'chk "^Dockerfile$"' 15
+
+    run_challenge "Pick the Base Image Instruction" \
+        "Every Dockerfile starts by declaring exactly what it's built on top of. Which instruction sets the base image?" \
+        "FROM: for example FROM python:3.12-slim. It's every Dockerfile's first real instruction, with everything else layering on top of it." \
+        'chk "^FROM$"' 15
+
+    run_challenge "Build an Image From the Current Directory" \
+        "Build an image tagged ${YELLOW}myapp:latest${NC}, using the Dockerfile in the current directory." \
+        "docker build -t myapp:latest .: -t tags the resulting image, the trailing . is the build context, the current directory docker reads the Dockerfile and any files it COPYs from." \
+        'chk "^docker build -t myapp"' 20
+
+    run_challenge "Tag an Existing Image" \
+        "Give the existing ${YELLOW}myapp:latest${NC} image a second tag, ${YELLOW}myapp:v2${NC}, without rebuilding anything." \
+        "docker tag myapp:latest myapp:v2: creates a second name pointing at the exact same image layers, no rebuild involved at all." \
+        'chk "^docker tag .+"' 20
+
+    run_challenge "Push an Image to a Registry" \
+        "Push ${YELLOW}myrepo/myapp:latest${NC} to its configured registry." \
+        "docker push myrepo/myapp:latest: uploads the image's layers to whatever registry the image's name/tag points at (Docker Hub by default)." \
+        'chk "^docker push .+"' 15
+
+    cleanup_game_env
+    level_complete 70
+}
+
+run_level_71() {
+    level_intro 71 "Volumes &amp; Networks" \
+        "A container's own filesystem disappears the moment it's removed, which is exactly wrong for a database. Volumes give data a life outside any one container. Custom networks give containers a way to find each other by name instead of guessing at IPs." \
+        "🔌   Commands: docker volume  |  -v  |  docker network"
+    setup_game_env
+
+    run_challenge "Create a Named Volume" \
+        "Create a named volume called ${YELLOW}dbdata${NC}." \
+        "docker volume create dbdata: allocates storage docker manages itself, independent of any single container's lifecycle." \
+        'chk "^docker volume create .+"' 15
+
+    run_challenge "Mount a Volume Into a Container" \
+        "Run postgres detached, mounting the ${YELLOW}dbdata${NC} volume at ${YELLOW}/var/lib/postgresql/data${NC} inside the container." \
+        "docker run -d -v dbdata:/var/lib/postgresql/data postgres: -v name:path mounts a named volume, so the data survives the container itself being removed and rebuilt." \
+        'chk "^docker run -d -v dbdata:"' 25
+
+    run_challenge "List Volumes" \
+        "List every volume docker currently manages." \
+        "docker volume ls: shows every named volume, regardless of whether a running container currently has it mounted." \
+        'exact "docker volume ls"' 15
+
+    run_challenge "Create a Custom Network" \
+        "Create a custom bridge network called ${YELLOW}appnet${NC}." \
+        "docker network create appnet: containers attached to the same custom network can reach each other by container name, unlike the default bridge network, where that doesn't work." \
+        'chk "^docker network create .+"' 15
+
+    run_challenge "Run a Container on That Network" \
+        "Run redis detached, attached to the ${YELLOW}appnet${NC} network." \
+        "docker run -d --network appnet redis: --network attaches the container to a specific custom network at start time instead of the default one." \
+        'chk "^docker run -d --network appnet"' 25
+
+    cleanup_game_env
+    level_complete 71
+}
+
+run_level_72() {
+    level_intro 72 "Docker Compose" \
+        "A real app is rarely one container. It's a web service, a database, a cache, and a queue, all needing to start in the right order and talk to each other. Compose describes that whole stack in one file and brings all of it up or down with a single command." \
+        "📋   Commands: docker compose up  |  down  |  logs"
+    setup_game_env
+
+    run_challenge "Name the Compose File" \
+        "What's the standard filename docker compose looks for by default in the current directory?" \
+        "docker-compose.yml (or compose.yml on newer versions): defines every service, network, and volume for a whole multi-container app in one place." \
+        'chk "^docker-compose\\.yml$|^compose\\.yml$"' 15
+
+    run_challenge "Bring Up the Whole Stack" \
+        "Start every service defined in the compose file, detached." \
+        "docker compose up -d: builds or pulls and starts every service defined in the file, in the right dependency order, all detached." \
+        'chk "^docker compose up -d$"' 20
+
+    run_challenge "View Logs for the Whole Stack" \
+        "Follow the combined, live log output of every service in the stack." \
+        "docker compose logs -f: interleaves the logs from every service, prefixed with which one each line came from." \
+        'chk "^docker compose logs -f$"' 20
+
+    run_challenge "Scale a Service" \
+        "Scale the ${YELLOW}worker${NC} service specifically up to 3 running instances." \
+        "docker compose up -d --scale worker=3: runs multiple instances of one named service behind the scenes, without touching any of the others." \
+        'chk "^docker compose up -d --scale worker=3$"' 25
+
+    run_challenge "Tear Down the Whole Stack" \
+        "Stop and remove every container and network compose created for this project." \
+        "docker compose down: the exact inverse of up, cleans up everything the stack created in one command." \
+        'exact "docker compose down"' 20
+
+    cleanup_game_env
+    level_complete 72
+}
+
+run_level_73() {
+    level_intro 73 "Cleanup &amp; Pruning" \
+        "Every pulled image, every stopped container, every unused volume sits quietly eating disk space until something actually removes it. A real docker host needs regular cleanup, or df -h eventually becomes a very unpleasant surprise." \
+        "🧹   Commands: docker system prune  |  docker rm  |  docker rmi"
+    setup_game_env
+
+    run_challenge "Remove All Stopped Containers" \
+        "Remove every stopped container on this host in one command." \
+        "docker container prune: removes every container that isn't currently running, after a confirmation prompt." \
+        'chk "^docker container prune$"' 15
+
+    run_challenge "Remove Unused Images" \
+        "Remove every dangling (untagged, unused) image." \
+        "docker image prune: cleans up image layers left behind by builds and pulls that nothing currently references." \
+        'chk "^docker image prune$"' 15
+
+    run_challenge "Remove Everything Unused at Once" \
+        "Reclaim disk space in one shot: remove every stopped container, unused network, and dangling image together." \
+        "docker system prune: the broad cleanup command, everything the narrower prune commands do, combined. Add -a to also remove images not attached to any container at all." \
+        'chk "^docker system prune"' 20
+
+    run_challenge "Force-Remove a Running Container" \
+        "Container ${YELLOW}web${NC} won't stop cleanly. Remove it anyway, forcibly." \
+        "docker rm -f web: -f kills the container first if it's still running, then removes it, skipping the usual 'must be stopped first' refusal." \
+        'chk "^docker rm -f .+"' 20
+
+    run_challenge "Check What's Actually Using Disk Space" \
+        "Before cleaning anything up, see exactly how much disk space images, containers, and volumes are each using." \
+        "docker system df: a breakdown by category (images, containers, local volumes, build cache), so you know what's actually worth pruning before you run it." \
+        'exact "docker system df"' 15
+
+    cleanup_game_env
+    tier_complete 73 "Docker & Containers" \
+        "Pulling and running images, inspecting and exec'ing into live containers, building your own with a Dockerfile, giving data and networking a life outside any single container, orchestrating a whole stack with Compose, and cleaning up after all of it." \
+        "Tier 15: Universal Packages: snap and flatpak, the two competing answers to sandboxed, distro-independent app installs."
+}
+
+# ---- TIER 15: UNIVERSAL PACKAGES (SNAP & FLATPAK) ----
+
+run_level_74() {
+    level_intro 74 "Installing with Snap" \
+        "apt, dnf, and pacman all install packages built specifically for one distro's exact library versions. Snap takes a different approach: every snap bundles its own dependencies and runs sandboxed, so the same package installs identically on Ubuntu, Fedora, or anywhere else snapd runs." \
+        "📦   Commands: snap install  |  snap list  |  snap remove"
+    setup_game_env
+
+    run_challenge "Install a Snap Package" \
+        "Install the ${YELLOW}spotify${NC} snap." \
+        "snap install spotify: downloads and installs the package, sandboxed, along with everything it needs bundled in." \
+        'chk "^snap install .+"' 15
+
+    run_challenge "List Installed Snaps" \
+        "List every snap currently installed." \
+        "snap list: shows every installed snap, its version, and which channel it's tracking." \
+        'exact "snap list"' 15
+
+    run_challenge "Get Info About a Snap" \
+        "Show detailed information about the ${YELLOW}spotify${NC} snap, without installing or removing it." \
+        "snap info spotify: publisher, description, available channels, and install size, before you commit to installing anything." \
+        'chk "^snap info .+"' 15
+
+    run_challenge "Remove a Snap" \
+        "Remove the ${YELLOW}spotify${NC} snap." \
+        "snap remove spotify: uninstalls it. Snap keeps a revision or two around by default in case you want it back." \
+        'chk "^snap remove .+"' 15
+
+    run_challenge "Install in Classic Confinement" \
+        "Some snaps, dev tools especially, need full system access that snap's normal sandboxing won't allow. Install ${YELLOW}code${NC} in classic confinement mode." \
+        "snap install code --classic: --classic opts a specific snap out of the sandbox entirely. Only snaps that explicitly declare they need it are allowed to use this flag at all." \
+        'chk "^snap install .*--classic"' 20
+
+    cleanup_game_env
+    level_complete 74
+}
+
+run_level_75() {
+    level_intro 75 "Snap Channels &amp; Updates" \
+        "Snaps update themselves automatically by default, which is usually exactly what you want and occasionally exactly what you don't. Channels let you deliberately track a more (or less) stable release stream, and every update is reversible." \
+        "🔄   Commands: snap refresh  |  --channel  |  snap revert"
+    setup_game_env
+
+    run_challenge "Check for Updates" \
+        "Check for and install updates to every installed snap." \
+        "snap refresh: with no arguments, refreshes everything installed, the snap equivalent of apt upgrade." \
+        'exact "snap refresh"' 15
+
+    run_challenge "Install From a Specific Channel" \
+        "Install a snap called ${YELLOW}mytool${NC}, tracking its ${YELLOW}edge${NC} channel instead of the stable default." \
+        "snap install mytool --channel=edge (or the shorthand --edge): channels (stable/candidate/beta/edge) are snap's release-stream system, edge being the least tested, most current." \
+        'chk "^snap install .*--channel=edge|^snap install .*--edge"' 20
+
+    run_challenge "See Every Installed Revision" \
+        "See every revision of ${YELLOW}mytool${NC} snap currently kept on disk, not just the active one." \
+        "snap list --all mytool: --all shows every kept revision, including ones disabled after an update, which is exactly what makes a revert possible." \
+        'chk "^snap list --all"' 20
+
+    run_challenge "Roll Back a Bad Update" \
+        "The latest refresh of ${YELLOW}mytool${NC} broke something. Roll it back to the previous working revision." \
+        "snap revert mytool: snap deliberately keeps the previous revision around for exactly this, no reinstall from scratch needed." \
+        'chk "^snap revert .+"' 20
+
+    run_challenge "Disable Without Uninstalling" \
+        "Temporarily disable the ${YELLOW}mytool${NC} snap without removing it or losing its data." \
+        "snap disable mytool: stops it from running and removes its commands from your PATH, but keeps everything in place for snap enable mytool later." \
+        'chk "^snap disable .+"' 15
+
+    cleanup_game_env
+    level_complete 75
+}
+
+run_level_76() {
+    level_intro 76 "Installing with Flatpak" \
+        "Flatpak solves the same distro-independence problem as snap, with a different design: a shared, deduplicated pool of runtimes across every app, and Flathub as the community-run app store almost every flatpak setup points at by default." \
+        "📱   Commands: flatpak install  |  flatpak run  |  flatpak list"
+    setup_game_env
+
+    run_challenge "Install a Flatpak" \
+        "Install GIMP (${YELLOW}org.gimp.GIMP${NC}) from the flathub remote." \
+        "flatpak install flathub org.gimp.GIMP: <remote> <app-id>, flathub being the default community app store almost every flatpak setup points at." \
+        'chk "^flatpak install flathub .+"' 20
+
+    run_challenge "Run a Flatpak App" \
+        "Launch the installed GIMP flatpak from the command line." \
+        "flatpak run org.gimp.GIMP: launches a flatpak app by its full application ID, the same one used to install it." \
+        'chk "^flatpak run .+"' 15
+
+    run_challenge "List Installed Flatpaks" \
+        "List every flatpak application currently installed." \
+        "flatpak list: shows every installed app (and runtime) along with its version and installed size." \
+        'exact "flatpak list"' 15
+
+    run_challenge "Uninstall a Flatpak" \
+        "Uninstall the GIMP flatpak." \
+        "flatpak uninstall org.gimp.GIMP: removes the app itself, though its shared runtime dependencies may still be kept around for other apps." \
+        'chk "^flatpak uninstall .+"' 15
+
+    run_challenge "Remove Unused Runtimes" \
+        "Flatpak apps depend on shared runtimes that stick around even after the app itself is removed. Clean up every runtime nothing installed depends on anymore." \
+        "flatpak uninstall --unused: finds and removes every orphaned runtime in one pass, the flatpak equivalent of docker's own prune commands." \
+        'chk "^flatpak uninstall --unused"' 20
+
+    cleanup_game_env
+    level_complete 76
+}
+
+run_level_77() {
+    level_intro 77 "Flatpak Remotes" \
+        "A flatpak install without a configured remote has nowhere to pull from. Wiring up flathub is the very first thing almost every fresh flatpak setup does, and it's worth knowing exactly what snap and flatpak are each doing differently under the hood too." \
+        "🌐   Commands: flatpak remote-add  |  flatpak update  |  flatpak search"
+    setup_game_env
+
+    run_challenge "Add the Flathub Remote" \
+        "A fresh install has no app store configured at all. Add the flathub remote so flatpak install has somewhere to actually pull from." \
+        "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo: the exact command from flathub's own setup instructions. --if-not-exists makes it safe to run more than once." \
+        'chk "^flatpak remote-add "' 25
+
+    run_challenge "List Configured Remotes" \
+        "List every remote (app store) flatpak currently knows about." \
+        "flatpak remotes: shows every configured remote by name and URL, flathub being the near-universal default." \
+        'exact "flatpak remotes"' 15
+
+    run_challenge "Update Everything" \
+        "Update every installed flatpak application and runtime." \
+        "flatpak update: with no arguments, checks and updates everything installed from any configured remote." \
+        'exact "flatpak update"' 15
+
+    run_challenge "Search Flathub for an App" \
+        "Search flathub for apps matching ${YELLOW}video editor${NC}, without installing anything yet." \
+        "flatpak search video editor: queries the configured remotes by name/keyword, the flatpak equivalent of apt search." \
+        'chk "^flatpak search .+"' 15
+
+    run_challenge "Name Flatpak's Sandboxing Technology" \
+        "Both snap and flatpak sandbox apps and bundle their own dependencies. Flatpak isolates apps using the same underlying Linux kernel feature containers rely on for isolation. Name it, one word." \
+        "namespaces (via bubblewrap): flatpak apps run inside Linux namespaces plus bubblewrap, similar low-level isolation primitives to what container runtimes use, versus snap's AppArmor-based confinement model." \
+        'chk "^[Nn]amespaces"' 20
+
+    cleanup_game_env
+    tier_complete 77 "Universal Packages" \
+        "Two competing answers to the same problem, sandboxed, distro-independent app installs, and the practical commands for installing, updating, rolling back, and cleaning up after both." \
+        "Tier 16: Terminal Multiplexing: tmux, and why an SSH session dropping doesn't have to mean your work dies with it."
+}
+
+# ---- TIER 16: TERMINAL MULTIPLEXING ----
+
+run_level_78() {
+    level_intro 78 "Starting tmux" \
+        "An SSH session that drops kills every process running inside it, unless that process is running inside tmux. A tmux session lives on the server itself, independent of any one connection to it, and you can detach and reattach to the exact same running session as many times as you need." \
+        "🪟   Commands: tmux new -s  |  tmux ls  |  tmux attach"
+    setup_game_env
+
+    run_challenge "Start a Named Session" \
+        "Start a new tmux session named ${YELLOW}deploy${NC}." \
+        "tmux new -s deploy (or tmux new-session -s deploy): naming a session up front means you can find and reattach to it later instead of guessing which unnamed session is which." \
+        'chk "^tmux new -s .+|^tmux new-session -s .+"' 20
+
+    run_challenge "List Running Sessions" \
+        "List every tmux session currently running on this machine." \
+        "tmux ls (or tmux list-sessions): shows every session by name, whether anything's currently attached to it, and how many windows each one has." \
+        'chk "^tmux ls$|^tmux list-sessions$"' 15
+
+    run_challenge "Attach to a Named Session" \
+        "Reattach to the existing ${YELLOW}deploy${NC} session from outside tmux." \
+        "tmux attach -t deploy (or tmux a -t deploy): -t targets a session by name, the whole reason you named it in the first place." \
+        'chk "^tmux attach -t deploy$|^tmux a -t deploy$"' 20
+
+    run_challenge "Kill a Session" \
+        "The ${YELLOW}deploy${NC} session finished its job. Kill it entirely, from outside tmux, without attaching to it first." \
+        "tmux kill-session -t deploy: ends the session and every process running inside it, no need to attach first." \
+        'chk "^tmux kill-session -t deploy$"' 20
+
+    cleanup_game_env
+    level_complete 78
+}
+
+run_level_79() {
+    level_intro 79 "Windows Inside a Session" \
+        "One tmux session can hold multiple windows, each a full separate terminal screen, closer to browser tabs than anything else. Every window action here has both a keybinding for while you're inside tmux, and this exact standalone command form for scripting it from outside." \
+        "🗂️   Commands: new-window  |  rename-window  |  next-window"
+    setup_game_env
+
+    run_challenge "Create a New Window" \
+        "Create a new window in the current session." \
+        "tmux new-window: opens a fresh window, a whole new full-screen shell, inside the same session." \
+        'exact "tmux new-window"' 15
+
+    run_challenge "Create a Named Window" \
+        "Open a new window and name it ${YELLOW}logs${NC} immediately, in one command." \
+        "tmux new-window -n logs: -n names the window right away, so tmux's status bar shows something meaningful instead of just a shell path." \
+        'chk "^tmux new-window -n .+"' 20
+
+    run_challenge "Rename the Current Window" \
+        "Rename the currently active window to ${YELLOW}deploy${NC}." \
+        "tmux rename-window deploy: relabels whichever window you're currently standing in." \
+        'chk "^tmux rename-window .+"' 15
+
+    run_challenge "Switch to the Next Window" \
+        "Move to the next window in the current session." \
+        "tmux next-window: cycles forward through the session's windows, wrapping back to the first after the last." \
+        'exact "tmux next-window"' 15
+
+    run_challenge "List Every Window in the Session" \
+        "List every window currently open in this session." \
+        "tmux list-windows: shows every window's index, name, and which one is currently active." \
+        'exact "tmux list-windows"' 15
+
+    cleanup_game_env
+    level_complete 79
+}
+
+run_level_80() {
+    level_intro 80 "Panes" \
+        "A window itself can be split into panes, multiple shells visible at once side by side, so you can watch a log stream in one corner while working in another without ever leaving the window." \
+        "🪟   Commands: split-window  |  -h  |  -v  |  select-pane"
+    setup_game_env
+
+    run_challenge "Split the Window Side by Side" \
+        "Split the current window into two panes, side by side." \
+        "tmux split-window -h: -h splits horizontally, meaning the DIVIDER runs vertically and the panes sit left/right - tmux names splits by the divider's axis, easy to get backwards." \
+        'chk "^tmux split-window -h$"' 20
+
+    run_challenge "Split the Window Stacked" \
+        "Split the current window into two panes, stacked one above the other." \
+        "tmux split-window -v: the counterpart to -h, panes stack top/bottom instead." \
+        'chk "^tmux split-window -v$"' 20
+
+    run_challenge "Move Focus to the Right" \
+        "Move keyboard focus to the pane on the right." \
+        "tmux select-pane -R: -L/-R/-U/-D move focus by direction, effectively arrow keys for panes." \
+        'chk "^tmux select-pane -R$"' 20
+
+    run_challenge "Resize a Pane" \
+        "Make the currently focused pane 10 columns wider." \
+        "tmux resize-pane -R 10: -R grows it rightward by the given number of cells; -L/-U/-D handle the other three directions." \
+        'chk "^tmux resize-pane -R 10$"' 20
+
+    run_challenge "Close the Current Pane" \
+        "Close the currently focused pane." \
+        "tmux kill-pane: closes just the one pane, the rest of the window's layout stays intact." \
+        'exact "tmux kill-pane"' 15
+
+    cleanup_game_env
+    level_complete 80
+}
+
+run_level_81() {
+    level_intro 81 "Detach &amp; Reattach" \
+        "This is the entire reason tmux exists for a sysadmin: a long-running job survives an SSH connection dropping, on purpose, as long as it was running inside a tmux session in the first place." \
+        "🔌   Commands: tmux detach  |  tmux attach  |  tmux ls"
+    setup_game_env
+
+    run_challenge "Detach From a Session" \
+        "You need to close your laptop lid without losing the long-running job in this session. Detach cleanly, leaving the session running in the background." \
+        "tmux detach (the keybinding Ctrl-b d does the exact same thing from inside): leaves every pane and process running, you just stop watching." \
+        'exact "tmux detach"' 20
+
+    run_challenge "Reattach to the Most Recent Session" \
+        "Back at your desk. Reattach to whichever tmux session you were last in, without needing to remember its name." \
+        "tmux attach: with no -t given, attaches to the most recently used session." \
+        'exact "tmux attach"' 15
+
+    run_challenge "Reattach and Force-Detach Other Clients" \
+        "Someone else, or another terminal tab of your own, is also attached to this session, and it's fighting the layout on your smaller screen. Attach and kick every other client off." \
+        "tmux attach -d: -d detaches every OTHER client currently attached to that session, so you end up with sole control of it." \
+        'chk "^tmux attach -d"' 20
+
+    run_challenge "Prove the Job Survived an SSH Drop" \
+        "Your SSH connection just dropped mid-task. You reconnect. Prove the long job survived: list every tmux session still running." \
+        "tmux ls: if the session is still in this list, whatever was running inside it never stopped. The connection dying killed the connection, nothing else." \
+        'chk "^tmux ls$|^tmux list-sessions$"' 20
+
+    cleanup_game_env
+    tier_complete 81 "Terminal Multiplexing" \
+        "Sessions that outlive a dropped connection, multiple windows inside one session, panes splitting a single window, and the detach/reattach loop that makes all of it actually useful in practice." \
+        "Tier 17: TUI Toolbelt: a full-screen file manager, two different approaches to terminal music, a modern resource monitor, and the fuzzy finder that ends up wired into almost everything."
+}
+
+# ---- TIER 17: TUI TOOLBELT (FINAL) ----
+
+run_level_82() {
+    level_intro 82 "ranger" \
+        "Everything you've done with cd, ls, cp, and mv still works exactly the same. A full-screen file manager built for the keyboard just turns multi-step file operations into a handful of keystrokes, with a live preview pane the whole time. ranger is the classic terminal one, vim-style keybindings and all." \
+        "📂   Commands: ranger  |  hjkl  |  shell-out  |  search"
+    setup_game_env
+
+    run_challenge "Launch ranger" \
+        "Launch ranger in the current directory." \
+        "ranger: opens the full-screen, three-column file browser right where you're standing." \
+        'exact "ranger"' 15
+
+    run_challenge "Open ranger in a Specific Directory" \
+        "Launch ranger, starting it directly in ${YELLOW}/var/log${NC} instead of the current directory." \
+        "ranger /var/log: takes a starting path as its argument, same idea as cd but launching the full browser there." \
+        'chk "^ranger .+"' 15
+
+    run_challenge "Name ranger's Navigation Keys" \
+        "ranger uses the same four keys as vim for cursor movement: down, up, back a directory, into a directory. Name them, in that order, no spaces." \
+        "jkhl: j=down, k=up, h=back a directory, l=into a directory or open a file. Identical to vim's own cursor movement, ranger leans on it deliberately." \
+        'chk "^jkhl$"' 20
+
+    run_challenge "Drop to a Shell in the Current Directory" \
+        "You're browsing in ranger and need a real shell right where you are, without quitting ranger to get one." \
+        "The ranger keybinding is S (capital): opens a subshell already cd'd into whatever directory ranger is currently showing. Exiting that shell returns you to ranger exactly where you left off." \
+        'chk "^[Ss]$"' 20
+
+    run_challenge "Search for a File by Name" \
+        "While browsing in ranger, search forward for a file or directory matching a name pattern." \
+        "Press / then type the pattern, Enter to jump to the first match, n for the next one - identical to vim's own search." \
+        'chk "^/"' 15
+
+    cleanup_game_env
+    level_complete 82
+}
+
+run_level_83() {
+    level_intro 83 "cmus" \
+        "A full TUI music player that never leaves the terminal: browse a whole library, queue tracks, control playback, all without a mouse or a GUI window ever opening." \
+        "🎵   Commands: cmus  |  :add  |  play/pause  |  cmus-remote"
+    setup_game_env
+
+    run_challenge "Launch cmus" \
+        "Launch cmus." \
+        "cmus: opens the full-screen player, empty library and all, until you add something to it." \
+        'exact "cmus"' 15
+
+    run_challenge "Add Your Music Library" \
+        "From inside cmus's command mode, add every track under ${YELLOW}~/Music${NC} to your library." \
+        ":add ~/Music: cmus's command mode (press : to open it, vim-style) accepts add <path>, recursively adding every audio file it finds under that path." \
+        'chk "^:add .+"' 20
+
+    run_challenge "Play / Pause" \
+        "Toggle play and pause on the current track." \
+        "The cmus keybinding is c: toggles playback, the single most-used key in the whole player." \
+        'chk "^[cC]$"' 15
+
+    run_challenge "Skip to the Next Track" \
+        "Skip straight to the next track in the queue." \
+        "The cmus keybinding is b: the mnemonic doesn't map cleanly to 'next', it's just cmus's own convention - z/x/c/v/b handle previous/stop/play/pause/next, in that order, across the bottom row." \
+        'chk "^[bB]$"' 15
+
+    run_challenge "Control cmus From Outside, Without Attaching" \
+        "cmus is running detached in the background. Skip to the next track from a completely different terminal, without switching to the one running cmus." \
+        "cmus-remote -n: cmus ships a separate remote-control binary specifically for this - -n is next track, -r is play, -u toggles pause." \
+        'chk "^cmus-remote -n$"' 20
+
+    cleanup_game_env
+    level_complete 83
+}
+
+run_level_84() {
+    level_intro 84 "mpd &amp; mpc" \
+        "cmus is a player. MPD, the Music Player Daemon, is a different idea entirely: a background service that owns your music library and does the actual playing, controlled by any of a dozen different lightweight clients. The player itself keeps running even if every client quits, and every client always sees the identical, currently-playing state." \
+        "🎶   Commands: mpd  |  mpc play  |  mpc add"
+    setup_game_env
+
+    run_challenge "Start the MPD Daemon" \
+        "Start the mpd daemon." \
+        "mpd: starts the background music service, reading its config for where the music directory and database live." \
+        'exact "mpd"' 15
+
+    run_challenge "Update the Library Database" \
+        "You added new music files to MPD's music directory on disk. Tell it to rescan and pick them up." \
+        "mpc update: mpc is the lightweight default CLI client for talking to mpd, update triggers a rescan of the configured music directory." \
+        'chk "^mpc update$"' 20
+
+    run_challenge "Add a Track to the Queue" \
+        "Add ${YELLOW}Artist/Album/Track.flac${NC} to the current playback queue." \
+        "mpc add \"Artist/Album/Track.flac\": paths are relative to MPD's configured music directory, not your shell's current directory." \
+        'chk "^mpc add .+"' 15
+
+    run_challenge "Start Playback" \
+        "Start playing whatever's in the queue." \
+        "mpc play: starts (or resumes) playback of the current queue from wherever it left off." \
+        'exact "mpc play"' 15
+
+    run_challenge "Check What's Currently Playing" \
+        "Check what's currently playing, without opening a full client." \
+        "mpc status (or mpc current): a quick one-line answer, no need for a TUI at all just to check what's on." \
+        'chk "^mpc status$|^mpc current$"' 15
+
+    run_challenge "Toggle Shuffle Mode" \
+        "Toggle random/shuffle playback mode on." \
+        "mpc random: toggles (or explicitly sets with on/1) whether the queue plays in order or shuffled." \
+        'chk "^mpc random( on| 1)?$"' 15
+
+    cleanup_game_env
+    level_complete 84
+}
+
+run_level_85() {
+    level_intro 85 "btop" \
+        "top and htop already gave you basic process, CPU, and memory visibility. btop is the modern, actively developed answer: full mouse support, per-core graphs, disk and network I/O, and an interface that genuinely fits the ricing half of this job as much as the monitoring half." \
+        "📊   Commands: btop  |  filter  |  kill  |  presets"
+    setup_game_env
+
+    run_challenge "Launch btop" \
+        "Launch btop." \
+        "btop: opens the full-screen resource monitor, CPU, memory, disks, network, and process list all visible at once by default." \
+        'exact "btop"' 15
+
+    run_challenge "Filter the Process List" \
+        "While btop is running, start typing to filter the process list down live to whatever you type. What key opens that filter?" \
+        "/: opens btop's process filter, the same muscle memory as search in vim, less, or ranger. Type to narrow the list as you go." \
+        'chk "^/$"' 15
+
+    run_challenge "Kill a Process From Inside btop" \
+        "Select a runaway process in btop's process list and send it a signal to kill it, without leaving btop for a separate kill command." \
+        "k: btop's own kill keybinding, opens a signal picker (SIGTERM by default) for whichever process is currently selected." \
+        'chk "^[kK]$"' 15
+
+    run_challenge "Switch Between Preset Layouts" \
+        "btop ships several preset box layouts: full view, minimal, process-focused. Cycle to the next preset." \
+        "p: cycles through btop's built-in presets, useful for a quick full-detail view versus a minimal one on a small pane." \
+        'chk "^[pP]$"' 15
+
+    run_challenge "Launch Straight Into a Specific Preset" \
+        "Launch btop directly into preset 2 instead of the default, from the command line." \
+        "btop -p 2: -p picks a preset index at launch time, skipping having to cycle to it by hand every single time." \
+        'chk "^btop -p .+"' 20
+
+    cleanup_game_env
+    level_complete 85
+}
+
+run_level_86() {
+    level_intro 86 "fzf" \
+        "Every tool in this tier so far replaces a whole workflow. fzf replaces a single reflex: instead of remembering an exact filename, an exact past command, or an exact process name, you type a few loose characters and pick from a live fuzzy-filtered list. Once it's wired into your shell, it turns out to be genuinely everywhere." \
+        "🔎   Commands: fzf  |  Ctrl-R  |  Ctrl-T  |  --preview"
+    setup_game_env
+
+    run_challenge "Pipe a List Into fzf" \
+        "You have a list of branch names from git branch. Pipe it into fzf to interactively fuzzy-search and pick one." \
+        "git branch | fzf: fzf reads lines from stdin, filters them live as you type, and prints whichever one you select to stdout - it composes with literally anything that produces a list." \
+        'chk "\\| fzf$"' 20
+
+    run_challenge "Search Command History Fuzzily" \
+        "fzf's shell integration rebinds one of readline's own keys to a live fuzzy search over your shell history instead of the plain reverse-search. Which key combo?" \
+        "Ctrl+R: normally bash/zsh's own incremental reverse-search, fzf's integration hooks the exact same binding and gives it fuzzy matching plus a live preview instead." \
+        'chk "[Cc]trl.?[Rr]|\\^R"' 20
+
+    run_challenge "Fuzzy-Find a File to Insert Into the Command Line" \
+        "fzf's shell integration also rebinds a key that opens a fuzzy FILE finder and inserts whatever you pick right at your cursor. Which key combo?" \
+        "Ctrl+T: pastes the selected file or directory path directly into your current command line, no separate ls-and-tab-completion dance needed." \
+        'chk "[Cc]trl.?[Tt]|\\^T"' 20
+
+    run_challenge "Preview a File While Fuzzy-Finding It" \
+        "Fuzzy-find files under the current directory, showing a live preview of the highlighted file with every keystroke." \
+        "fzf --preview 'cat {}' (or bat {} for syntax highlighting): --preview runs a command per highlighted item, {} is replaced with the current selection." \
+        'chk "fzf --preview"' 25
+
+    run_challenge "Use fzf to Pick a Process to Kill" \
+        "Fuzzy-search running processes and kill whichever one you select, all in one pipeline." \
+        "ps aux | fzf | awk '{print \$2}' | xargs kill: list processes, pick one interactively, pull out the PID column, kill it - a real, commonly used one-liner chaining together nearly everything from earlier tiers." \
+        'chk "fzf.*kill|kill.*fzf"' 25
+
+    cleanup_game_env
     graduation_ceremony
 }
 
@@ -3793,8 +4743,8 @@ graduation_ceremony() {
     printf '║%b%-75s%b║\n' "${WHITE}" "  This certifies that" "${YELLOW}"
     printf '║%b%-75s%b║\n' "${LCYAN}${BOLD}" "  ${PLAYER_NAME}" "${NC}${YELLOW}"
     printf '║%75s║\n' ""
-    printf '║%b%-75s%b║\n' "${WHITE}" "  has completed all ${TOTAL_LEVELS} levels across all twelve tiers, from" "${YELLOW}"
-    printf '║%b%-75s%b║\n' "${WHITE}" "  basic navigation to storage, networking, SAN, kernels, and ricing," "${YELLOW}"
+    printf '║%b%-75s%b║\n' "${WHITE}" "  has completed all ${TOTAL_LEVELS} levels across all seventeen tiers, from" "${YELLOW}"
+    printf '║%b%-75s%b║\n' "${WHITE}" "  basic navigation to storage, networking, SAN, containers, and ricing," "${YELLOW}"
     printf '║%75s║\n' ""
     printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  and is certified ready to administrate a corporate network AND" "${NC}${YELLOW}"
     printf '║%b%-75s%b║\n' "${LGREEN}${BOLD}" "  run a genuinely great-looking home setup." "${NC}${YELLOW}"
@@ -3808,11 +4758,12 @@ graduation_ceremony() {
         echo "BASHQUEST - CERTIFICATE OF COMPLETION"
         echo ""
         echo "This certifies that ${PLAYER_NAME}"
-        echo "has completed all ${TOTAL_LEVELS} levels of BashQuest across all twelve tiers:"
+        echo "has completed all ${TOTAL_LEVELS} levels of BashQuest across all seventeen tiers:"
         echo "Beginner, Intermediate, Pipes & Patterns, Power Tools, Expert,"
         echo "Storage & Filesystems, File Editing & Sharing, Networking,"
         echo "Storage Networking & SAN, Boot Process & Kernel, Media Management,"
-        echo "and Desktop Ricing."
+        echo "Desktop Ricing, Git & Version Control, Docker & Containers,"
+        echo "Universal Packages, Terminal Multiplexing, and the TUI Toolbelt."
         echo ""
         echo "Certified ready to administrate a corporate network AND run a"
         echo "genuinely great-looking home setup."
@@ -3830,13 +4781,16 @@ graduation_ceremony() {
 
     printf '\n'
     root_speech \
-        "${TOTAL_LEVELS} levels. Twelve tiers. Every fire I put in front of you, lit on purpose." \
+        "${TOTAL_LEVELS} levels. Seventeen tiers. Every fire I put in front of you, lit on purpose." \
         "You started at ls and pwd. You're finishing having built and grown storage" \
         "with LVM, shared it over Samba and NFS, run a real network with VLANs and" \
         "a firewall, connected to a SAN over iSCSI, recovered from a kernel panic," \
         "and built a kernel from source. Hand you a login prompt on a server you've" \
         "never seen, in a datacenter you've never visited, and you'd know exactly" \
         "where to start. That's not a course anymore. That's the job." \
+        "Then you kept going: real version control, containers built and orchestrated" \
+        "from scratch, sandboxed cross-distro packaging, sessions that outlive a dropped" \
+        "SSH connection, and a whole toolbelt of TUI programs that never touch a mouse." \
         "And when the pager's finally quiet, you now also know how to make your own" \
         "desktop look genuinely good instead of just functional. That part matters too." \
         "A copy of this is saved at ${cert_file}." \
@@ -3868,7 +4822,13 @@ dispatch_level() {
         49) run_level_49 ;; 50) run_level_50 ;; 51) run_level_51 ;; 52) run_level_52 ;;
         53) run_level_53 ;; 54) run_level_54 ;; 55) run_level_55 ;; 56) run_level_56 ;;
         57) run_level_57 ;; 58) run_level_58 ;; 59) run_level_59 ;; 60) run_level_60 ;;
-        61) run_level_61 ;;
+        61) run_level_61 ;; 62) run_level_62 ;; 63) run_level_63 ;; 64) run_level_64 ;;
+        65) run_level_65 ;; 66) run_level_66 ;; 67) run_level_67 ;; 68) run_level_68 ;;
+        69) run_level_69 ;; 70) run_level_70 ;; 71) run_level_71 ;; 72) run_level_72 ;;
+        73) run_level_73 ;; 74) run_level_74 ;; 75) run_level_75 ;; 76) run_level_76 ;;
+        77) run_level_77 ;; 78) run_level_78 ;; 79) run_level_79 ;; 80) run_level_80 ;;
+        81) run_level_81 ;; 82) run_level_82 ;; 83) run_level_83 ;; 84) run_level_84 ;;
+        85) run_level_85 ;; 86) run_level_86 ;;
         *) printf '%b\n' "\n${LGREEN}  🏆 All ${TOTAL_LEVELS} levels complete, true master!${NC}"; press_enter; main_menu ;;
     esac
 }

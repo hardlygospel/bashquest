@@ -25,22 +25,22 @@ Once logged in you'll see the main menu and a persistent **status bar** showing:
 
 ```
 👤 alice   ⭐ Level 3   ✨ XP: 85   ❤  Lives: 3
-█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  3/61 levels
+█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  3/86 levels
 ```
 
 | Element | Meaning |
 |---|---|
-| **Level** | Your current level (1–61) |
+| **Level** | Your current level (1–86) |
 | **XP** | Total experience points earned |
 | **Lives** | Remaining lives (start with 3, replenish on login) |
-| **Progress bar** | How far through all 61 levels you are |
+| **Progress bar** | How far through all 86 levels you are |
 | **🔥 streak** | Shown once you have 3+ correct answers in a row |
 
 ---
 
 ## Meet Tasmania
 
-Tasmania is BashQuest's mentor character, Tony "Hardlygospel" Hosaroygard's in-game handle, a legend of a sysadmin who narrates your run. Tasmania reacts to every correct answer, every wrong one, every hint you take, and celebrates streaks of 3, 5, and 8 in a row. It's flavor, not a mechanic: nothing Tasmania says changes your score, but it's there on every screen from your first login to the graduation ceremony at level 61.
+Tasmania is BashQuest's mentor character, Tony "Hardlygospel" Hosaroygard's in-game handle, a legend of a sysadmin who narrates your run. Tasmania reacts to every correct answer, every wrong one, every hint you take, and celebrates streaks of 3, 5, and 8 in a row. It's flavor, not a mechanic: nothing Tasmania says changes your score, but it's there on every screen from your first login to the graduation ceremony at level 86.
 
 ---
 
@@ -108,7 +108,7 @@ The leaderboard ranks all player accounts on the machine by total XP. Access it 
 
 ## Tiers & Milestones
 
-The 61 levels are grouped into twelve tiers. Finish the last level of a tier and you get a milestone screen instead of the usual level-complete screen, showing your progress and a preview of what's next. See [levels](/bashquest/levels/) for the full breakdown.
+The 86 levels are grouped into seventeen tiers. Finish the last level of a tier and you get a milestone screen instead of the usual level-complete screen, showing your progress and a preview of what's next. See [levels](/bashquest/levels/) for the full breakdown.
 
 From the main menu, **Level Select** (option 2) now opens a topic-jump menu: pick a tier first, then a level within it, rather than scrolling one long flat list.
 
@@ -125,7 +125,7 @@ Access **Achievements** from the main menu (option 5) to see your badges:
 | **Untouchable** | Never losing a life |
 | **On a Roll** | A 5-answer streak |
 | **Unstoppable** | A 10-answer streak |
-| **Graduate** | Completing all 61 levels |
+| **Graduate** | Completing all 86 levels |
 
 The hint-free, skip-free, and lives-untouched badges track your whole run: they stay earned only until the moment you break them.
 
@@ -133,9 +133,9 @@ The hint-free, skip-free, and lives-untouched badges track your whole run: they 
 
 ## Graduation
 
-Clear all 61 levels and you get a graduation ceremony: a certificate with your name, final XP, best streak, and badge count, plus a closing speech from Tasmania. A copy of the certificate is written to `~/.bashquest/<your-name>.certificate.txt` so it's yours to keep.
+Clear all 86 levels and you get a graduation ceremony: a certificate with your name, final XP, best streak, and badge count, plus a closing speech from Tasmania. A copy of the certificate is written to `~/.bashquest/<your-name>.certificate.txt` so it's yours to keep.
 
-Right after that, BashQuest detects your actual OS (Arch, Ubuntu/Debian, Fedora/RHEL, openSUSE, or macOS) and prints the real package-manager command to start ricing your own desktop for real: a window manager, compositor, launcher, and bar, not the simulated one from Level 61. If it can't identify your distro, it shows the command for the three most common ones instead.
+Right after that, BashQuest detects your actual OS (Arch, Ubuntu/Debian, Fedora/RHEL, openSUSE, or macOS) and prints the real package-manager command to start ricing your own desktop for real: a window manager, compositor, launcher, and bar, not the simulated one from the Desktop Ricing tier. If it can't identify your distro, it shows the command for the three most common ones instead.
 
 ---
 
