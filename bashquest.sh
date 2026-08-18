@@ -482,7 +482,34 @@ status_bar() {
 
 press_enter() {
     printf '%b\n' "\n${DIM}Press ${YELLOW}[ENTER]${NC}${DIM} to continue...${NC}"
-    read -r -n 32
+    read -e -r -n 32
+}
+
+# `read -n` takes bash out of canonical mode so it can stop after N chars,
+# which means bash's own read loop does no erase-key handling at all:
+# backspace/arrows land as raw bytes (^?, ^[[A) IN the answer instead of
+# editing the line. `read -e` hands editing to readline, which does the
+# right thing, while keeping the `-n` cap (see the username/answer length
+# checks below - that's an intentional bound, not a side effect to lose).
+#
+# Readline needs to own the prompt for this to work: `read -e -p "$prompt"`
+# rather than a separate `printf` before the read. Otherwise readline
+# thinks the line starts at column 0, and anything that reaches for line
+# start (Ctrl+A, Home, a redraw) sends a bare \r and overwrites the prompt.
+# This wraps each ANSI colour code in the prompt with \001/\002
+# (RL_PROMPT_START_IGNORE/END_IGNORE) so readline's width math only counts
+# the visible characters, not the escape bytes.
+rl_prompt() {
+    local rest=$1 out='' esc pre
+    local pattern=$'\033''\[[0-9;]*m'
+    while [[ $rest =~ $pattern ]]; do
+        esc="${BASH_REMATCH[0]}"
+        pre="${rest%%"$esc"*}"
+        out+="$pre"$'\001'"$esc"$'\002'
+        rest="${rest#"$pre""$esc"}"
+    done
+    out+="$rest"
+    printf '%s' "$out"
 }
 
 # Every menu loop below calls this right after its `read`. A closed stdin
@@ -692,7 +719,7 @@ register_user() {
     printf '%b\n' "╚═══════════════════════════════╝${NC}\n"
     local username password confirm hashed
     while true; do
-        printf "${YELLOW}Choose a username: ${NC}"; read -r -n "$USERNAME_MAX_LEN" username; require_input $?
+        read -e -r -n "$USERNAME_MAX_LEN" -p "$(rl_prompt "${YELLOW}Choose a username: ${NC}")" username; require_input $?
         username="${username//[[:space:]]/}"
         if ! valid_username "$username"; then
             printf '%b\n' "${RED}Usernames are ${USERNAME_MAX_LEN} characters or fewer: letters, numbers, underscore, dot, or dash, starting with a letter, number, or underscore.${NC}"
@@ -758,7 +785,7 @@ login_user() {
     printf '%b\n' "${DIM}$(date)${NC}\n"
     local attempts=0 username password stored
     while [ $attempts -lt 3 ]; do
-        printf "${WHITE}login: ${NC}";    read -r -n "$USERNAME_MAX_LEN" username; require_input $?
+        read -e -r -n "$USERNAME_MAX_LEN" -p "$(rl_prompt "${WHITE}login: ${NC}")" username; require_input $?
         printf "${WHITE}Password: ${NC}"; read -rs -n 128 password; require_input $?; echo
         # Reject before the username ever reaches a lookup. Usernames used
         # to be interpolated straight into a `grep` pattern here, so a
@@ -865,7 +892,7 @@ main_menu() {
         printf '%b\n' "║  ${RED}[6]${LCYAN} Logout                         ║"
         printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
         root_says "$(root_pick "${ROOT_IDLE[@]}")"
-        printf "\n${YELLOW}Choice: ${NC}"; read -r -n 32 choice; require_input $?
+        printf '\n'; read -e -r -n 32 -p "$(rl_prompt "${YELLOW}Choice: ${NC}")" choice; require_input $?
         case $choice in
             1) run_current_level; return ;;
             2) level_select; return ;;
@@ -900,7 +927,7 @@ level_select() {
             fi
         done
         printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
-        printf "\n${YELLOW}Enter tier (1-${#TIERS[@]}) or 0 to go back: ${NC}"; read -r -n 32 choice; require_input $?
+        printf '\n'; read -e -r -n 32 -p "$(rl_prompt "${YELLOW}Enter tier (1-${#TIERS[@]}) or 0 to go back: ${NC}")" choice; require_input $?
         if [ "$choice" = "0" ]; then
             main_menu; return
         fi
@@ -935,7 +962,7 @@ level_select_tier() {
             fi
         done
         printf '%b\n' "${LCYAN}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
-        printf "\n${YELLOW}Enter level (${start}-${end}) or 0 to go back: ${NC}"; read -r -n 32 choice; require_input $?
+        printf '\n'; read -e -r -n 32 -p "$(rl_prompt "${YELLOW}Enter level (${start}-${end}) or 0 to go back: ${NC}")" choice; require_input $?
         if [ "$choice" = "0" ]; then
             level_select; return
         fi
@@ -1055,7 +1082,7 @@ startup_screen() {
         printf '%b\n' "║  ${YELLOW}[2]${LCYAN} Create Account                 ║"
         printf '%b\n' "║  ${RED}[3]${LCYAN} Quit                           ║"
         printf '%b\n' "╚══════════════════════════════════════╝${NC}\n"
-        printf "${YELLOW}Choice: ${NC}"; read -r -n 32 choice; require_input $?
+        read -e -r -n 32 -p "$(rl_prompt "${YELLOW}Choice: ${NC}")" choice; require_input $?
         case $choice in
             1) login_user; return ;;
             2) register_user; return ;;
@@ -1100,8 +1127,7 @@ run_challenge() {
         printf "│  ${YELLOW}%-48s${LCYAN}│\n" "CHALLENGE: $title"
         printf '%b\n' "└──────────────────────────────────────────────────┘${NC}"
         printf '%b\n' "\n${WHITE}${desc}${NC}\n"
-        printf "${LGREEN}bashquest${NC}${CYAN}@terminal${NC}:${YELLOW}~\$${NC} "
-        read -r -n 1000 user_input; require_input $?
+        read -e -r -n 1000 -p "$(rl_prompt "${LGREEN}bashquest${NC}${CYAN}@terminal${NC}:${YELLOW}~\$${NC} ")" user_input; require_input $?
         case "$user_input" in
             hint)
                 TOTAL_HINTS_USED=$((TOTAL_HINTS_USED + 1))
