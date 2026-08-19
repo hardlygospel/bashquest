@@ -1199,8 +1199,8 @@ level_complete() {
     sleep 1; press_enter; main_menu
 }
 
-# A bigger milestone than an ordinary level_complete: BashQuest's 28 levels
-# split into four tiers (see levels/README.md), and finishing one is worth
+# A bigger milestone than an ordinary level_complete: BashQuest's levels
+# split into tiers (see the TIERS array above), and finishing one is worth
 # marking properly instead of it looking identical to every other level.
 # This is also what replaces the old bug where level 8 alone showed a full
 # "GAME COMPLETE" banner, a leftover from when the game only had 8 levels.
