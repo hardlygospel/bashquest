@@ -81,6 +81,25 @@ import '@xterm/xterm/css/xterm.css';
 				min-height: 0;
 				padding: 0.75rem;
 			}
+			.bq-footer {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				padding: 0.5rem 1rem;
+				background: var(--bq-panel);
+				border-top: 1px solid #1e293b;
+				font-size: 0.8rem;
+				color: var(--bq-dim);
+				flex-wrap: wrap;
+			}
+			.bq-footer a {
+				color: var(--bq-accent);
+				text-decoration: none;
+			}
+			.bq-footer a:hover {
+				text-decoration: underline;
+			}
 			#bq-terminal {
 				height: 100%;
 				width: 100%;
@@ -109,6 +128,13 @@ import '@xterm/xterm/css/xterm.css';
 			<div class="bq-term-wrap">
 				<div id="bq-terminal"></div>
 			</div>
+			<footer class="bq-footer">
+				<span>BashQuest by Tony "Hardlygospel" Hosaroygard</span>
+				<span>·</span>
+				<a href="https://github.com/hardlygospel" target="_blank" rel="noopener">GitHub</a>
+				<span>·</span>
+				<a href="https://www.linkedin.com/in/tonyharrisson/" target="_blank" rel="noopener">LinkedIn</a>
+			</footer>
 		</div>
 		<noscript>BashQuest's browser game needs JavaScript enabled to run.</noscript>
 		<script>
