@@ -1,0 +1,120 @@
+---
+// Full-bleed page outside Starlight's doc layout (Starlight's own docs
+// recommend src/pages/ for pages that need to control their whole layout,
+// which a terminal emulator does). Deliberately its own minimal shell
+// rather than <StarlightPage> so the terminal can own the full viewport.
+import '@xterm/xterm/css/xterm.css';
+---
+
+<html lang="en" data-theme="dark">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Play BashQuest in your browser</title>
+		<meta
+			name="description"
+			content="Play BashQuest, the 90-level Linux command trainer, directly in your browser. Practice mode: no install, no account."
+		/>
+		<link rel="icon" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} />
+		<style>
+			:root {
+				--bq-bg: #0b1120;
+				--bq-panel: #0f1729;
+				--bq-accent: #06b6d4;
+				--bq-text: #d1f7ff;
+				--bq-dim: #64748b;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				margin: 0;
+				height: 100%;
+				background: var(--bq-bg);
+				color: var(--bq-text);
+				font-family:
+					system-ui,
+					-apple-system,
+					sans-serif;
+			}
+			.bq-shell {
+				display: flex;
+				flex-direction: column;
+				height: 100vh;
+			}
+			.bq-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 1rem;
+				padding: 0.6rem 1rem;
+				background: var(--bq-panel);
+				border-bottom: 1px solid #1e293b;
+				flex-wrap: wrap;
+			}
+			.bq-header a {
+				color: var(--bq-accent);
+				text-decoration: none;
+				font-size: 0.9rem;
+			}
+			.bq-header a:hover {
+				text-decoration: underline;
+			}
+			.bq-title {
+				font-weight: 700;
+				letter-spacing: 0.02em;
+				color: var(--bq-text);
+			}
+			.bq-title span {
+				color: var(--bq-accent);
+			}
+			.bq-badge {
+				font-size: 0.75rem;
+				color: var(--bq-dim);
+				border: 1px solid #1e293b;
+				border-radius: 999px;
+				padding: 0.15rem 0.6rem;
+			}
+			.bq-term-wrap {
+				flex: 1;
+				min-height: 0;
+				padding: 0.75rem;
+			}
+			#bq-terminal {
+				height: 100%;
+				width: 100%;
+			}
+			.xterm {
+				height: 100%;
+				padding: 0.5rem;
+			}
+			noscript {
+				display: block;
+				padding: 2rem;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="bq-shell">
+			<header class="bq-header">
+				<div class="bq-title">Bash<span>Quest</span>: Play in Browser</div>
+				<div style="display:flex; align-items:center; gap:0.75rem;">
+					<span class="bq-badge">Practice mode · progress saved to this browser only</span>
+					<a href={`${import.meta.env.BASE_URL}`}>&larr; Docs</a>
+					<a href="https://github.com/hardlygospel/bashquest" target="_blank" rel="noopener">GitHub</a>
+				</div>
+			</header>
+			<div class="bq-term-wrap">
+				<div id="bq-terminal"></div>
+			</div>
+		</div>
+		<noscript>BashQuest's browser game needs JavaScript enabled to run.</noscript>
+		<script>
+			import { mountGame } from '../game/terminal';
+			const el = document.getElementById('bq-terminal');
+			if (el) mountGame(el);
+		</script>
+	</body>
+</html>

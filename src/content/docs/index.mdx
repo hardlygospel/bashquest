@@ -8,9 +8,13 @@ hero:
   image:
     file: ../../assets/banner.png
   actions:
+    - text: Play in Browser
+      link: /bashquest/play/
+      icon: right-arrow
     - text: Get Started
       link: /bashquest/getting-started/
-      icon: right-arrow
+      icon: rocket
+      variant: minimal
     - text: View on GitHub
       link: https://github.com/hardlygospel/bashquest
       icon: external
@@ -22,6 +26,9 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 Each challenge explains **how** a command works and **why** you'd use it, not just the syntax. You create an account, log in, and work through 90 progressive levels across eighteen tiers: from basic navigation all the way to LVM, enterprise networking and SAN storage, kernel panics and building your own kernel, git, Docker, tmux, ricing your own desktop with a tiling window manager, and finally the newest generation of TUI tools.
 
 <CardGrid stagger>
+	<Card title="Play in Browser" icon="seti:shell">
+		Try it right now, no install: [play BashQuest at /play](/bashquest/play/). Progress saves to your browser only.
+	</Card>
 	<Card title="90 Levels, Eighteen Tiers" icon="rocket">
 		From `ls`/`pwd` to LVM, enterprise networking, SAN storage, kernel builds, git, Docker, tmux, and desktop ricing. See the [full breakdown](/bashquest/levels/).
 	</Card>
@@ -31,8 +38,8 @@ Each challenge explains **how** a command works and **why** you'd use it, not ju
 	<Card title="Zero Dependencies" icon="approve-check">
 		Pure Bash, no installation, no external services. Runs on Linux, macOS, and Windows (bash 3.2+, via WSL or Git Bash).
 	</Card>
-	<Card title="A Real Certificate" icon="seti:shell">
-		Graduate all 90 levels and get a certificate, written to disk, that's yours to keep.
+	<Card title="A Real Certificate" icon="document">
+		Graduate all 90 levels locally or [via late.sh](https://late.sh) for a certificate that's yours to keep. The browser version is practice only, no certificate.
 	</Card>
 </CardGrid>
 

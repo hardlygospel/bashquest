@@ -1,5 +1,8 @@
 # build output
 dist/
+
+# generated from bashquest.sh at build time (see scripts/extract-levels.mjs)
+src/game/data/
 # generated types
 .astro/
 
