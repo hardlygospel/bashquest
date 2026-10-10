@@ -1331,8 +1331,8 @@ run_level_2() {
 
     run_challenge "Create a tar Archive" \
         "Archive the ${YELLOW}home${NC} directory into a compressed file called ${YELLOW}home.tar.gz${NC}.\n\n  tar is the standard way to bundle files on Linux, like zip but better." \
-        "tar -czf home.tar.gz home/: c=create, z=gzip compress, f=filename" \
-        'chk "^tar .*-[czf]*c[czf]*.* .+|^tar -czf .+ .+"' 25
+        "tar -czf home.tar.gz home/ (or tar czf home.tar.gz home/): c=create, z=gzip compress, f=filename" \
+        'chk "^tar .*-[czf]*c[czf]*.* .+|^tar [czfv]*c[czfv]* .+ .+"' 25
 
     run_challenge "List Archive Contents" \
         "Without extracting it, list what's inside ${YELLOW}home.tar.gz${NC}.\n\n  Preview the archive before unpacking." \
@@ -1346,8 +1346,8 @@ run_level_2() {
 
     run_challenge "Extract to a Specific Directory" \
         "Extract ${YELLOW}home.tar.gz${NC} into the ${YELLOW}tmp${NC} directory instead of the current one." \
-        "tar -xzf home.tar.gz -C tmp/: -C sets the destination directory" \
-        'chk "^tar .*x.*-C .+|^tar .*-C .+.*x"' 25
+        "tar -xzf home.tar.gz -C tmp/ (or tar -xf home.tar.gz --directory tmp): -C and --directory set the destination. GNU tar detects gzip when extracting, so -z is optional." \
+        'chk "^tar .*x.*(-C |--directory[ =]).+|^tar .*(-C |--directory[ =]).+.*x"' 25
 
     cleanup_game_env
     level_complete 2
